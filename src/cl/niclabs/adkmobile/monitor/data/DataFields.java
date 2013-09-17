@@ -10,5 +10,5 @@ import android.provider.BaseColumns;
  *
  */
 public interface DataFields extends BaseColumns {
-	/* TODO: the structure is a proposal */
+	public static final String TIMESTAMP = "timestamp";
 }

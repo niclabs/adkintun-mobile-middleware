@@ -26,7 +26,10 @@ import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
 public class Connectivity extends Monitor {
 	public static class ConnectivityData implements DataFields {
 		public static final String NETWORK_TYPE = "network_type";
-
+		
+		/**
+		 * For devices with API level 13.
+		 */
 		public static final String NETWORK_TYPE_OTHER = "network_type_other";
 		public static final String IS_CONNECTED = "is_connected";
 		public static final String IS_ROAMING = "is_roaming";
@@ -146,6 +149,7 @@ public class Connectivity extends Monitor {
 			NetworkInfo ni = connectivityManager.getActiveNetworkInfo();
 
 			DataObject data = new ContentValuesDataObject();
+			data.put(ConnectivityData.TIMESTAMP, System.currentTimeMillis());
 			data.put(ConnectivityData.IS_CONNECTED,
 					ni.isConnectedOrConnecting());
 
