@@ -12,6 +12,8 @@ import android.util.Log;
 import cl.niclabs.adkmobile.monitor.data.ContentValuesDataObject;
 import cl.niclabs.adkmobile.monitor.data.DataFields;
 import cl.niclabs.adkmobile.monitor.data.DataObject;
+import cl.niclabs.adkmobile.monitor.listeners.ConnectivityListener;
+import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
 
 public class Connectivity extends Monitor {
 	public static class ConnectivityData implements DataFields {
@@ -126,7 +128,7 @@ public class Connectivity extends Monitor {
 		public void onReceive(Context context, Intent intent) {
 			String action = intent.getAction();
 			if (!action.equals(ConnectivityManager.CONNECTIVITY_ACTION)
-					|| !isActive(MonitorEventManager.CONNECTIVITY)) {
+					|| !isActive(MonitorManager.CONNECTIVITY)) {
 				Log.w(TAG, "onReceived() called with intent " + intent);
 				return;
 			}
@@ -151,17 +153,17 @@ public class Connectivity extends Monitor {
 			Log.d(TAG, data.toString());
 
 			/* Update the current state */
-			setCurrentState(MonitorEventManager.CONNECTIVITY, data);
+			setCurrentState(MonitorManager.CONNECTIVITY, data);
 
 			/* Notify listeners */
-			notifyListeners(MonitorEventManager.CONNECTIVITY, data);
+			notifyListeners(MonitorManager.CONNECTIVITY, data);
 		}
 
 	};
 
 	@Override
 	public DataFields getDataFields(int eventType) {
-		if (eventType == MonitorEventManager.CONNECTIVITY) {
+		if (eventType == MonitorManager.CONNECTIVITY) {
 			if (connectivityDataFields == null)
 				connectivityDataFields = new ConnectivityData();
 			return connectivityDataFields;
@@ -187,6 +189,17 @@ public class Connectivity extends Monitor {
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
 		registerReceiver(connectivityMonitor, filter);
+	}
+
+	@Override
+	protected void onDataReceived(MonitorListener listener, int eventType,
+			DataObject data) {
+		// Only notify the listeners of the appropriate type
+		if (eventType == MonitorManager.CONNECTIVITY
+				&& listener instanceof ConnectivityListener) {
+			((ConnectivityListener) listener).onConnectivityChanged(data);
+		}
+		
 	}
 
 	@Override

@@ -6,7 +6,7 @@ package cl.niclabs.adkmobile.monitor;
  * 
  * @author Felipe Lalanne <flalanne@niclabs.cl>
  */
-public final class MonitorEventManager {
+public final class MonitorManager {
 	/**
 	 * Defines a change in connectivity status
 	 */

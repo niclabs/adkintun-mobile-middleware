@@ -11,6 +11,7 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import cl.niclabs.adkmobile.monitor.data.DataFields;
 import cl.niclabs.adkmobile.monitor.data.DataObject;
+import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
 
 /**
  * Base class for all monitoring services. It allows for implementing classes to handle multiple types 
@@ -87,8 +88,7 @@ public abstract class Monitor extends Service {
 		if ((list = listeners.get(eventType)) != null) {
 			for (MonitorListener listener: list) {
 				/* Notify the listener */
-				listener.onSensorEvent(eventType);
-				listener.onDataReceived(eventType, getDataFields(eventType), data);
+				onDataReceived(listener, eventType, data);
 			}
 		}
 		/* Ignore if there are no listeners for the data type */
@@ -111,7 +111,17 @@ public abstract class Monitor extends Service {
 		
 		/* TODO: Apply configuration from general preferences and listen to general broadcasts */
 		if(DEBUG) Log.d(TAG, TAG + " sensor started...");
-	} 
+	}
+	
+	/**
+	 * Must be implemented by sub-classes in order to notify the appropriate
+	 * monitor listener of the monitoring events
+	 * 
+	 * @param listener
+	 * @param eventType
+	 * @param data
+	 */
+	protected abstract void onDataReceived(MonitorListener listener, int eventType, DataObject data); 
 	
 	/**
 	 * Method triggered on deactivation of the specified event type.
