@@ -10,5 +10,5 @@ public final class MonitorManager {
 	/**
 	 * Defines a change in connectivity status
 	 */
-	public static final int CONNECTIVITY = 1;
+	public static final int CONNECTIVITY_CHANGE = 1;
 }
