@@ -14,8 +14,9 @@ import cl.niclabs.adkmobile.monitor.data.DataObject;
 import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
 
 /**
- * Base class for all monitoring services. It allows for implementing classes to handle multiple types 
- * of events and data types, as well as listeners of the monitoring events to be notified of status changes.
+ * Base class for all monitoring services. It allows implementing classes to
+ * handle multiple types of events and data types, as well as listeners of the
+ * monitoring events to be notified of status changes.
  * 
  * TODO: Verify thread safety of the methods in this class
  * 
@@ -47,7 +48,9 @@ public abstract class Monitor extends Service {
 	 * @return
 	 */
 	public DataObject getCurrentState(int eventType) {
-		return currentStates.get(eventType);
+		synchronized(currentStates) {
+			return currentStates.get(eventType);
+		}
 	}
 	
 	/**
@@ -72,7 +75,12 @@ public abstract class Monitor extends Service {
 		}
 	}
 	
-	public void listen(MonitorListener listener, int eventType) {
+	/**
+	 * Assign a listener to the monitor for a specified eventType
+	 * @param listener
+	 * @param eventType
+	 */
+	public synchronized void listen(MonitorListener listener, int eventType) {
 		List<MonitorListener> list;
 		if ((list = listeners.get(eventType)) == null) list = new ArrayList<MonitorListener>();
 		listeners.put(eventType, list);
@@ -98,7 +106,7 @@ public abstract class Monitor extends Service {
 	 * Method triggered on activation of the specified event type. 
 	 * @param eventType
 	 */
-	public abstract void onActivateEvent(int eventType);
+	protected abstract void onActivateEvent(int eventType);
 	
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -127,7 +135,7 @@ public abstract class Monitor extends Service {
 	 * Method triggered on deactivation of the specified event type.
 	 * @param eventType
 	 */
-	public abstract void onDeactivateEvent(int eventType);
+	protected abstract void onDeactivateEvent(int eventType);
 	
 	@Override
 	public void onDestroy() {
@@ -170,6 +178,8 @@ public abstract class Monitor extends Service {
 	 * @param state
 	 */
 	public void setCurrentState(int eventType, DataObject state) {
-		currentStates.put(eventType, state);
+		synchronized(currentStates) {
+			currentStates.put(eventType, state);
+		}
 	}
 }

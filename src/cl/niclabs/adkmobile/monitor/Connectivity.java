@@ -101,7 +101,7 @@ public class Connectivity extends Monitor {
 			case WIMAX:
 				return "wimax";
 			case OTHER:
-				return "unknown";
+				return "other";
 			}
 			/* This is never reached, left here only to avoid compiling errors */
 			return null;
@@ -174,7 +174,7 @@ public class Connectivity extends Monitor {
 	};
 
 	@Override
-	public DataFields getDataFields(int eventType) {
+	public synchronized DataFields getDataFields(int eventType) {
 		if (eventType == MonitorManager.CONNECTIVITY_CHANGE) {
 			if (connectivityDataFields == null)
 				connectivityDataFields = new ConnectivityData();
@@ -184,7 +184,7 @@ public class Connectivity extends Monitor {
 	}
 
 	@Override
-	public void onActivateEvent(int eventType) {
+	protected synchronized void onActivateEvent(int eventType) {
 		// TODO: What is a better way to do this?
 		if (eventType == MonitorManager.CONNECTIVITY_CHANGE) {
 			IntentFilter filter = new IntentFilter();
@@ -220,7 +220,7 @@ public class Connectivity extends Monitor {
 	}
 
 	@Override
-	public void onDeactivateEvent(int eventType) {
+	protected synchronized void onDeactivateEvent(int eventType) {
 		if (eventType == MonitorManager.CONNECTIVITY_CHANGE) {
 			unregisterReceiver(connectivityMonitor);
 		}
@@ -235,5 +235,4 @@ public class Connectivity extends Monitor {
 		// TODO: what happens if the event is not active and we call unregisterReceiver?
 		setActive(MonitorManager.CONNECTIVITY_CHANGE, false);
 	}
-
 }
