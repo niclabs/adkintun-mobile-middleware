@@ -11,4 +11,8 @@ public final class MonitorManager {
 	 * Defines a change in connectivity status
 	 */
 	public static final int CONNECTIVITY_CHANGE = 1;
+	/**
+	 * Defines a change in traffic rate
+	 */
+	public static final int TRAFFIC_CHANGE = 2;
 }
