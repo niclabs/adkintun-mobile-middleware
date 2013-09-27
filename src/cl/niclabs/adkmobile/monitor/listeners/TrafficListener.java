@@ -13,5 +13,5 @@ public interface TrafficListener extends MonitorListener {
 	 * Inform the listener of a traffic change
 	 * @param trafficState the new traffic data
 	 */
-	public void onTrafficChanged(DataObject connectivityState);
+	public void onMobileTcpTrafficChanged(DataObject connectivityState);
 }

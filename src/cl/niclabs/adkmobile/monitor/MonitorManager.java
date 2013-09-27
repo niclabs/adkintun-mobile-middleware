@@ -12,7 +12,11 @@ public final class MonitorManager {
 	 */
 	public static final int CONNECTIVITY_CHANGE = 1;
 	/**
-	 * Defines a change in traffic rate
+	 * Defines a change in mobile tcp traffic rate
 	 */
-	public static final int TRAFFIC_CHANGE = 2;
+	public static final int MOBILE_TCP_TRAFFIC_CHANGE = 2;
+	/**
+	 * Defines a change in mobile traffic rate
+	 */
+	public static final int MOBILE_TRAFFIC_CHANGE = 3;
 }
