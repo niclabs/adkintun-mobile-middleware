@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.TrafficStats;
@@ -16,11 +16,9 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.Build.VERSION;
 import android.util.Log;
-import cl.niclabs.adkmobile.monitor.Connectivity.ConnectivityData;
 import cl.niclabs.adkmobile.monitor.data.ContentValuesDataObject;
 import cl.niclabs.adkmobile.monitor.data.DataFields;
 import cl.niclabs.adkmobile.monitor.data.DataObject;
-import cl.niclabs.adkmobile.monitor.listeners.ConnectivityListener;
 import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
 import cl.niclabs.adkmobile.monitor.listeners.TrafficListener;
 
@@ -28,7 +26,7 @@ import cl.niclabs.adkmobile.monitor.listeners.TrafficListener;
  * Implements monitoring of Rx & Tx bytes. Traffic is
  * notified by the system as a listener. This class will listen
  * for each 10 seconds.
- * @author Administrador.
+ * @author Mauricio Castro.
  *         Created 27-09-2013.
  */
 public class Traffic extends Monitor {
@@ -83,7 +81,8 @@ public class Traffic extends Monitor {
 	 */
 	private final IBinder serviceBinder = new ServiceBinder();
 	
-	private Timer mTimer = new Timer();	
+	private Timer mTimer_Traffic = new Timer();
+	private Timer mTimer_Traffic_TCP = new Timer();
 	private TimerTask mobile_tcp_task = new TimerTask() {
 		
 		@Override
@@ -103,7 +102,7 @@ public class Traffic extends Monitor {
 			notifyListeners(MonitorManager.MOBILE_TCP_TRAFFIC_CHANGE, data);
 			
 			/* Log the results */
-			Log.d(TAG,bytes.toString());
+			Log.d(TAG,data.toString());
 		}
 	};
 	
@@ -118,6 +117,14 @@ public class Traffic extends Monitor {
 			data.put(TrafficData.TIMESTAMP,System.currentTimeMillis());
 			data.put(TrafficData.MOBILE_RECEIVED,bytes[0]);
 			data.put(TrafficData.MOBILE_TRANSMITTED,bytes[1]);
+			
+			setCurrentState(MonitorManager.MOBILE_TRAFFIC_CHANGE, data);
+
+			/* Notify listeners */
+			notifyListeners(MonitorManager.MOBILE_TRAFFIC_CHANGE, data);
+			
+			/* Log the results */
+			Log.d(TAG,data.toString());
 		}
 	};
 	
@@ -213,22 +220,31 @@ public class Traffic extends Monitor {
 	@Override
 	protected void onActivateEvent(int eventType) {
 		// TODO see how to implement the listener.
-		if (eventType == MonitorManager.MOBILE_TCP_TRAFFIC_CHANGE) {
-			mTimer.schedule(mobile_tcp_task,0,1000 * TrafficData.TRAFFIC_UPDATE_INTERVAL);
+		
+		if (eventType == MonitorManager.MOBILE_TRAFFIC){
+			Log.d(TAG, "Active Listeners");
+			mTimer_Traffic_TCP.schedule(mobile_tcp_task,0,1000 * TrafficData.TRAFFIC_UPDATE_INTERVAL);
+			mTimer_Traffic.schedule(mobile_task,0,1000 * TrafficData.TRAFFIC_UPDATE_INTERVAL);
 		}
-		if (eventType == MonitorManager.MOBILE_TRAFFIC_CHANGE) {
-			mTimer.schedule(mobile_task,0,1000 * TrafficData.TRAFFIC_UPDATE_INTERVAL);
-		}
+		
 	}
 	
 	@Override
-	public void onCreate() {
-		super.onCreate();
-
-		/* Activate the event connectivity change */
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		super.onStartCommand(intent, flags, startId);
+		int event = intent.getExtras().getInt(MonitorManager.TRAFFIC_INTENT);
+		/* Activate the event traffic_change */
 		/* TODO: activate the event if activated on the preferences */
-		setActive(MonitorManager.MOBILE_TCP_TRAFFIC_CHANGE, true);
-		setActive(MonitorManager.MOBILE_TRAFFIC_CHANGE, true);
+		switch (event) {
+		case MonitorManager.MOBILE_TRAFFIC:
+			setActive(MonitorManager.MOBILE_TRAFFIC, true);
+			break;
+			
+		default:
+			break;
+		}
+		
+		return START_STICKY;
 	}
 
 	@Override
@@ -244,9 +260,19 @@ public class Traffic extends Monitor {
 	@Override
 	protected void onDeactivateEvent(int eventType) {
 
-		if (eventType == MonitorManager.MOBILE_TCP_TRAFFIC_CHANGE) {
-			mTimer.cancel();
+		switch (eventType) {
+		case MonitorManager.MOBILE_TRAFFIC_CHANGE:
+			mTimer_Traffic.cancel();
+			break;
+			
+		case MonitorManager.MOBILE_TCP_TRAFFIC_CHANGE:
+			mTimer_Traffic_TCP.cancel();
+			break;
+			
+		default:
+			break;
 		}
+		
 	}
 	
 	@Override

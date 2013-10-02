@@ -147,6 +147,9 @@ public class Connectivity extends Monitor {
 			ConnectivityManager connectivityManager = (ConnectivityManager) context
 					.getSystemService(Context.CONNECTIVITY_SERVICE);
 			NetworkInfo ni = connectivityManager.getActiveNetworkInfo();
+			/* When the network goes from Wi-Fi to somekind of network, 
+			 * the variable is null */
+			if (ni == null){return;}
 
 			DataObject data = new ContentValuesDataObject();
 			data.put(ConnectivityData.TIMESTAMP, System.currentTimeMillis());
@@ -200,12 +203,13 @@ public class Connectivity extends Monitor {
 	}
 
 	@Override
-	public void onCreate() {
-		super.onCreate();
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		super.onStartCommand(intent, flags, startId);
 
 		/* Activate the event connectivity change */
 		/* TODO: activate the event if activated on the preferences */
 		setActive(MonitorManager.CONNECTIVITY_CHANGE, true);
+		return START_STICKY;
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package cl.niclabs.adkmobile.monitor.data;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -9,8 +10,10 @@ public class ContentValuesDataObject extends DataObject {
 	private ContentValues contentValues;
 	private Set<String> fieldNames;
 	
+	@SuppressWarnings("unchecked")
 	public ContentValuesDataObject() {
 		contentValues = new ContentValues();
+		fieldNames = new HashSet<String>();
 	}
 
 	@Override
