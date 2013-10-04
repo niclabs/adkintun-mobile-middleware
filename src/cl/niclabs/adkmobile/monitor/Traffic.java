@@ -44,14 +44,15 @@ public class Traffic extends Monitor {
 		
 		 public static int TRAFFIC_UPDATE_INTERVAL = 10;
 		 
-		 /**
-			 * Set the interval period of traffic measure in seconds.
-			 * For default is set on 10 seconds.
-			 * @param interval in seconds
-			 */
-		 private void setTrafficInterval(int interval){
-			 TRAFFIC_UPDATE_INTERVAL = interval;
-		 }
+	}
+	
+	/**
+	 * Set the interval period of traffic measure in seconds.
+	 * For default is set on 10 seconds.
+	 * @param interval in seconds
+	 */
+	public void setTrafficInterval(int interval){
+		trafficDataFields.TRAFFIC_UPDATE_INTERVAL= interval;
 	}
 	
 	
@@ -251,9 +252,9 @@ public class Traffic extends Monitor {
 	protected void onDataReceived(MonitorListener listener, int eventType,
 			DataObject data) {
 		// TODO Auto-generated method stub.
-		if (eventType == MonitorManager.MOBILE_TCP_TRAFFIC_CHANGE
+		if (eventType == MonitorManager.MOBILE_TRAFFIC
 				&& listener instanceof TrafficListener) {
-			((TrafficListener) listener).onMobileTcpTrafficChanged(data);
+			((TrafficListener) listener).onMobileTrafficChanged(data);
 		}
 	}
 
@@ -261,14 +262,11 @@ public class Traffic extends Monitor {
 	protected void onDeactivateEvent(int eventType) {
 
 		switch (eventType) {
-		case MonitorManager.MOBILE_TRAFFIC_CHANGE:
+		case MonitorManager.MOBILE_TRAFFIC:
 			mTimer_Traffic.cancel();
-			break;
-			
-		case MonitorManager.MOBILE_TCP_TRAFFIC_CHANGE:
 			mTimer_Traffic_TCP.cancel();
 			break;
-			
+
 		default:
 			break;
 		}
@@ -282,8 +280,8 @@ public class Traffic extends Monitor {
 
 		// Deactivate the event
 		// TODO: what happens if the event is not active and we call unregisterReceiver?
-		setActive(MonitorManager.MOBILE_TCP_TRAFFIC_CHANGE, false);
-		setActive(MonitorManager.MOBILE_TRAFFIC_CHANGE, false);
+		setActive(MonitorManager.MOBILE_TRAFFIC, false);
+		//setActive(MonitorManager.MOBILE_TRAFFIC_CHANGE, false);
 	}
 
 }
