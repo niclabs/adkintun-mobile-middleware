@@ -25,11 +25,19 @@ public final class MonitorManager {
 	 */
 	public static final int MOBILE_TRAFFIC = 4;
 	/**
+	 * Define a change in Telephony status
+	 */
+	public static final int TELEPHONY_CHANGE = 5;
+	/**
 	 * Define the key intent for Mobile Traffic
 	 */
 	public static final String TRAFFIC_INTENT = "traffic_change";
 	/**
-	 * Define the key intent for Mobile Traffic
+	 * Define the key intent for Connectivity
 	 */
 	public static final String CONNECTIVITY_INTENT = "connectivity_change";
+	/**
+	 * Define the key intent fo telephony
+	 */
+	public static final String TELEPHONY_INTENT = "telephony_change";
 }
