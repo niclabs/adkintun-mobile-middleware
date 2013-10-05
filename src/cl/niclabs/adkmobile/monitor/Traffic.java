@@ -45,10 +45,10 @@ public class Traffic extends Monitor {
 		 public static int TRAFFIC_UPDATE_INTERVAL = 10;
 		 
 		 /**
-			 * Set the interval period of traffic measure in seconds.
-			 * For default is set on 10 seconds.
-			 * @param interval in seconds
-			 */
+		 * Set the interval period of traffic measure in seconds.
+		 * For default is set on 10 seconds.
+		 * @param interval in seconds
+		 */
 		 private void setTrafficInterval(int interval){
 			 TRAFFIC_UPDATE_INTERVAL = interval;
 		 }
