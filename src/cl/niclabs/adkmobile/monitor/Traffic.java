@@ -72,11 +72,14 @@ public class Traffic extends Monitor {
 		public void run() {
 			// TODO Auto-generated method stub.
 			long[] bytes = getMobileTxRxBytes(mContext);
+			long[] bytesTcp = getMobileTcpTxRxBytes(mContext);
 			// assign the values to ContentValues variables
 			DataObject data = new ContentValuesDataObject();
 			data.put(TrafficData.TIMESTAMP,System.currentTimeMillis());
 			data.put(TrafficData.MOBILE_RECEIVED,bytes[0]);
 			data.put(TrafficData.MOBILE_TRANSMITTED,bytes[1]);
+			data.put(TrafficData.MOBILE_TCP_RECEIVED,bytesTcp[0]);
+			data.put(TrafficData.MOBILE_TCP_TRANSMITTED,bytesTcp[1]);
 			
 			setCurrentState(MonitorManager.MOBILE_TRAFFIC_CHANGE, data);
 
@@ -88,31 +91,7 @@ public class Traffic extends Monitor {
 		}
 	};
 	
-	private TimerTask mobileTcpTask = new TimerTask() {
-		
-		@Override
-		public void run() {
-			// TODO Auto-generated method stub.
-			long[] bytes = getMobileTcpTxRxBytes(mContext);
-			// assign the values to ContentValues variables
-			DataObject data = new ContentValuesDataObject();
-			data.put(TrafficData.TIMESTAMP,System.currentTimeMillis());
-			data.put(TrafficData.MOBILE_TCP_RECEIVED,bytes[0]);
-			data.put(TrafficData.MOBILE_TCP_TRANSMITTED,bytes[1]);
-			
-			/* Update the current state */
-			setCurrentState(MonitorManager.MOBILE_TCP_TRAFFIC_CHANGE, data);
-
-			/* Notify listeners */
-			notifyListeners(MonitorManager.MOBILE_TCP_TRAFFIC_CHANGE, data);
-			
-			/* Log the results */
-			Log.d(TAG,data.toString());
-		}
-	};
 	private Timer mTimer_Traffic = new Timer();
-
-	private Timer mTimer_Traffic_TCP = new Timer();
 	
 	/**
 	 * Activity-Service binder
@@ -216,7 +195,6 @@ public class Traffic extends Monitor {
 		
 		if (eventType == MonitorManager.MOBILE_TRAFFIC){
 			Log.d(TAG, "Active Listeners");
-			mTimer_Traffic_TCP.schedule(mobileTcpTask,0,1000 * TRAFFIC_UPDATE_INTERVAL);
 			mTimer_Traffic.schedule(mobileTask,0,1000 * TRAFFIC_UPDATE_INTERVAL);
 		}
 		
@@ -238,7 +216,6 @@ public class Traffic extends Monitor {
 		switch (eventType) {
 		case MonitorManager.MOBILE_TRAFFIC:
 			mTimer_Traffic.cancel();
-			mTimer_Traffic_TCP.cancel();
 			break;
 
 		default:
