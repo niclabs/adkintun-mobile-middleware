@@ -31,60 +31,64 @@ import cl.niclabs.adkmobile.monitor.listeners.TrafficListener;
  */
 public class Traffic extends Monitor {
 	
-	private static class TrafficData implements DataFields {
-		
-		public static String MOBILE_TCP_RECEIVED = "mobile_tcp_bytes_received";
-		public static String MOBILE_TCP_TRANSMITTED = "mobile_tcp_bytes_transmitted";
-		
-		public static String WIFI_RECEIVED = "wifi_bytes_received";
-		public static String WIFI_TRANSMITTED = "wifi_bytes_transmitted";
-		
-		public static String MOBILE_RECEIVED = "mobile_bytes_received";
-		public static String MOBILE_TRANSMITTED = "mobile_bytes_transmitted";
-		
-		 public static int TRAFFIC_UPDATE_INTERVAL = 10;
-		 
-	}
-	
-	/**
-	 * Set the interval period of traffic measure in seconds.
-	 * For default is set on 10 seconds.
-	 * @param interval in seconds
-	 */
-	public void setTrafficInterval(int interval){
-		trafficDataFields.TRAFFIC_UPDATE_INTERVAL= interval;
-	}
-	
-	
-	private Context mContext = this;
 	public class ServiceBinder extends Binder {
-		Traffic getService() {
+		public Traffic getService() {
 			return Traffic.getService();
 		}
 	}
+	
+	public static class TrafficData implements DataFields {
+		
+		public static String MOBILE_RECEIVED = "mobile_bytes_received";
+		public static String MOBILE_TCP_RECEIVED = "mobile_tcp_bytes_received";
+		
+		public static String MOBILE_TCP_TRANSMITTED = "mobile_tcp_bytes_transmitted";
+		public static String MOBILE_TRANSMITTED = "mobile_bytes_transmitted";
+		
+		public static String WIFI_RECEIVED = "wifi_bytes_received";
+		public static String WIFI_TRANSMITTED = "wifi_bytes_transmitted";
+		 
+	}
+	
+	public static int TRAFFIC_UPDATE_INTERVAL = 10;
+	
 	
 	/**
 	 * Instance of the current service
 	 */
 	private static Traffic trafficService;
-
 	public static Traffic getService() {
 		if (trafficService == null)
 			trafficService = new Traffic();
 		return trafficService;
 	}
 	
-	private TrafficData trafficDataFields;
-	protected String TAG = "AdkintunMobile::Traffic";
+	private Context mContext = this;
 
-	/**
-	 * Activity-Service binder
-	 */
-	private final IBinder serviceBinder = new ServiceBinder();
+	// TODO: Juntar esta tarea con mobileTcpTask
+	private TimerTask mobileTask = new TimerTask() {
+		
+		@Override
+		public void run() {
+			// TODO Auto-generated method stub.
+			long[] bytes = getMobileTxRxBytes(mContext);
+			// assign the values to ContentValues variables
+			DataObject data = new ContentValuesDataObject();
+			data.put(TrafficData.TIMESTAMP,System.currentTimeMillis());
+			data.put(TrafficData.MOBILE_RECEIVED,bytes[0]);
+			data.put(TrafficData.MOBILE_TRANSMITTED,bytes[1]);
+			
+			setCurrentState(MonitorManager.MOBILE_TRAFFIC_CHANGE, data);
+
+			/* Notify listeners */
+			notifyListeners(MonitorManager.MOBILE_TRAFFIC_CHANGE, data);
+			
+			/* Log the results */
+			Log.d(TAG,data.toString());
+		}
+	};
 	
-	private Timer mTimer_Traffic = new Timer();
-	private Timer mTimer_Traffic_TCP = new Timer();
-	private TimerTask mobile_tcp_task = new TimerTask() {
+	private TimerTask mobileTcpTask = new TimerTask() {
 		
 		@Override
 		public void run() {
@@ -106,28 +110,16 @@ public class Traffic extends Monitor {
 			Log.d(TAG,data.toString());
 		}
 	};
-	
-	private TimerTask mobile_task = new TimerTask() {
-		
-		@Override
-		public void run() {
-			// TODO Auto-generated method stub.
-			long[] bytes = getMobileTxRxBytes(mContext);
-			// assign the values to ContentValues variables
-			DataObject data = new ContentValuesDataObject();
-			data.put(TrafficData.TIMESTAMP,System.currentTimeMillis());
-			data.put(TrafficData.MOBILE_RECEIVED,bytes[0]);
-			data.put(TrafficData.MOBILE_TRANSMITTED,bytes[1]);
-			
-			setCurrentState(MonitorManager.MOBILE_TRAFFIC_CHANGE, data);
+	private Timer mTimer_Traffic = new Timer();
 
-			/* Notify listeners */
-			notifyListeners(MonitorManager.MOBILE_TRAFFIC_CHANGE, data);
-			
-			/* Log the results */
-			Log.d(TAG,data.toString());
-		}
-	};
+	private Timer mTimer_Traffic_TCP = new Timer();
+	
+	/**
+	 * Activity-Service binder
+	 */
+	private final IBinder serviceBinder = new ServiceBinder();
+	protected String TAG = "AdkintunMobile::Traffic";
+	private TrafficData trafficDataFields;
 	
 	@Override
 	public DataFields getDataFields(int eventType) {
@@ -192,7 +184,7 @@ public class Traffic extends Monitor {
 			long mobileTxBytes = TrafficStats.getMobileTxBytes();
 			
 			return new long[]{mobileRxBytes,mobileTxBytes};
-		}catch(Exception e){
+		}catch(Exception e){ //TODO: what kind of exception?
 			return new long[]{-1,-1};
 		}
 		
@@ -217,19 +209,55 @@ public class Traffic extends Monitor {
 		}
 		return uids;
 	}
-
+	
 	@Override
 	protected void onActivateEvent(int eventType) {
 		// TODO see how to implement the listener.
 		
 		if (eventType == MonitorManager.MOBILE_TRAFFIC){
 			Log.d(TAG, "Active Listeners");
-			mTimer_Traffic_TCP.schedule(mobile_tcp_task,0,1000 * TrafficData.TRAFFIC_UPDATE_INTERVAL);
-			mTimer_Traffic.schedule(mobile_task,0,1000 * TrafficData.TRAFFIC_UPDATE_INTERVAL);
+			mTimer_Traffic_TCP.schedule(mobileTcpTask,0,1000 * TRAFFIC_UPDATE_INTERVAL);
+			mTimer_Traffic.schedule(mobileTask,0,1000 * TRAFFIC_UPDATE_INTERVAL);
 		}
 		
 	}
+
+	@Override
+	protected void onDataReceived(MonitorListener listener, int eventType,
+			DataObject data) {
+		// TODO Auto-generated method stub.
+		if (eventType == MonitorManager.MOBILE_TRAFFIC
+				&& listener instanceof TrafficListener) {
+			((TrafficListener) listener).onMobileTrafficChanged(data);
+		}
+	}
 	
+	@Override
+	protected void onDeactivateEvent(int eventType) {
+
+		switch (eventType) {
+		case MonitorManager.MOBILE_TRAFFIC:
+			mTimer_Traffic.cancel();
+			mTimer_Traffic_TCP.cancel();
+			break;
+
+		default:
+			break;
+		}
+		
+	}
+
+	@Override
+	public void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+
+		// Deactivate the event
+		// TODO: what happens if the event is not active and we call unregisterReceiver?
+		setActive(MonitorManager.MOBILE_TRAFFIC, false);
+		//setActive(MonitorManager.MOBILE_TRAFFIC_CHANGE, false);
+	}
+
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		super.onStartCommand(intent, flags, startId);
@@ -247,41 +275,19 @@ public class Traffic extends Monitor {
 		
 		return START_STICKY;
 	}
-
-	@Override
-	protected void onDataReceived(MonitorListener listener, int eventType,
-			DataObject data) {
-		// TODO Auto-generated method stub.
-		if (eventType == MonitorManager.MOBILE_TRAFFIC
-				&& listener instanceof TrafficListener) {
-			((TrafficListener) listener).onMobileTrafficChanged(data);
-		}
-	}
-
-	@Override
-	protected void onDeactivateEvent(int eventType) {
-
-		switch (eventType) {
-		case MonitorManager.MOBILE_TRAFFIC:
-			mTimer_Traffic.cancel();
-			mTimer_Traffic_TCP.cancel();
-			break;
-
-		default:
-			break;
-		}
-		
-	}
 	
-	@Override
-	public void onDestroy() {
-		// TODO Auto-generated method stub
-		super.onDestroy();
+	/**
+	 * Set the interval period of traffic measure in seconds.
+	 * For default is set on 10 seconds.
+	 * @param interval in seconds
+	 */
+	public void setTrafficInterval(int interval){
+		TRAFFIC_UPDATE_INTERVAL= interval;
+	}
 
-		// Deactivate the event
-		// TODO: what happens if the event is not active and we call unregisterReceiver?
-		setActive(MonitorManager.MOBILE_TRAFFIC, false);
-		//setActive(MonitorManager.MOBILE_TRAFFIC_CHANGE, false);
+	@Override
+	public IBinder onBind(Intent intent) {
+		return serviceBinder;
 	}
 
 }

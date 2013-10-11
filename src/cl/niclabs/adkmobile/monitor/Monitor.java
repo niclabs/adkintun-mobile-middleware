@@ -23,24 +23,24 @@ import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
  * @author Felipe Lalanne <flalanne@niclabs.cl>
  */
 public abstract class Monitor extends Service {
-	protected String TAG = "AdkintunMobile";
-	
-	protected boolean DEBUG = true;
+	/**
+	 * Event activity status by event type
+	 */
+	private SparseBooleanArray activeEvents = new SparseBooleanArray();
 	
 	/**
 	 * Current status by eventType
 	 */
 	private SparseArray<DataObject> currentStates = new SparseArray<DataObject>();
 	
+	protected boolean DEBUG = true;
+	
 	/** 
 	 * List of listeners by event type 
 	 */
 	private SparseArray<List<MonitorListener>> listeners = new SparseArray<List<MonitorListener>>();
 	
-	/**
-	 * Event activity status by event type
-	 */
-	private SparseBooleanArray activeEvents = new SparseBooleanArray();
+	protected String TAG = "AdkintunMobile";
 	
 	/**
 	 * Get the current state data for the specified event type. Returns null if there is no data 
