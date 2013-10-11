@@ -65,7 +65,8 @@ public class Traffic extends Monitor {
 	
 	private Context mContext = this;
 
-	private TimerTask mobile_task = new TimerTask() {
+	// TODO: Juntar esta tarea con mobileTcpTask
+	private TimerTask mobileTask = new TimerTask() {
 		
 		@Override
 		public void run() {
@@ -87,7 +88,7 @@ public class Traffic extends Monitor {
 		}
 	};
 	
-	private TimerTask mobile_tcp_task = new TimerTask() {
+	private TimerTask mobileTcpTask = new TimerTask() {
 		
 		@Override
 		public void run() {
@@ -215,8 +216,8 @@ public class Traffic extends Monitor {
 		
 		if (eventType == MonitorManager.MOBILE_TRAFFIC){
 			Log.d(TAG, "Active Listeners");
-			mTimer_Traffic_TCP.schedule(mobile_tcp_task,0,1000 * TRAFFIC_UPDATE_INTERVAL);
-			mTimer_Traffic.schedule(mobile_task,0,1000 * TRAFFIC_UPDATE_INTERVAL);
+			mTimer_Traffic_TCP.schedule(mobileTcpTask,0,1000 * TRAFFIC_UPDATE_INTERVAL);
+			mTimer_Traffic.schedule(mobileTask,0,1000 * TRAFFIC_UPDATE_INTERVAL);
 		}
 		
 	}
