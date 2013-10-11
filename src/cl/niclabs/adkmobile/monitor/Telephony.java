@@ -1,9 +1,12 @@
 package cl.niclabs.adkmobile.monitor;
 
+import java.util.List;
+
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.telephony.CellLocation;
+import android.telephony.NeighboringCellInfo;
 import android.telephony.PhoneStateListener;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
@@ -19,7 +22,7 @@ import cl.niclabs.adkmobile.monitor.listeners.TelephonyListener;
 /**
  * TODO Put here a description of what this class does.
  * 
- * @author Administrador. Created 04-10-2013.
+ * @author Mauricio Castro. Created 04-10-2013.
  */
 public class Telephony extends Monitor {
 
@@ -45,6 +48,11 @@ public class Telephony extends Monitor {
 		public static String TELEPHONY_GSM_PSC = "gsm_psc";
 		public static String TELEPHONY_SIGNAL_STRENGTH = "signal_strength";
 		public static String TELEPHONY_STANDARD = "telephony_std";
+		
+		public static String TELEPHONY_NEIGHBOR_GSM_CID = "neighbor_gsm_cid";
+		public static String TELEPHONY_NEIGHBOR_GSM_LAC = "neighbor_gsm_lac";
+		public static String TELEPHONY_NEIGHBOR_GMS_PSC = "neighbor_gsm_psc";
+		public static String TELEPHONY_NEIGHBOR_SIGNAL_STRENGTH = "neighbor_signal_strenght";
 
 		public static String TOWER_TYPE = "tower_type";
 		// TODO: TELEPHONY_STANDARD and TOWER_TYPE are not used, same thing for CDMA_ECIO, EVDO_ECIO
@@ -72,6 +80,7 @@ public class Telephony extends Monitor {
 				GsmCellLocation loc = (GsmCellLocation) location;
 
 				data.put(TelephonyData.TIMESTAMP, System.currentTimeMillis());
+				data.put(TelephonyData.TELEPHONY_STANDARD, "gsm");
 				data.put(TelephonyData.TELEPHONY_GSM_CID, loc.getCid());
 				data.put(TelephonyData.TELEPHONY_GSM_LAC, loc.getLac());
 				
@@ -88,12 +97,33 @@ public class Telephony extends Monitor {
 					
 				}
 				data.put(TelephonyData.TELEPHONY_GSM_PSC, loc.getPsc());
+				
 
 				/* TODO add neighbor list? */
+				List<NeighboringCellInfo> neighbors = telephonyManager.getNeighboringCellInfo();
+				if( neighbors.size() > 0 ) {
+                    for(NeighboringCellInfo neighbor : neighbors ) {
+                    	
+                        data.put(TelephonyData.TIMESTAMP, System.currentTimeMillis());
+                        data.put(TelephonyData.TELEPHONY_NEIGHBOR_GSM_CID, neighbor.getCid());
+                        data.put(TelephonyData.TELEPHONY_NEIGHBOR_GSM_LAC, neighbor.getLac());
+                        data.put(TelephonyData.TELEPHONY_NEIGHBOR_GMS_PSC, neighbor.getPsc());
+                        
+                        
+                        if(neighbor.getRssi() != neighbor.UNKNOWN_RSSI){
+                        		float signalNeighborStrength = (neighbor.getRssi()*2) - 113;
+                        		data.put(TelephonyData.TELEPHONY_NEIGHBOR_SIGNAL_STRENGTH,signalNeighborStrength);
+                        }                        
+                    }
+                }
 
 			} else {
 				CdmaCellLocation loc = (CdmaCellLocation) location;
-
+				
+				data.put(TelephonyData.TIMESTAMP, 
+						System.currentTimeMillis());
+				data.put(TelephonyData.TELEPHONY_STANDARD,
+						"cdma");
 				data.put(TelephonyData.CDMA_BASE_STATION,
 						loc.getBaseStationId());
 				data.put(TelephonyData.CDMA_BASE_LONGITUDE,
@@ -129,6 +159,11 @@ public class Telephony extends Monitor {
 			lastSignalStrength = signalStrength;
 			/* TODO: add signal now to DB? */
 		}
+		
+		@Override
+		public void onDataConnectionStateChanged(int state, int networkType){
+    		
+    	}
 	}
 
 	private SignalStrength lastSignalStrength = null;
