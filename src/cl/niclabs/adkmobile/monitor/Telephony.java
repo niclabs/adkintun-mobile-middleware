@@ -57,7 +57,7 @@ public class Telephony extends Monitor {
 	 * 
 	 * @author Mauricio Castro. Created 04-10-2013.
 	 */
-	public class TelephonyState extends PhoneStateListener {
+	public class TelephonyStateListener extends PhoneStateListener {
 
 		@Override
 		public void onCellLocationChanged(CellLocation location) {
@@ -131,9 +131,9 @@ public class Telephony extends Monitor {
 		}
 	}
 
-	private static SignalStrength lastSignalStrength = null;
+	private SignalStrength lastSignalStrength = null;
 
-	private static TelephonyManager telephonyManager = null;
+	private TelephonyManager telephonyManager = null;
 	
 	/**
 	 * Instance of the current service
@@ -153,7 +153,7 @@ public class Telephony extends Monitor {
 
 	protected String TAG = "AdkintunMobile::Telephony";
 	private TelephonyData telephonyDataFields;
-	private TelephonyState telephonyState = new TelephonyState();
+	private TelephonyStateListener telephonyStateListener = new TelephonyStateListener();
 
 	@Override
 	public DataFields getDataFields(int eventType) {
@@ -171,7 +171,7 @@ public class Telephony extends Monitor {
 		// TODO Auto-generated method stub.
 		if (eventType == MonitorManager.TELEPHONY_CHANGE) {
 			telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
-			telephonyManager.listen(telephonyState,
+			telephonyManager.listen(telephonyStateListener,
 					PhoneStateListener.LISTEN_CELL_LOCATION
 							| PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
 		}
@@ -197,7 +197,7 @@ public class Telephony extends Monitor {
 		// TODO Auto-generated method stub.
 		switch (eventType) {
 		case MonitorManager.TELEPHONY_CHANGE:
-			telephonyManager.listen(telephonyState,
+			telephonyManager.listen(telephonyStateListener,
 					PhoneStateListener.LISTEN_NONE);
 			break;
 		default:
