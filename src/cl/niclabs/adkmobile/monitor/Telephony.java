@@ -15,63 +15,126 @@ import cl.niclabs.adkmobile.monitor.data.DataFields;
 import cl.niclabs.adkmobile.monitor.data.DataObject;
 import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
 import cl.niclabs.adkmobile.monitor.listeners.TelephonyListener;
-import cl.niclabs.adkmobile.monitor.listeners.TrafficListener;
 
 /**
  * TODO Put here a description of what this class does.
- *
- * @author Administrador.
- *         Created 04-10-2013.
+ * 
+ * @author Administrador. Created 04-10-2013.
  */
-public class Telephony extends Monitor{
-	
-	
-	
-	private static class TelephonyData implements DataFields{
-		
-		public static String TELEPHONY_SIGNAL_STRENGTH = "signal_strength";
-		
-		public static String TELEPHONY_GSM_LAC = "gsm_lac";
-		
-		public static String TELEPHONY_GSM_CID = "gsm_cid";
-		
-		public static String TELEPHONY_GSM_PSC = "gsm_psc";
-		
-		public static String TYPE_OF_TOWER = "type_of_tower";
-		
-		public static String TELEPHONY_STANDARD = "telephony_standard";
-		
-		public static String CDMA_BASE_STATION = "cdma_base_station";
-		
-		public static String CDMA_BASE_LONGITUDE = "cdma_base_longitude";
-		
-		public static String CDMA_BASE_LATITUDE = "cdma_base_latitude";
-		
-		public static String CDMA_NETWORK_ID = "cdma_network_id";
-		
-		public static String CDMA_ECIO = "cdma_ecio";
-		
-		public static String EVDO_DBM = "evdo_dbm";
-		
-		public static String EVDO_ECIO = "evdo_ecio";
-		
-		public static String EVDO_SNR = "evdo_snr";
-		
-	}
-	
+public class Telephony extends Monitor {
+
 	public class ServiceBinder extends Binder {
-		Telephony getService() {
+		public Telephony getService() {
 			return Telephony.getService();
 		}
 	}
-	
-	private TelephonyData telephonyDataFields;
-	protected String TAG = "AdkintunMobile::Telephony";
-	
+
+	private static class TelephonyData implements DataFields {
+		public static String CDMA_BASE_LATITUDE = "cdma_base_latitude";
+		public static String CDMA_BASE_LONGITUDE = "cdma_base_longitude";
+		public static String CDMA_BASE_STATION = "cdma_base_station";
+		public static String CDMA_ECIO = "cdma_ecio";
+		public static String CDMA_NETWORK_ID = "cdma_network_id";
+
+		public static String EVDO_DBM = "evdo_dbm";
+		public static String EVDO_ECIO = "evdo_ecio";
+		public static String EVDO_SNR = "evdo_snr";
+		
+		public static String TELEPHONY_GSM_CID = "gsm_cid";
+		public static String TELEPHONY_GSM_LAC = "gsm_lac";
+		public static String TELEPHONY_GSM_PSC = "gsm_psc";
+		public static String TELEPHONY_SIGNAL_STRENGTH = "signal_strength";
+		public static String TELEPHONY_STANDARD = "telephony_std";
+
+		public static String TOWER_TYPE = "tower_type";
+		// TODO: TELEPHONY_STANDARD and TOWER_TYPE are not used, same thing for CDMA_ECIO, EVDO_ECIO
+	}
+
 	/**
-	 * Activity-Service binder
+	 * TODO Class that got all the listener of PhoneStateListener Interface.
+	 * Describe what to do when a event occurs. This events can be signal
+	 * strength change, tower location change.
+	 * 
+	 * @author Mauricio Castro. Created 04-10-2013.
 	 */
-	private final IBinder serviceBinder = new ServiceBinder();
+	public class TelephonyState extends PhoneStateListener {
+
+		@Override
+		public void onCellLocationChanged(CellLocation location) {
+			super.onCellLocationChanged(location);
+			
+			// TODO: What if the telephony service is disabled
+
+			// assign the values to ContentValues variables
+			DataObject data = new ContentValuesDataObject();
+			
+			if (location instanceof GsmCellLocation) {
+				GsmCellLocation loc = (GsmCellLocation) location;
+
+				data.put(TelephonyData.TIMESTAMP, System.currentTimeMillis());
+				data.put(TelephonyData.TELEPHONY_GSM_CID, loc.getCid());
+				data.put(TelephonyData.TELEPHONY_GSM_LAC, loc.getLac());
+				
+				if (lastSignalStrength != null) {
+					/* convert the Signal Strength from GSM to Dbm */
+					if (lastSignalStrength.getGsmSignalStrength() != 99) {
+						float signalStrengthDbm = (lastSignalStrength
+								.getGsmSignalStrength() * 2) - 113;
+						data.put(TelephonyData.TELEPHONY_SIGNAL_STRENGTH,
+								signalStrengthDbm);
+					}
+					
+					//TODO: add lastSignalStrength.getGsmBitErrorRate()
+					
+				}
+				data.put(TelephonyData.TELEPHONY_GSM_PSC, loc.getPsc());
+
+				/* TODO add neighbor list? */
+
+			} else {
+				CdmaCellLocation loc = (CdmaCellLocation) location;
+
+				data.put(TelephonyData.CDMA_BASE_STATION,
+						loc.getBaseStationId());
+				data.put(TelephonyData.CDMA_BASE_LONGITUDE,
+						loc.getBaseStationLongitude());
+				data.put(TelephonyData.CDMA_BASE_LATITUDE,
+						loc.getBaseStationLatitude());
+				data.put(TelephonyData.CDMA_NETWORK_ID, loc.getNetworkId());
+				
+				if (lastSignalStrength != null) {
+					data.put(TelephonyData.TELEPHONY_SIGNAL_STRENGTH,
+							lastSignalStrength.getCdmaDbm());
+					data.put(TelephonyData.EVDO_DBM,
+							lastSignalStrength.getEvdoDbm());
+					data.put(TelephonyData.EVDO_DBM,
+							lastSignalStrength.getEvdoDbm());
+					data.put(TelephonyData.EVDO_SNR,
+							lastSignalStrength.getEvdoSnr());
+				}
+			}
+			
+			setCurrentState(MonitorManager.TELEPHONY_CHANGE, data);
+			
+			/* Notify listeners */
+			notifyListeners(MonitorManager.TELEPHONY_CHANGE, data);
+
+			/* Log the results */
+			Log.d(TAG, data.toString());
+		}
+
+		@Override
+		public void onSignalStrengthsChanged(SignalStrength signalStrength) {
+			super.onSignalStrengthsChanged(signalStrength);
+			lastSignalStrength = signalStrength;
+			/* TODO: add signal now to DB? */
+		}
+	}
+
+	private static SignalStrength lastSignalStrength = null;
+
+	private static TelephonyManager telephonyManager = null;
+	
 	/**
 	 * Instance of the current service
 	 */
@@ -82,7 +145,16 @@ public class Telephony extends Monitor{
 			telephonyService = new Telephony();
 		return telephonyService;
 	}
-	
+
+	/**
+	 * Activity-Service binder
+	 */
+	private final IBinder serviceBinder = new ServiceBinder();
+
+	protected String TAG = "AdkintunMobile::Telephony";
+	private TelephonyData telephonyDataFields;
+	private TelephonyState telephonyState = new TelephonyState();
+
 	@Override
 	public DataFields getDataFields(int eventType) {
 		// TODO Auto-generated method stub.
@@ -93,110 +165,21 @@ public class Telephony extends Monitor{
 		}
 		return null;
 	}
-	
-	private static TelephonyManager telephonyManager = null;
-	private static SignalStrength lastSignalStrength = null;
-	private TelephonyState telephonyState = new TelephonyState();
-	
-	
-	/**
-	 * TODO Class that got all the listener of PhoneStateListener Interface.
-	 * Describe what to do when a event occurs. This events can be signal strength
-	 * change, tower location change.
-	 *
-	 * @author Mauricio Castro.
-	 *         Created 04-10-2013.
-	 */
-	public static class TelephonyState extends PhoneStateListener{
-		
-		 @Override
-	        public void onSignalStrengthsChanged(SignalStrength signalStrength) {
-	            super.onSignalStrengthsChanged(signalStrength);
-	            lastSignalStrength = signalStrength;
-	            /* TODO: add signal now to DB? */
-	        }
-		 
-		 @Override
-	        public void onCellLocationChanged(CellLocation location) {
-	            super.onCellLocationChanged(location);
-	            
-	            // assign the values to ContentValues variables
-				DataObject data = new ContentValuesDataObject();
-	            
-	            if ( lastSignalStrength == null ) return;
-	            if ( telephonyService == null) Telephony.getService();
-	          
-	            if( location instanceof GsmCellLocation ) {
-	                GsmCellLocation loc = (GsmCellLocation) location;
-	                
-	                data.put(TelephonyData.TIMESTAMP,System.currentTimeMillis());
-	                data.put(TelephonyData.TELEPHONY_GSM_CID,loc.getCid());
-	                data.put(TelephonyData.TELEPHONY_GSM_LAC,loc.getLac());
-	                /* convert the Signal Strength from GSM to Dbm*/
-	                float signalStrengthDbm = (lastSignalStrength.getGsmSignalStrength()*2) -113;
-	                data.put(TelephonyData.TELEPHONY_SIGNAL_STRENGTH,signalStrengthDbm);
-	                data.put(TelephonyData.TELEPHONY_GSM_PSC,loc.getPsc());
-	                
-	                telephonyService.setCurrentState(MonitorManager.TELEPHONY_CHANGE, data);
-	                /* Notify listeners */
-	                telephonyService.notifyListeners(MonitorManager.TELEPHONY_CHANGE, data);
-	    			
-	    			/* Log the results */
-	    			Log.d(telephonyService.TAG,data.toString());
-	                
-	                
-	                /* TODO add neighbor list? */
-	                
-	            } else {
-	                CdmaCellLocation loc = (CdmaCellLocation) location;
-	                
-	                data.put(TelephonyData.CDMA_BASE_STATION,loc.getBaseStationId());
-	                data.put(TelephonyData.CDMA_BASE_LONGITUDE,loc.getBaseStationLongitude());
-	                data.put(TelephonyData.CDMA_BASE_LATITUDE,loc.getBaseStationLatitude());
-	                data.put(TelephonyData.CDMA_NETWORK_ID, loc.getNetworkId());
-	                data.put(TelephonyData.TELEPHONY_SIGNAL_STRENGTH,lastSignalStrength.getCdmaDbm());
-	                data.put(TelephonyData.EVDO_DBM,lastSignalStrength.getEvdoDbm());
-	                data.put(TelephonyData.EVDO_DBM,lastSignalStrength.getEvdoDbm());
-	                data.put(TelephonyData.EVDO_SNR,lastSignalStrength.getEvdoSnr());
-	                
-	                telephonyService.setCurrentState(MonitorManager.TELEPHONY_CHANGE, data);
-	                /* Notify listeners */
-	    			telephonyService.notifyListeners(MonitorManager.TELEPHONY_CHANGE, data);
-	    			
-	    			/* Log the results */
-	    			Log.d(telephonyService.TAG,data.toString());
-	                
-	            }
-	            
-	        }
-	}
-	
-	public int onStartCommand(Intent intent, int flags, int startId) {
-		super.onStartCommand(intent, flags, startId);
-		
-		int event = intent.getExtras().getInt(MonitorManager.TELEPHONY_INTENT);
-		
-		switch (event) {
-		case MonitorManager.TELEPHONY_CHANGE:
-			
-			setActive(MonitorManager.TELEPHONY_CHANGE, true);
-			break;
-
-		default:
-			break;
-		}
-		
-		return START_STICKY;
-	}
 
 	@Override
 	protected void onActivateEvent(int eventType) {
 		// TODO Auto-generated method stub.
-		if (eventType == MonitorManager.TELEPHONY_CHANGE){
+		if (eventType == MonitorManager.TELEPHONY_CHANGE) {
 			telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
-			telephonyManager.listen(telephonyState,PhoneStateListener.LISTEN_CELL_LOCATION | 
-					PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
+			telephonyManager.listen(telephonyState,
+					PhoneStateListener.LISTEN_CELL_LOCATION
+							| PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
 		}
+	}
+
+	@Override
+	public IBinder onBind(Intent intent) {
+		return serviceBinder;
 	}
 
 	@Override
@@ -214,24 +197,39 @@ public class Telephony extends Monitor{
 		// TODO Auto-generated method stub.
 		switch (eventType) {
 		case MonitorManager.TELEPHONY_CHANGE:
-			
-			telephonyManager.listen(telephonyState, PhoneStateListener.LISTEN_NONE);
+			telephonyManager.listen(telephonyState,
+					PhoneStateListener.LISTEN_NONE);
 			break;
-
 		default:
 			break;
 		}
 	}
-	
+
 	@Override
 	public void onDestroy() {
 		// TODO Auto-generated method stub
 		super.onDestroy();
 
 		// Deactivate the event
-		// TODO: what happens if the event is not active and we call unregisterReceiver?
 		setActive(MonitorManager.TELEPHONY_CHANGE, false);
-		//setActive(MonitorManager.MOBILE_TRAFFIC_CHANGE, false);
+	}
+
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		super.onStartCommand(intent, flags, startId);
+
+		int event = intent.getExtras().getInt(MonitorManager.TELEPHONY_INTENT);
+
+		switch (event) {
+		case MonitorManager.TELEPHONY_CHANGE:
+
+			setActive(MonitorManager.TELEPHONY_CHANGE, true);
+			break;
+
+		default:
+			break;
+		}
+
+		return START_STICKY;
 	}
 
 }
