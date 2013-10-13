@@ -6,8 +6,6 @@ import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
 /**
  * Defines a manager of monitor events, i.e. a monitor.
  * 
- * 
- * 
  * @author Felipe Lalanne <flalanne@niclabs.cl>
  *
  */

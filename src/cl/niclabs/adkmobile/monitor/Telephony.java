@@ -35,6 +35,7 @@ public class Telephony extends Monitor {
 	}
 
 	private static class TelephonyData implements DataFields {
+		/* TODO: Document fields */
 		public static String CDMA_BASE_LATITUDE = "cdma_base_latitude";
 		public static String CDMA_BASE_LONGITUDE = "cdma_base_longitude";
 		public static String CDMA_BASE_STATION = "cdma_base_station";
@@ -49,6 +50,7 @@ public class Telephony extends Monitor {
 		public static String TELEPHONY_GSM_LAC = "gsm_lac";
 		public static String TELEPHONY_GSM_PSC = "gsm_psc";
 		public static String TELEPHONY_SIGNAL_STRENGTH = "signal_strength";
+		public static String TELEPHONY_SIGNAL_BER = "signal_ber";
 		public static String TELEPHONY_STANDARD = "telephony_std";
 		
 		public static String TELEPHONY_NEIGHBOR_GSM_CID = "neighbor_gsm_cid";
@@ -68,7 +70,12 @@ public class Telephony extends Monitor {
 	 * @author Mauricio Castro. Created 04-10-2013.
 	 */
 	public class TelephonyStateListener extends PhoneStateListener {
-
+		/**
+		 * Equivalences between RXQUAL and BER(%).
+		 * Source TS 45.008 (8.2.4)
+		 */
+		double gsmBerTable [] = {0.14, 0.28, 0.57, 1.13, 2.26, 4.53, 9.05, 18.10};
+			
 		@Override
 		public void onCellLocationChanged(CellLocation location) {
 			super.onCellLocationChanged(location);
@@ -87,16 +94,20 @@ public class Telephony extends Monitor {
 				data.put(TelephonyData.TELEPHONY_GSM_LAC, loc.getLac());
 				
 				if (lastSignalStrength != null) {
-					/* convert the Signal Strength from GSM to Dbm */
-					if (lastSignalStrength.getGsmSignalStrength() != 99) {
-						float signalStrengthDbm = (lastSignalStrength
-								.getGsmSignalStrength() * 2) - 113;
-						data.put(TelephonyData.TELEPHONY_SIGNAL_STRENGTH,
-								signalStrengthDbm);
+					synchronized(lastSignalStrength) {
+						/* convert the Signal Strength from GSM to Dbm */
+						if (lastSignalStrength.getGsmSignalStrength() != 99) {
+							float signalStrengthDbm = (lastSignalStrength
+									.getGsmSignalStrength() * 2) - 113;
+							data.put(TelephonyData.TELEPHONY_SIGNAL_STRENGTH,
+									signalStrengthDbm);
+						}
+						if (lastSignalStrength.getGsmBitErrorRate() != 99) {
+							double gsmBerPercent = gsmBerTable[lastSignalStrength.getGsmBitErrorRate()] / 100.0;
+							data.put(TelephonyData.TELEPHONY_SIGNAL_BER,
+									gsmBerPercent);
+						}
 					}
-					
-					//TODO: add lastSignalStrength.getGsmBitErrorRate()
-					
 				}
 				data.put(TelephonyData.TELEPHONY_GSM_PSC, loc.getPsc());
 				
@@ -134,15 +145,18 @@ public class Telephony extends Monitor {
 						loc.getBaseStationLatitude());
 				data.put(TelephonyData.CDMA_NETWORK_ID, loc.getNetworkId());
 				
+				
 				if (lastSignalStrength != null) {
-					data.put(TelephonyData.TELEPHONY_SIGNAL_STRENGTH,
-							lastSignalStrength.getCdmaDbm());
-					data.put(TelephonyData.EVDO_DBM,
-							lastSignalStrength.getEvdoDbm());
-					data.put(TelephonyData.EVDO_DBM,
-							lastSignalStrength.getEvdoDbm());
-					data.put(TelephonyData.EVDO_SNR,
-							lastSignalStrength.getEvdoSnr());
+					synchronized(lastSignalStrength) {
+						data.put(TelephonyData.TELEPHONY_SIGNAL_STRENGTH,
+								lastSignalStrength.getCdmaDbm());
+						data.put(TelephonyData.EVDO_DBM,
+								lastSignalStrength.getEvdoDbm());
+						data.put(TelephonyData.EVDO_DBM,
+								lastSignalStrength.getEvdoDbm());
+						data.put(TelephonyData.EVDO_SNR,
+								lastSignalStrength.getEvdoSnr());
+					}
 				}
 			}
 			
@@ -158,7 +172,9 @@ public class Telephony extends Monitor {
 		@Override
 		public void onSignalStrengthsChanged(SignalStrength signalStrength) {
 			super.onSignalStrengthsChanged(signalStrength);
-			lastSignalStrength = signalStrength;
+			synchronized (lastSignalStrength) {
+				lastSignalStrength = signalStrength;
+			}
 			/* TODO: add signal now to DB? */
 		}
 		
