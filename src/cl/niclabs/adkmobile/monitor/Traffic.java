@@ -36,7 +36,7 @@ public class Traffic extends Monitor {
 	
 	public class ServiceBinder extends Binder {
 		public Traffic getService() {
-			return Traffic.getService();
+			return Traffic.this;
 		}
 	}
 	
@@ -65,16 +65,6 @@ public class Traffic extends Monitor {
 	public static final String TRAFFIC_UPDATE_INTERVAL_EXTRA = "traffic_update_interval";
 	
 	protected int trafficUpdateInterval = TRAFFIC_UPDATE_INTERVAL;
-	
-	/**
-	 * Instance of the current service
-	 */
-	private static Traffic trafficService;
-	public static Traffic getService() {
-		if (trafficService == null)
-			trafficService = new Traffic();
-		return trafficService;
-	}
 	
 	private Context mContext = this;
 

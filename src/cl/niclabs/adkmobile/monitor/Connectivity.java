@@ -143,23 +143,8 @@ public class Connectivity extends Monitor {
 
 	public class ServiceBinder extends Binder {
 		public Connectivity getService() {
-			return Connectivity.getService();
+			return Connectivity.this;
 		}
-	}
-
-	/**
-	 * Instance of the current service
-	 */
-	private static Connectivity connectivityService;
-
-	/**
-	 * Get service statically
-	 * @return
-	 */
-	public static Connectivity getService() {
-		if (connectivityService == null)
-			connectivityService = new Connectivity();
-		return connectivityService;
 	}
 
 	private MonitorEvent connectivityEvent = new BaseMonitorEvent() {

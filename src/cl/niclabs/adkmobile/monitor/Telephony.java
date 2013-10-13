@@ -31,7 +31,7 @@ public class Telephony extends Monitor {
 
 	public class ServiceBinder extends Binder {
 		public Telephony getService() {
-			return Telephony.getService();
+			return Telephony.this;
 		}
 	}
 
@@ -229,17 +229,6 @@ public class Telephony extends Monitor {
 		}
 		
 	};
-	
-	/**
-	 * Instance of the current service
-	 */
-	private static Telephony telephonyService;
-
-	public static Telephony getService() {
-		if (telephonyService == null)
-			telephonyService = new Telephony();
-		return telephonyService;
-	}
 
 	/**
 	 * Activity-Service binder
