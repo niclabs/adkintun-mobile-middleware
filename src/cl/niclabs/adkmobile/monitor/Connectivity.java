@@ -12,6 +12,8 @@ import android.util.Log;
 import cl.niclabs.adkmobile.monitor.data.ContentValuesDataObject;
 import cl.niclabs.adkmobile.monitor.data.DataFields;
 import cl.niclabs.adkmobile.monitor.data.DataObject;
+import cl.niclabs.adkmobile.monitor.events.BaseMonitorEvent;
+import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
 import cl.niclabs.adkmobile.monitor.listeners.ConnectivityListener;
 import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
 
@@ -159,14 +161,56 @@ public class Connectivity extends Monitor {
 		return connectivityService;
 	}
 
-	private ConnectivityData connectivityDataFields;
+	private MonitorEvent connectivityEvent = new BaseMonitorEvent() {
+		private DataFields connectivityDataFields;
+		
+		@Override
+		public synchronized void activate() {
+			if (!isActive()) {
+				IntentFilter filter = new IntentFilter();
+				filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+				registerReceiver(connectivityMonitor, filter);
+				
+				// Do not forget
+				super.activate();
+			}
+		}
+
+		@Override
+		public synchronized void deactivate() {
+			if (isActive()) {
+				// TODO: what happens if the event is not active and we call unregisterReceiver?
+				unregisterReceiver(connectivityMonitor);
+				
+				super.deactivate();
+			}
+		}
+		
+		@Override
+		public synchronized void onDataReceived(MonitorListener listener, DataObject data) {
+			if (listener instanceof ConnectivityListener) {
+				((ConnectivityListener) listener).onConnectivityChanged(data);
+				
+				// TODO: detect WiFi connected and notify the listener
+				// TODO: detect mobile connected
+			}
+		}
+
+		@Override
+		public synchronized DataFields getDataFields() {
+			if (connectivityDataFields == null)
+				connectivityDataFields = new ConnectivityData();
+			return connectivityDataFields;
+		}
+		
+	};
 
 	private BroadcastReceiver connectivityMonitor = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			String action = intent.getAction();
 			if (!action.equals(ConnectivityManager.CONNECTIVITY_ACTION)
-					|| !isActive(MonitorManager.CONNECTIVITY_CHANGE)) {
+					|| !isActive(connectivityEvent)) {
 				Log.w(TAG, "onReceived() called with intent " + intent);
 				return;
 			}
@@ -201,10 +245,10 @@ public class Connectivity extends Monitor {
 			Log.d(TAG, data.toString());
 
 			/* Update the current state */
-			setCurrentState(MonitorManager.CONNECTIVITY_CHANGE, data);
+			setState(connectivityEvent, data);
 
 			/* Notify listeners */
-			notifyListeners(MonitorManager.CONNECTIVITY_CHANGE, data);
+			notifyListeners(connectivityEvent, data);
 		}
 
 	};
@@ -215,26 +259,6 @@ public class Connectivity extends Monitor {
 	private final IBinder serviceBinder = new ServiceBinder();
 
 	protected String TAG = "AdkintunMobile::Connectivity";
-
-	@Override
-	public synchronized DataFields getDataFields(int eventType) {
-		if (eventType == MonitorManager.CONNECTIVITY_CHANGE) {
-			if (connectivityDataFields == null)
-				connectivityDataFields = new ConnectivityData();
-			return connectivityDataFields;
-		}
-		return null;
-	}
-
-	@Override
-	protected synchronized void onActivateEvent(int eventType) {
-		// TODO: What is a better way to do this?
-		if (eventType == MonitorManager.CONNECTIVITY_CHANGE) {
-			IntentFilter filter = new IntentFilter();
-			filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-			registerReceiver(connectivityMonitor, filter);
-		}
-	}
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -248,28 +272,7 @@ public class Connectivity extends Monitor {
 		
 		/* Activate the event connectivity change */
 		/* TODO: activate the event if activated on the preferences */
-		setActive(MonitorManager.CONNECTIVITY_CHANGE, true);
-	}
-
-	@Override
-	protected void onDataReceived(MonitorListener listener, int eventType,
-			DataObject data) {
-		// Only notify the listeners of the appropriate type
-		if (eventType == MonitorManager.CONNECTIVITY_CHANGE
-				&& listener instanceof ConnectivityListener) {
-			((ConnectivityListener) listener).onConnectivityChanged(data);
-			
-			// TODO: detect WiFi connected and notify the listener
-			// TODO: detect mobile connected
-		}
-		
-	}
-
-	@Override
-	protected synchronized void onDeactivateEvent(int eventType) {
-		if (eventType == MonitorManager.CONNECTIVITY_CHANGE) {
-			unregisterReceiver(connectivityMonitor);
-		}
+		activate(connectivityEvent);
 	}
 
 	@Override
@@ -278,7 +281,6 @@ public class Connectivity extends Monitor {
 		super.onDestroy();
 
 		// Deactivate the event
-		// TODO: what happens if the event is not active and we call unregisterReceiver?
-		setActive(MonitorManager.CONNECTIVITY_CHANGE, false);
+		deactivate(connectivityEvent);
 	}
 }

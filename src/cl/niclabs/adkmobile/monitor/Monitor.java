@@ -2,15 +2,16 @@ package cl.niclabs.adkmobile.monitor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
-import android.util.SparseArray;
-import android.util.SparseBooleanArray;
-import cl.niclabs.adkmobile.monitor.data.DataFields;
 import cl.niclabs.adkmobile.monitor.data.DataObject;
+import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
+import cl.niclabs.adkmobile.monitor.events.MonitorEventManager;
 import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
 
 /**
@@ -22,57 +23,49 @@ import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
  * 
  * @author Felipe Lalanne <flalanne@niclabs.cl>
  */
-public abstract class Monitor extends Service {
+public abstract class Monitor extends Service implements MonitorEventManager {
 	/**
-	 * Event activity status by event type
+	 * Current state by eventType
 	 */
-	private SparseBooleanArray activeEvents = new SparseBooleanArray();
-	
-	/**
-	 * Current status by eventType
-	 */
-	private SparseArray<DataObject> currentStates = new SparseArray<DataObject>();
+	private Map<MonitorEvent, DataObject> currentStates = new ConcurrentHashMap<MonitorEvent,DataObject>();
 	
 	protected boolean DEBUG = true;
 	
 	/** 
 	 * List of listeners by event type 
 	 */
-	private SparseArray<List<MonitorListener>> listeners = new SparseArray<List<MonitorListener>>();
+	private Map<MonitorEvent, List<MonitorListener>> listeners = new ConcurrentHashMap<MonitorEvent, List<MonitorListener>>();
 	
 	protected String TAG = "AdkintunMobile";
+	
+	@Override
+	public void activate(MonitorEvent eventType) {
+		eventType.activate();
+	}
+	
+	
+	@Override
+	public void deactivate(MonitorEvent eventType) {
+		eventType.deactivate();
+	}
 	
 	/**
 	 * Get the current state data for the specified event type. Returns null if there is no data 
 	 * @param eventType
 	 * @return
 	 */
-	public DataObject getCurrentState(int eventType) {
-		synchronized(currentStates) {
-			return currentStates.get(eventType);
-		}
+	@Override
+	public DataObject getState(MonitorEvent eventType) {
+		return currentStates.get(eventType);
 	}
-	
-	/**
-	 * Return column structure for a given data type
-	 * @param eventType
-	 * @return
-	 */
-	public abstract DataFields getDataFields(int eventType);
 	
 	/**
 	 * Get the activation status of the specified event type
 	 * @param eventType
 	 * @return
 	 */
-	public boolean isActive(int eventType) {
-		synchronized(activeEvents) {
-			Boolean result = activeEvents.get(eventType);
-			if (result != null) {
-				return result;
-			}
-			return false;
-		}
+	public boolean isActive(MonitorEvent eventType) {
+		return eventType.isActive();
 	}
 	
 	/**
@@ -80,7 +73,8 @@ public abstract class Monitor extends Service {
 	 * @param listener
 	 * @param eventType
 	 */
-	public synchronized void listen(MonitorListener listener, int eventType) {
+	@Override
+	public synchronized void listen(MonitorListener listener, MonitorEvent eventType) {
 		List<MonitorListener> list;
 		if ((list = listeners.get(eventType)) == null) list = new ArrayList<MonitorListener>();
 		listeners.put(eventType, list);
@@ -91,22 +85,16 @@ public abstract class Monitor extends Service {
 	 * @param eventType the event to which the data is related  
 	 * @param data 
 	 */
-	protected void notifyListeners(int eventType, DataObject data) {
+	protected void notifyListeners(MonitorEvent eventType, DataObject data) {
 		List<MonitorListener> list;
 		if ((list = listeners.get(eventType)) != null) {
 			for (MonitorListener listener: list) {
 				/* Notify the listener */
-				onDataReceived(listener, eventType, data);
+				eventType.onDataReceived(listener, data);
 			}
 		}
 		/* Ignore if there are no listeners for the data type */
 	}
-	
-	/**
-	 * Method triggered on activation of the specified event type. 
-	 * @param eventType
-	 */
-	protected abstract void onActivateEvent(int eventType);
 	
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -120,22 +108,6 @@ public abstract class Monitor extends Service {
 		/* TODO: Apply configuration from general preferences and listen to general broadcasts */
 		if(DEBUG) Log.d(TAG, TAG + " sensor started...");
 	}
-	
-	/**
-	 * Must be implemented by sub-classes in order to notify the appropriate
-	 * monitor listener of the monitoring events
-	 * 
-	 * @param listener
-	 * @param eventType
-	 * @param data
-	 */
-	protected abstract void onDataReceived(MonitorListener listener, int eventType, DataObject data); 
-	
-	/**
-	 * Method triggered on deactivation of the specified event type.
-	 * @param eventType
-	 */
-	protected abstract void onDeactivateEvent(int eventType);
 	
 	@Override
 	public void onDestroy() {
@@ -156,30 +128,11 @@ public abstract class Monitor extends Service {
 	}
 
 	/**
-	 * Set the activation status of the specified event type
-	 * @param eventType
-	 * @param active
-	 */
-	public void setActive(int eventType, boolean active) {
-		synchronized(activeEvents) {
-			if (active) {
-				onActivateEvent(eventType);
-			}
-			else {
-				onDeactivateEvent(eventType);
-			}
-			activeEvents.put(eventType, active);
-		}
-	}
-
-	/**
 	 * Set the current status data for the specified event type
 	 * @param eventType
 	 * @param state
 	 */
-	public void setCurrentState(int eventType, DataObject state) {
-		synchronized(currentStates) {
-			currentStates.put(eventType, state);
-		}
+	protected void setState(MonitorEvent eventType, DataObject state) {
+		currentStates.put(eventType, state);
 	}
 }

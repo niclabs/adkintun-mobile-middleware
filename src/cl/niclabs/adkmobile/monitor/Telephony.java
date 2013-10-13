@@ -16,6 +16,8 @@ import android.util.Log;
 import cl.niclabs.adkmobile.monitor.data.ContentValuesDataObject;
 import cl.niclabs.adkmobile.monitor.data.DataFields;
 import cl.niclabs.adkmobile.monitor.data.DataObject;
+import cl.niclabs.adkmobile.monitor.events.BaseMonitorEvent;
+import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
 import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
 import cl.niclabs.adkmobile.monitor.listeners.TelephonyListener;
 
@@ -110,7 +112,7 @@ public class Telephony extends Monitor {
                         data.put(TelephonyData.TELEPHONY_NEIGHBOR_GMS_PSC, neighbor.getPsc());
                         
                         
-                        if(neighbor.getRssi() != neighbor.UNKNOWN_RSSI){
+                        if(neighbor.getRssi() != NeighboringCellInfo.UNKNOWN_RSSI){
                         		float signalNeighborStrength = (neighbor.getRssi()*2) - 113;
                         		data.put(TelephonyData.TELEPHONY_NEIGHBOR_SIGNAL_STRENGTH,signalNeighborStrength);
                         }                        
@@ -144,10 +146,10 @@ public class Telephony extends Monitor {
 				}
 			}
 			
-			setCurrentState(MonitorManager.TELEPHONY_CHANGE, data);
+			setState(telephonyEvent, data);
 			
 			/* Notify listeners */
-			notifyListeners(MonitorManager.TELEPHONY_CHANGE, data);
+			notifyListeners(telephonyEvent, data);
 
 			/* Log the results */
 			Log.d(TAG, data.toString());
@@ -170,6 +172,46 @@ public class Telephony extends Monitor {
 
 	private TelephonyManager telephonyManager = null;
 	
+	private MonitorEvent telephonyEvent = new BaseMonitorEvent() {
+		private TelephonyData telephonyDataFields;
+		
+		@Override
+		public synchronized void activate() {
+			if (!isActive()) {
+				telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+				telephonyManager.listen(telephonyStateListener,
+						PhoneStateListener.LISTEN_CELL_LOCATION
+								| PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
+				
+				super.activate();
+			}
+		}
+
+		@Override
+		public synchronized void deactivate() {
+			if (isActive()) {
+				telephonyManager.listen(telephonyStateListener,
+						PhoneStateListener.LISTEN_NONE);
+				super.deactivate();
+			}
+		}
+
+		@Override
+		public synchronized void onDataReceived(MonitorListener listener, DataObject data) {
+			if (listener instanceof TelephonyListener) {
+				((TelephonyListener) listener).onMobileTelephonyChanged(data);
+			}
+		}
+
+		@Override
+		public synchronized DataFields getDataFields() {
+			if (telephonyDataFields == null)
+				telephonyDataFields = new TelephonyData();
+			return telephonyDataFields;
+		}
+		
+	};
+	
 	/**
 	 * Instance of the current service
 	 */
@@ -187,57 +229,12 @@ public class Telephony extends Monitor {
 	private final IBinder serviceBinder = new ServiceBinder();
 
 	protected String TAG = "AdkintunMobile::Telephony";
-	private TelephonyData telephonyDataFields;
+	
 	private TelephonyStateListener telephonyStateListener = new TelephonyStateListener();
-
-	@Override
-	public DataFields getDataFields(int eventType) {
-		// TODO Auto-generated method stub.
-		if (eventType == MonitorManager.MOBILE_TCP_TRAFFIC_CHANGE) {
-			if (telephonyDataFields == null)
-				telephonyDataFields = new TelephonyData();
-			return telephonyDataFields;
-		}
-		return null;
-	}
-
-	@Override
-	protected void onActivateEvent(int eventType) {
-		// TODO Auto-generated method stub.
-		if (eventType == MonitorManager.TELEPHONY_CHANGE) {
-			telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
-			telephonyManager.listen(telephonyStateListener,
-					PhoneStateListener.LISTEN_CELL_LOCATION
-							| PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
-		}
-	}
 
 	@Override
 	public IBinder onBind(Intent intent) {
 		return serviceBinder;
-	}
-
-	@Override
-	protected void onDataReceived(MonitorListener listener, int eventType,
-			DataObject data) {
-		// TODO Auto-generated method stub.
-		if (eventType == MonitorManager.TELEPHONY_CHANGE
-				&& listener instanceof TelephonyListener) {
-			((TelephonyListener) listener).onMobileTelephonyChanged(data);
-		}
-	}
-
-	@Override
-	protected void onDeactivateEvent(int eventType) {
-		// TODO Auto-generated method stub.
-		switch (eventType) {
-		case MonitorManager.TELEPHONY_CHANGE:
-			telephonyManager.listen(telephonyStateListener,
-					PhoneStateListener.LISTEN_NONE);
-			break;
-		default:
-			break;
-		}
 	}
 
 	@Override
@@ -246,22 +243,20 @@ public class Telephony extends Monitor {
 		super.onDestroy();
 
 		// Deactivate the event
-		setActive(MonitorManager.TELEPHONY_CHANGE, false);
+		deactivate(telephonyEvent);
 	}
 
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		super.onStartCommand(intent, flags, startId);
 
-		int event = intent.getExtras().getInt(MonitorManager.TELEPHONY_INTENT);
+		int event = intent.getExtras().getInt(TELEPHONY_INTENT);
 
 		switch (event) {
-		case MonitorManager.TELEPHONY_CHANGE:
-
-			setActive(MonitorManager.TELEPHONY_CHANGE, true);
-			break;
-
-		default:
-			break;
+			case TELEPHONY_CHANGE:
+				activate(telephonyEvent);
+				break;
+			default:
+				break;
 		}
 
 		return START_STICKY;
