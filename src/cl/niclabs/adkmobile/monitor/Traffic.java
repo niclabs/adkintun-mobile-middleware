@@ -97,9 +97,6 @@ public class Traffic extends AbstractMonitor {
 	};
 	
 	private MonitorEvent mobileTrafficEvent = new BaseMonitorEvent() {
-
-		private MobileTrafficData trafficDataFields;
-		
 		@Override
 		public synchronized void activate() {
 			if (!isActive()) {
@@ -127,15 +124,7 @@ public class Traffic extends AbstractMonitor {
 			if (listener instanceof TrafficListener) {
 				((TrafficListener) listener).onMobileTrafficChanged(data);
 			}
-		}
-
-		@Override
-		public synchronized DataFields getDataFields() {
-			if (trafficDataFields == null)
-				trafficDataFields = new MobileTrafficData();
-			return trafficDataFields;
-		}
-		
+		}		
 	};
 	
 	private Timer mTimerTraffic = new Timer();

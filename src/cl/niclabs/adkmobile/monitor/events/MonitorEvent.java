@@ -42,10 +42,4 @@ public interface MonitorEvent {
 	 * @param data
 	 */
 	public void onDataReceived(MonitorListener listener, DataObject data);
-	
-	/**
-	 * 
-	 * @return the structure of the DataObjects associated with this object
-	 */
-	public DataFields getDataFields();
 }

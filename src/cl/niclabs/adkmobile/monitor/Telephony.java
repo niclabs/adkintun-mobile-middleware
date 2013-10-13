@@ -187,8 +187,6 @@ public class Telephony extends AbstractMonitor {
 	private TelephonyManager telephonyManager = null;
 	
 	private MonitorEvent telephonyEvent = new BaseMonitorEvent() {
-		private TelephonyData telephonyDataFields;
-		
 		@Override
 		public synchronized void activate() {
 			if (!isActive()) {
@@ -220,14 +218,6 @@ public class Telephony extends AbstractMonitor {
 				((TelephonyListener) listener).onMobileTelephonyChanged(data);
 			}
 		}
-
-		@Override
-		public synchronized DataFields getDataFields() {
-			if (telephonyDataFields == null)
-				telephonyDataFields = new TelephonyData();
-			return telephonyDataFields;
-		}
-		
 	};
 
 	/**

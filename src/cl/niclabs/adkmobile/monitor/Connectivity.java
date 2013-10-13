@@ -148,8 +148,6 @@ public class Connectivity extends AbstractMonitor {
 	}
 
 	private MonitorEvent connectivityEvent = new BaseMonitorEvent() {
-		private DataFields connectivityDataFields;
-		
 		@Override
 		public synchronized void activate() {
 			if (!isActive()) {
@@ -184,14 +182,6 @@ public class Connectivity extends AbstractMonitor {
 				// TODO: detect mobile connected
 			}
 		}
-
-		@Override
-		public synchronized DataFields getDataFields() {
-			if (connectivityDataFields == null)
-				connectivityDataFields = new ConnectivityData();
-			return connectivityDataFields;
-		}
-		
 	};
 
 	private BroadcastReceiver connectivityMonitor = new BroadcastReceiver() {
