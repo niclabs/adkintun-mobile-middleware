@@ -6,7 +6,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.IBinder;
 import android.util.Log;
 import cl.niclabs.adkmobile.monitor.data.DataObject;
@@ -37,6 +40,21 @@ public abstract class Monitor extends Service implements MonitorEventManager {
 	private Map<MonitorEvent, List<MonitorListener>> listeners = new ConcurrentHashMap<MonitorEvent, List<MonitorListener>>();
 	
 	protected String TAG = "AdkintunMobile";
+	
+	protected class MonitorEventController extends BroadcastReceiver {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (intent.getAction().equals(ACTIVATE_EVENT)) {
+				activate(intent.getIntExtra(EVENTS_EXTRA, 0), intent.getExtras());
+			}
+			else if (intent.getAction().equals(DEACTIVATE_EVENT)) {
+				deactivate(intent.getIntExtra(EVENTS_EXTRA, 0));
+			}
+		}
+		
+	}
+	
+	private MonitorEventController eventController = new MonitorEventController();
 	
 	@Override
 	public void activate(MonitorEvent eventType) {
@@ -105,6 +123,13 @@ public abstract class Monitor extends Service implements MonitorEventManager {
 	public void onCreate() {
 		super.onCreate();
 		
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(ACTIVATE_EVENT);
+		filter.addAction(DEACTIVATE_EVENT);
+		
+		/* Listen for activation messages */
+		registerReceiver(eventController, filter);
+		
 		/* TODO: Apply configuration from general preferences and listen to general broadcasts */
 		if(DEBUG) Log.d(TAG, TAG + " sensor started...");
 	}
@@ -112,6 +137,13 @@ public abstract class Monitor extends Service implements MonitorEventManager {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
+		
+		unregisterReceiver(eventController);
+		
+		/**
+		 * Deactivate all the events
+		 */
+		deactivate(ALL_EVENTS);
 		
 		/* TODO: Unregister broadcasts */
 		if(DEBUG) Log.d(TAG, TAG + " sensor terminated...");
@@ -121,9 +153,11 @@ public abstract class Monitor extends Service implements MonitorEventManager {
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		super.onStartCommand(intent, flags, startId);
 		
-		/* TODO: Read configurations from preferences and perform tasks for starting the service */
+		/* Activate the events specified on the intent */
+		activate(intent.getIntExtra(EVENTS_EXTRA, 0), intent.getExtras());
 		
 		if(DEBUG) Log.d(TAG, TAG + " sensor active...");
+		
         return START_STICKY;
 	}
 

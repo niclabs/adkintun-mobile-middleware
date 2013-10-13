@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import cl.niclabs.adkmobile.monitor.data.ContentValuesDataObject;
@@ -48,7 +49,7 @@ public class Connectivity extends Monitor {
 	 * @author Felipe Lalanne <flalanne@niclabs.cl>
 	 */
 	public static enum NetworkState {
-		AUTHENTICATING(1), BLOCKED(1), CAPTIVE_PORTAL_CHECK(3), CONNECTED(4), CONNECTING(
+		AUTHENTICATING(1), BLOCKED(2), CAPTIVE_PORTAL_CHECK(3), CONNECTED(4), CONNECTING(
 				5), DISCONNECTED(6), DISCONNECTING(7), FAILED(8), IDLE(9), OBTAINING_IP_ADDRESS(
 				10), OTHER(0), SCANNING(11), SUSPENDED(12), VERIFYING_POOR_LINK(13);
 		
@@ -171,6 +172,8 @@ public class Connectivity extends Monitor {
 				filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
 				registerReceiver(connectivityMonitor, filter);
 				
+				Log.d(TAG, "Connectivity service has been activated");
+				
 				// Do not forget
 				super.activate();
 			}
@@ -182,6 +185,7 @@ public class Connectivity extends Monitor {
 				// TODO: what happens if the event is not active and we call unregisterReceiver?
 				unregisterReceiver(connectivityMonitor);
 				
+				Log.d(TAG, "Connectivity service has been deactivated");
 				super.deactivate();
 			}
 		}
@@ -209,8 +213,7 @@ public class Connectivity extends Monitor {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			String action = intent.getAction();
-			if (!action.equals(ConnectivityManager.CONNECTIVITY_ACTION)
-					|| !isActive(connectivityEvent)) {
+			if (!action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
 				Log.w(TAG, "onReceived() called with intent " + intent);
 				return;
 			}
@@ -262,25 +265,21 @@ public class Connectivity extends Monitor {
 
 	@Override
 	public IBinder onBind(Intent intent) {
-		/* TODO: do we need this method? */
+		Log.d(TAG, "Service has been bound");
 		return serviceBinder;
 	}
 
 	@Override
-	public void onCreate() {
-		super.onCreate();
-		
-		/* Activate the event connectivity change */
-		/* TODO: activate the event if activated on the preferences */
-		activate(connectivityEvent);
+	public void activate(int events, Bundle configuration) {
+		if ((events & CONNECTIVITY) == CONNECTIVITY) {
+			activate(connectivityEvent);
+		}
 	}
 
 	@Override
-	public void onDestroy() {
-		// TODO Auto-generated method stub
-		super.onDestroy();
-
-		// Deactivate the event
-		deactivate(connectivityEvent);
+	public void deactivate(int events) {
+		if ((events & CONNECTIVITY) == CONNECTIVITY) {
+			deactivate(connectivityEvent);
+		}
 	}
 }

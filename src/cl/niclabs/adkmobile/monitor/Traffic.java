@@ -14,6 +14,7 @@ import android.net.TrafficStats;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Build.VERSION;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import cl.niclabs.adkmobile.monitor.data.ContentValuesDataObject;
@@ -39,21 +40,31 @@ public class Traffic extends Monitor {
 		}
 	}
 	
-	public static class TrafficData implements DataFields {
+	public static class MobileTrafficData implements DataFields {
 		
-		public static String MOBILE_RECEIVED = "mobile_bytes_received";
-		public static String MOBILE_TCP_RECEIVED = "mobile_tcp_bytes_received";
+		public static String MOBILE_RX_BYTES = "mobile_rx_bytes";
+		public static String MOBILE_TX_BYTES = "mobile_tx_bytes";
 		
-		public static String MOBILE_TCP_TRANSMITTED = "mobile_tcp_bytes_transmitted";
-		public static String MOBILE_TRANSMITTED = "mobile_bytes_transmitted";
-		
-		public static String WIFI_RECEIVED = "wifi_bytes_received";
-		public static String WIFI_TRANSMITTED = "wifi_bytes_transmitted";
-		 
+		public static String MOBILE_TCP_RX_BYTES = "mobile_tcp_rx_bytes";
+		public static String MOBILE_TCP_TX_BYTES = "mobile_tcp_tx_bytes";
 	}
 	
-	public static int TRAFFIC_UPDATE_INTERVAL = 10;
+	public static class WifiTrafficData implements DataFields {
+		public static String WIFI_RX_BYTES = "wifi_rx_bytes";
+		public static String WIFI_TX_BYTES = "wifi_tx_bytes";
+	}
 	
+	/**
+	 * @var Frequency of sampling (in seconds)
+	 */
+	public static final int TRAFFIC_UPDATE_INTERVAL = 10;
+	
+	/**
+	 * Extra key for configuring the traffic update interval
+	 */
+	public static final String TRAFFIC_UPDATE_INTERVAL_EXTRA = "traffic_update_interval";
+	
+	protected int trafficUpdateInterval = TRAFFIC_UPDATE_INTERVAL;
 	
 	/**
 	 * Instance of the current service
@@ -67,7 +78,6 @@ public class Traffic extends Monitor {
 	
 	private Context mContext = this;
 
-	// TODO: Juntar esta tarea con mobileTcpTask
 	private TimerTask mobileTask = new TimerTask() {
 		@Override
 		public void run() {
@@ -76,14 +86,14 @@ public class Traffic extends Monitor {
 			long[] bytesTcp = getMobileTcpTxRxBytes(mContext);
 			// assign the values to ContentValues variables
 			DataObject data = new ContentValuesDataObject();
-			data.put(TrafficData.TIMESTAMP,System.currentTimeMillis());
-			data.put(TrafficData.MOBILE_RECEIVED,bytes[0]);
-			data.put(TrafficData.MOBILE_TRANSMITTED,bytes[1]);
+			data.put(MobileTrafficData.TIMESTAMP,System.currentTimeMillis());
+			data.put(MobileTrafficData.MOBILE_RX_BYTES,bytes[0]);
+			data.put(MobileTrafficData.MOBILE_TX_BYTES,bytes[1]);
 			
 			// Only add TCP bytes only if they are available
 			if (bytesTcp[0] > 0 && bytesTcp[1] >= 0) {
-				data.put(TrafficData.MOBILE_TCP_RECEIVED, bytesTcp[0]);
-				data.put(TrafficData.MOBILE_TCP_TRANSMITTED, bytesTcp[1]);
+				data.put(MobileTrafficData.MOBILE_TCP_RX_BYTES, bytesTcp[0]);
+				data.put(MobileTrafficData.MOBILE_TCP_TX_BYTES, bytesTcp[1]);
 			}
 			
 			setState(mobileTrafficEvent, data);
@@ -92,21 +102,22 @@ public class Traffic extends Monitor {
 			notifyListeners(mobileTrafficEvent, data);
 			
 			/* Log the results */
-			Log.d(TAG,data.toString());
+			Log.d(TAG, data.toString());
 		}
 	};
 	
 	private MonitorEvent mobileTrafficEvent = new BaseMonitorEvent() {
 
-		private TrafficData trafficDataFields;
+		private MobileTrafficData trafficDataFields;
 		
 		@Override
 		public synchronized void activate() {
 			if (!isActive()) {
 				Log.d(TAG, "Active Listeners");
-				mTimerTraffic.schedule(mobileTask, 0, 1000*TRAFFIC_UPDATE_INTERVAL);
-				
+				mTimerTraffic.schedule(mobileTask, 0, 1000 * trafficUpdateInterval);
 				super.activate();
+				
+				Log.d(TAG, "Traffic service has been activated");
 			}
 		}
 
@@ -116,6 +127,8 @@ public class Traffic extends Monitor {
 				// Stop the task
 				mTimerTraffic.cancel();
 				super.deactivate();
+				
+				Log.d(TAG, "Traffic service has been deactivated");
 			}
 		}
 
@@ -129,7 +142,7 @@ public class Traffic extends Monitor {
 		@Override
 		public synchronized DataFields getDataFields() {
 			if (trafficDataFields == null)
-				trafficDataFields = new TrafficData();
+				trafficDataFields = new MobileTrafficData();
 			return trafficDataFields;
 		}
 		
@@ -223,46 +236,33 @@ public class Traffic extends Monitor {
 		}
 		return uids;
 	}
-
-	@Override
-	public void onDestroy() {
-		// TODO Auto-generated method stub
-		super.onDestroy();
-
-		// Deactivate the event
-		deactivate(mobileTrafficEvent);
-	}
-
-	@Override
-	public int onStartCommand(Intent intent, int flags, int startId) {
-		super.onStartCommand(intent, flags, startId);
-		int event = intent.getExtras().getInt(TRAFFIC_INTENT);
-		
-		/* TODO: activate the event if activated on the preferences */
-		switch (event) {
-			case MOBILE_TRAFFIC_CHANGE:
-				/* Activate the event traffic_change */
-				activate(mobileTrafficEvent);
-				break;
-				
-			default:
-				break;
-		}
-		
-		return START_STICKY;
-	}
 	
 	/**
 	 * Set the interval period of traffic measure in seconds.
 	 * For default is set on 10 seconds.
 	 * @param interval in seconds
 	 */
-	public void setTrafficInterval(int interval){
-		TRAFFIC_UPDATE_INTERVAL= interval;
+	protected void setTrafficInterval(int interval){
+		trafficUpdateInterval = interval;
 	}
 
 	@Override
 	public IBinder onBind(Intent intent) {
 		return serviceBinder;
+	}
+	
+	@Override
+	public void activate(int events, Bundle configuration) {
+		if ((events & MOBILE_TRAFFIC) == MOBILE_TRAFFIC) {
+			trafficUpdateInterval = configuration.getInt(TRAFFIC_UPDATE_INTERVAL_EXTRA, TRAFFIC_UPDATE_INTERVAL);
+			activate(mobileTrafficEvent);
+		}
+	}
+
+	@Override
+	public void deactivate(int events) {
+		if ((events & MOBILE_TRAFFIC) == MOBILE_TRAFFIC) {
+			deactivate(mobileTrafficEvent);
+		}
 	}
 }

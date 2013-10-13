@@ -1,5 +1,6 @@
 package cl.niclabs.adkmobile.monitor.events;
 
+import android.os.Bundle;
 import cl.niclabs.adkmobile.monitor.data.DataObject;
 import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
 
@@ -11,31 +12,39 @@ import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
  */
 public interface MonitorEventManager {
 	/**
-	 * Defines a change in connectivity status
+	 * Flag to represent all events
 	 */
-	public static final int CONNECTIVITY_CHANGE = 1;
+	public static final int ALL_EVENTS = 2147483647;
 	
 	/**
-	 * Defines a change in mobile traffic rate
+	 * Defines a connectivity event
 	 */
-	public static final int MOBILE_TRAFFIC_CHANGE = 2;
+	public static final int CONNECTIVITY = 1;
+	
+	/**
+	 * Defines a mobile traffic event
+	 */
+	public static final int MOBILE_TRAFFIC = 2;
 
 	/**
-	 * Define a change in Telephony status
+	 * Defines a telephony event
 	 */
-	public static final int TELEPHONY_CHANGE = 3;
+	public static final int TELEPHONY = 4;
+	
 	/**
-	 * Define the key intent for Mobile Traffic
+	 * Intent action for activating monitor events
 	 */
-	public static final String TRAFFIC_INTENT = "traffic_change";
+	public static final String ACTIVATE_EVENT = "monitor_event_activate";
+	
 	/**
-	 * Define the key intent for Connectivity
+	 * Intent action for deactivating monitor events
 	 */
-	public static final String CONNECTIVITY_INTENT = "connectivity_change";
+	public static final String DEACTIVATE_EVENT = "monitor_event_deactivate";
+	
 	/**
-	 * Define the key intent fo telephony
+	 * Extra key for communicating the activated/deactivated events to the monitor
 	 */
-	public static final String TELEPHONY_INTENT = "telephony_change";
+	public static final String EVENTS_EXTRA = "events_extra";
 	
 	/**
 	 * Returns the activation status for a given event
@@ -51,10 +60,23 @@ public interface MonitorEventManager {
 	public void activate(MonitorEvent event);
 	
 	/**
+	 * Activate the specified events 
+	 * @param events
+	 * @param configuration additional configurations for the events
+	 */
+	public void activate(int events, Bundle configuration);
+	
+	/**
 	 * Deactivates the monitor for a given event
 	 * @param event
 	 */
 	public void deactivate(MonitorEvent event);
+	
+	/**
+	 * Deactivate the specified events
+	 * @param events
+	 */
+	public void deactivate(int events);
 	
 	/**
 	 * Adds a listener for a given event

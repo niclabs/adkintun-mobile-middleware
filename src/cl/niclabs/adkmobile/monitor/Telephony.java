@@ -4,6 +4,7 @@ import java.util.List;
 
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.telephony.CellLocation;
 import android.telephony.NeighboringCellInfo;
@@ -34,7 +35,7 @@ public class Telephony extends Monitor {
 		}
 	}
 
-	private static class TelephonyData implements DataFields {
+	public static class TelephonyData implements DataFields {
 		/* TODO: Document fields */
 		public static String CDMA_BASE_LATITUDE = "cdma_base_latitude";
 		public static String CDMA_BASE_LONGITUDE = "cdma_base_longitude";
@@ -69,7 +70,7 @@ public class Telephony extends Monitor {
 	 * 
 	 * @author Mauricio Castro. Created 04-10-2013.
 	 */
-	public class TelephonyStateListener extends PhoneStateListener {
+	private class TelephonyStateListener extends PhoneStateListener {
 		/**
 		 * Equivalences between RXQUAL and BER(%).
 		 * Source TS 45.008 (8.2.4)
@@ -110,7 +111,6 @@ public class Telephony extends Monitor {
 					}
 				}
 				data.put(TelephonyData.TELEPHONY_GSM_PSC, loc.getPsc());
-				
 
 				/* TODO add neighbor list? */
 				List<NeighboringCellInfo> neighbors = telephonyManager.getNeighboringCellInfo();
@@ -121,7 +121,6 @@ public class Telephony extends Monitor {
                         data.put(TelephonyData.TELEPHONY_NEIGHBOR_GSM_CID, neighbor.getCid());
                         data.put(TelephonyData.TELEPHONY_NEIGHBOR_GSM_LAC, neighbor.getLac());
                         data.put(TelephonyData.TELEPHONY_NEIGHBOR_GMS_PSC, neighbor.getPsc());
-                        
                         
                         if(neighbor.getRssi() != NeighboringCellInfo.UNKNOWN_RSSI){
                         		float signalNeighborStrength = (neighbor.getRssi()*2) - 113;
@@ -144,7 +143,6 @@ public class Telephony extends Monitor {
 				data.put(TelephonyData.CDMA_BASE_LATITUDE,
 						loc.getBaseStationLatitude());
 				data.put(TelephonyData.CDMA_NETWORK_ID, loc.getNetworkId());
-				
 				
 				if (lastSignalStrength != null) {
 					synchronized(lastSignalStrength) {
@@ -200,6 +198,8 @@ public class Telephony extends Monitor {
 								| PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
 				
 				super.activate();
+				
+				Log.d(TAG, "Telephony service has been activated");
 			}
 		}
 
@@ -209,6 +209,8 @@ public class Telephony extends Monitor {
 				telephonyManager.listen(telephonyStateListener,
 						PhoneStateListener.LISTEN_NONE);
 				super.deactivate();
+				
+				Log.d(TAG, "Telephony service has been deactivated");
 			}
 		}
 
@@ -252,30 +254,19 @@ public class Telephony extends Monitor {
 	public IBinder onBind(Intent intent) {
 		return serviceBinder;
 	}
-
+	
 	@Override
-	public void onDestroy() {
-		// TODO Auto-generated method stub
-		super.onDestroy();
-
-		// Deactivate the event
-		deactivate(telephonyEvent);
+	public void activate(int events, Bundle configuration) {
+		if ((events & TELEPHONY) == TELEPHONY) {
+			activate(telephonyEvent);
+		}
 	}
 
-	public int onStartCommand(Intent intent, int flags, int startId) {
-		super.onStartCommand(intent, flags, startId);
-
-		int event = intent.getExtras().getInt(TELEPHONY_INTENT);
-
-		switch (event) {
-			case TELEPHONY_CHANGE:
-				activate(telephonyEvent);
-				break;
-			default:
-				break;
+	@Override
+	public void deactivate(int events) {
+		if ((events & TELEPHONY) == TELEPHONY) {
+			deactivate(telephonyEvent);
 		}
-
-		return START_STICKY;
 	}
 
 }
