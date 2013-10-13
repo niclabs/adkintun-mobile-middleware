@@ -13,7 +13,6 @@ import android.content.IntentFilter;
 import android.os.IBinder;
 import android.util.Log;
 import cl.niclabs.adkmobile.monitor.data.DataObject;
-import cl.niclabs.adkmobile.monitor.events.Monitor;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
 import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
 
