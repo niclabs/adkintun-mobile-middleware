@@ -85,16 +85,19 @@ public abstract class AbstractMonitor extends Service implements Monitor {
 		return eventType.isActive();
 	}
 	
-	/**
-	 * Assign a listener to the monitor for a specified eventType
-	 * @param listener
-	 * @param eventType
-	 */
 	@Override
-	public synchronized void listen(MonitorListener listener, MonitorEvent eventType) {
+	public void listen(MonitorEvent eventType, MonitorListener listener, boolean listen) {
 		List<MonitorListener> list;
 		if ((list = listeners.get(eventType)) == null) list = new ArrayList<MonitorListener>();
-		listeners.put(eventType, list);
+		
+		if (listen) {
+			list.add(listener);
+			listeners.put(eventType, list);
+		}
+		else {
+			list.remove(listener);
+		}
+
 	}
 	
 	/**

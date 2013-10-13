@@ -26,11 +26,21 @@ public interface Monitor {
 	 * Defines a mobile traffic event
 	 */
 	public static final int MOBILE_TRAFFIC = 2;
+	
+	/**
+	 * Defines a wifi traffic event
+	 */
+	public static final int WIFI_TRAFFIC = 4;
+	
+	/**
+	 * Defines a general traffic event (all traffic) 
+	 */
+	public static final int TRAFFIC = MOBILE_TRAFFIC | WIFI_TRAFFIC;
 
 	/**
 	 * Defines a telephony event
 	 */
-	public static final int TELEPHONY = 4;
+	public static final int TELEPHONY = 8;
 	
 	/**
 	 * Intent action for activating monitor events
@@ -80,11 +90,15 @@ public interface Monitor {
 	public void deactivate(int events);
 	
 	/**
-	 * Adds a listener for a given event
-	 * @param listener
+	 * Adds/remove a listener for a given event. 
+	 * 
+	 * If listen is false then the listener must be removed if active
+	 * 
 	 * @param event
+	 * @param listener
+	 * @param listen true to add listener
 	 */
-	public void listen(MonitorListener listener, MonitorEvent event);
+	public void listen(MonitorEvent event, MonitorListener listener, boolean listen);
 	
 	/**
 	 * Get the internal state of the specified event
