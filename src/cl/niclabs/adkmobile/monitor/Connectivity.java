@@ -26,7 +26,7 @@ import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
  * 
  * @author Felipe Lalanne <flalanne@niclabs.cl>
  */
-public class Connectivity extends Monitor {
+public class Connectivity extends AbstractMonitor {
 	public static class ConnectivityData implements DataFields {
 		public static final String DETAILED_STATE = "detailed_state";
 		

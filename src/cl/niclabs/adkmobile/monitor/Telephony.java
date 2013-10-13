@@ -27,7 +27,7 @@ import cl.niclabs.adkmobile.monitor.listeners.TelephonyListener;
  * 
  * @author Mauricio Castro. Created 04-10-2013.
  */
-public class Telephony extends Monitor {
+public class Telephony extends AbstractMonitor {
 
 	public class ServiceBinder extends Binder {
 		public Telephony getService() {

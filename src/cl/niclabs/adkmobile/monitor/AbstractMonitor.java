@@ -13,8 +13,8 @@ import android.content.IntentFilter;
 import android.os.IBinder;
 import android.util.Log;
 import cl.niclabs.adkmobile.monitor.data.DataObject;
+import cl.niclabs.adkmobile.monitor.events.Monitor;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
-import cl.niclabs.adkmobile.monitor.events.MonitorEventManager;
 import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
 
 /**
@@ -26,7 +26,7 @@ import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
  * 
  * @author Felipe Lalanne <flalanne@niclabs.cl>
  */
-public abstract class Monitor extends Service implements MonitorEventManager {
+public abstract class AbstractMonitor extends Service implements Monitor {
 	/**
 	 * Current state by eventType
 	 */

@@ -32,7 +32,7 @@ import cl.niclabs.adkmobile.monitor.listeners.TrafficListener;
  * @author Mauricio Castro.
  *         Created 27-09-2013.
  */
-public class Traffic extends Monitor {
+public class Traffic extends AbstractMonitor {
 	
 	public class ServiceBinder extends Binder {
 		public Traffic getService() {

@@ -10,7 +10,7 @@ import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
  * @author Felipe Lalanne <flalanne@niclabs.cl>
  *
  */
-public interface MonitorEventManager {
+public interface Monitor {
 	/**
 	 * Flag to represent all events
 	 */
