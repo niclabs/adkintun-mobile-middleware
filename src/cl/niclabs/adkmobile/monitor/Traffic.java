@@ -88,7 +88,7 @@ public class Traffic extends AbstractMonitor {
 			notifyListeners(mobileTrafficEvent, data);
 			
 			/* Log the results */
-			Log.d(TAG, data.toString());
+			if(DEBUG) Log.d(TAG, data.toString());
 		}
 	};
 
@@ -96,11 +96,11 @@ public class Traffic extends AbstractMonitor {
 		@Override
 		public synchronized void activate() {
 			if (!isActive()) {
-				Log.d(TAG, "Active Listeners");
+				if(DEBUG) Log.d(TAG, "Active Listeners");
 				mTimerTraffic.schedule(mobileTask, 0, 1000 * trafficUpdateInterval);
 				super.activate();
 				
-				Log.d(TAG, "Traffic service has been activated");
+				if(DEBUG) Log.d(TAG, "Traffic service has been activated");
 			}
 		}
 
@@ -111,7 +111,7 @@ public class Traffic extends AbstractMonitor {
 				mTimerTraffic.cancel();
 				super.deactivate();
 				
-				Log.d(TAG, "Traffic service has been deactivated");
+				if(DEBUG) Log.d(TAG, "Traffic service has been deactivated");
 			}
 		}
 		

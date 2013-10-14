@@ -30,11 +30,11 @@ public abstract class AbstractMonitor extends Service implements Monitor {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (intent.getAction().equals(ACTIVATE)) {
-				Log.d(TAG, "Received activation broadcast");
+				if(DEBUG) Log.d(TAG, "Received activation broadcast");
 				activate(intent.getIntExtra(EVENTS_EXTRA, 0), intent.getExtras());
 			}
 			else if (intent.getAction().equals(DEACTIVATE)) {
-				Log.d(TAG, "Received deactivation broadcast");
+				if(DEBUG) Log.d(TAG, "Received deactivation broadcast");
 				deactivate(intent.getIntExtra(EVENTS_EXTRA, 0));
 			}
 		}

@@ -155,7 +155,7 @@ public class Connectivity extends AbstractMonitor {
 				filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
 				registerReceiver(connectivityMonitor, filter);
 				
-				Log.d(TAG, "Connectivity service has been activated");
+				if(DEBUG) Log.d(TAG, "Connectivity service has been activated");
 				
 				// Do not forget
 				super.activate();
@@ -168,7 +168,7 @@ public class Connectivity extends AbstractMonitor {
 				// TODO: what happens if the event is not active and we call unregisterReceiver?
 				unregisterReceiver(connectivityMonitor);
 				
-				Log.d(TAG, "Connectivity service has been deactivated");
+				if(DEBUG) Log.d(TAG, "Connectivity service has been deactivated");
 				super.deactivate();
 			}
 		}
@@ -187,11 +187,6 @@ public class Connectivity extends AbstractMonitor {
 	private BroadcastReceiver connectivityMonitor = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			String action = intent.getAction();
-			if (!action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
-				Log.w(TAG, "onReceived() called with intent " + intent);
-				return;
-			}
 			// Get the NetworkInfo object
 			ConnectivityManager connectivityManager = (ConnectivityManager) context
 					.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -201,7 +196,7 @@ public class Connectivity extends AbstractMonitor {
 			 * the variable is null
 			 * TODO: should we record this? */
 			if (ni == null) {
-				Log.d(TAG, "No active network");
+				if(DEBUG) Log.d(TAG, "No active network");
 				return; 
 			}
 
@@ -220,9 +215,9 @@ public class Connectivity extends AbstractMonitor {
 			data.put(ConnectivityData.DETAILED_STATE, NetworkState.getType(ni.getDetailedState()).getValue());
 
 			// Log new state
-			Log.d(TAG, data.toString());
+			if(DEBUG) Log.d(TAG, data.toString());
 
-			/* Notify listeners */
+			/* Notify listeners and update internal state */
 			notifyListeners(connectivityEvent, data);
 		}
 
@@ -251,7 +246,7 @@ public class Connectivity extends AbstractMonitor {
 
 	@Override
 	public IBinder onBind(Intent intent) {
-		Log.d(TAG, "Service has been bound");
+		if(DEBUG) Log.d(TAG, "Service has been bound");
 		return serviceBinder;
 	}
 }

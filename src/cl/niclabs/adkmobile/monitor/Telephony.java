@@ -158,7 +158,7 @@ public class Telephony extends AbstractMonitor {
 				}
 			}
 			
-			/* Notify listeners */
+			/* Notify listeners and update internal state */
 			notifyListeners(telephonyEvent, data);
 
 			/* Log the results */
