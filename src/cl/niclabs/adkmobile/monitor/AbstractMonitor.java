@@ -1,9 +1,9 @@
 package cl.niclabs.adkmobile.monitor;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -25,35 +25,37 @@ import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
  * 
  * @author Felipe Lalanne <flalanne@niclabs.cl>
  */
-public abstract class AbstractMonitor extends Service implements Monitor {
-	/**
-	 * Current state by eventType
-	 */
-	private Map<MonitorEvent, DataObject> currentStates = new ConcurrentHashMap<MonitorEvent,DataObject>();
-	
-	protected boolean DEBUG = true;
-	
-	/** 
-	 * List of listeners by event type 
-	 */
-	private Map<MonitorEvent, List<MonitorListener>> listeners = new ConcurrentHashMap<MonitorEvent, List<MonitorListener>>();
-	
-	protected String TAG = "AdkintunMobile";
-	
+public abstract class AbstractMonitor extends Service implements Monitor {	
 	protected class MonitorEventController extends BroadcastReceiver {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			if (intent.getAction().equals(ACTIVATE_EVENT)) {
+			if (intent.getAction().equals(ACTIVATE)) {
+				Log.d(TAG, "Received activation broadcast");
 				activate(intent.getIntExtra(EVENTS_EXTRA, 0), intent.getExtras());
 			}
-			else if (intent.getAction().equals(DEACTIVATE_EVENT)) {
+			else if (intent.getAction().equals(DEACTIVATE)) {
+				Log.d(TAG, "Received deactivation broadcast");
 				deactivate(intent.getIntExtra(EVENTS_EXTRA, 0));
 			}
 		}
 		
 	}
 	
+	/**
+	 * Current state by eventType
+	 */
+	private Map<MonitorEvent, DataObject> currentStates = new ConcurrentHashMap<MonitorEvent,DataObject>(4);
+	
+	protected boolean DEBUG = true;
+	
 	private MonitorEventController eventController = new MonitorEventController();
+	
+	/** 
+	 * List of listeners by event type 
+	 */
+	private List<MonitorListener> listeners = new CopyOnWriteArrayList<MonitorListener>();
+	
+	protected String TAG = "AdkintunMobile";
 	
 	@Override
 	public void activate(MonitorEvent eventType) {
@@ -86,32 +88,35 @@ public abstract class AbstractMonitor extends Service implements Monitor {
 	}
 	
 	@Override
-	public void listen(MonitorEvent eventType, MonitorListener listener, boolean listen) {
-		List<MonitorListener> list;
-		if ((list = listeners.get(eventType)) == null) list = new ArrayList<MonitorListener>();
-		
+	public void listen(MonitorListener listener, boolean listen) {
 		if (listen) {
-			list.add(listener);
-			listeners.put(eventType, list);
+			listeners.add(listener);
 		}
 		else {
-			list.remove(listener);
+			listeners.remove(listener);
 		}
 
 	}
 	
 	/**
+	 * Notifies listeners of the monitor of new data received and updates 
+	 * the internal state of the monitor that can be obtained with getState()
+	 * 
 	 * Must be called by sub-classes to notify listeners of data received 
-	 * @param eventType the event to which the data is related  
-	 * @param data 
+	 * 
+	 * @param eventType the event to which the data is related
+	 * @param data the new data received
 	 */
 	protected void notifyListeners(MonitorEvent eventType, DataObject data) {
-		List<MonitorListener> list;
-		if ((list = listeners.get(eventType)) != null) {
-			for (MonitorListener listener: list) {
-				/* Notify the listener */
-				eventType.onDataReceived(listener, data);
-			}
+		/* Get the previous state */
+		DataObject oldData = getState(eventType);
+		
+		/* Update the internal state */
+		setState(eventType, data);
+		
+		for (MonitorListener listener: listeners) {
+			/* Notify the listener */
+			eventType.onDataReceived(listener, oldData, data);
 		}
 		/* Ignore if there are no listeners for the data type */
 	}
@@ -126,8 +131,8 @@ public abstract class AbstractMonitor extends Service implements Monitor {
 		super.onCreate();
 		
 		IntentFilter filter = new IntentFilter();
-		filter.addAction(ACTIVATE_EVENT);
-		filter.addAction(DEACTIVATE_EVENT);
+		filter.addAction(ACTIVATE);
+		filter.addAction(DEACTIVATE);
 		
 		/* Listen for activation messages */
 		registerReceiver(eventController, filter);
@@ -143,7 +148,7 @@ public abstract class AbstractMonitor extends Service implements Monitor {
 		unregisterReceiver(eventController);
 		
 		/**
-		 * Deactivate all the events
+		 * Deactivate all the events for this monitor
 		 */
 		deactivate(ALL_EVENTS);
 		
@@ -168,7 +173,7 @@ public abstract class AbstractMonitor extends Service implements Monitor {
 	 * @param eventType
 	 * @param state
 	 */
-	protected void setState(MonitorEvent eventType, DataObject state) {
+	private void setState(MonitorEvent eventType, DataObject state) {
 		currentStates.put(eventType, state);
 	}
 }

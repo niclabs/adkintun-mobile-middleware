@@ -34,19 +34,19 @@ import cl.niclabs.adkmobile.monitor.listeners.TrafficListener;
  */
 public class Traffic extends AbstractMonitor {
 	
+	public static class MobileTrafficData implements DataFields {
+		
+		public static String MOBILE_RX_BYTES = "mobile_rx_bytes";
+		public static String MOBILE_TCP_RX_BYTES = "mobile_tcp_rx_bytes";
+		
+		public static String MOBILE_TCP_TX_BYTES = "mobile_tcp_tx_bytes";
+		public static String MOBILE_TX_BYTES = "mobile_tx_bytes";
+	}
+	
 	public class ServiceBinder extends Binder {
 		public Traffic getService() {
 			return Traffic.this;
 		}
-	}
-	
-	public static class MobileTrafficData implements DataFields {
-		
-		public static String MOBILE_RX_BYTES = "mobile_rx_bytes";
-		public static String MOBILE_TX_BYTES = "mobile_tx_bytes";
-		
-		public static String MOBILE_TCP_RX_BYTES = "mobile_tcp_rx_bytes";
-		public static String MOBILE_TCP_TX_BYTES = "mobile_tcp_tx_bytes";
 	}
 	
 	public static class WifiTrafficData implements DataFields {
@@ -64,10 +64,8 @@ public class Traffic extends AbstractMonitor {
 	 */
 	public static final String TRAFFIC_UPDATE_INTERVAL_EXTRA = "traffic_update_interval";
 	
-	protected int trafficUpdateInterval = TRAFFIC_UPDATE_INTERVAL;
-	
 	private Context mContext = this;
-
+	
 	private TimerTask mobileTask = new TimerTask() {
 		@Override
 		public void run() {
@@ -85,17 +83,15 @@ public class Traffic extends AbstractMonitor {
 				data.put(MobileTrafficData.MOBILE_TCP_RX_BYTES, bytesTcp[0]);
 				data.put(MobileTrafficData.MOBILE_TCP_TX_BYTES, bytesTcp[1]);
 			}
-			
-			setState(mobileTrafficEvent, data);
 
-			/* Notify listeners */
+			/* Notify listeners and update state */
 			notifyListeners(mobileTrafficEvent, data);
 			
 			/* Log the results */
 			Log.d(TAG, data.toString());
 		}
 	};
-	
+
 	private MonitorEvent mobileTrafficEvent = new BaseMonitorEvent() {
 		@Override
 		public synchronized void activate() {
@@ -118,13 +114,13 @@ public class Traffic extends AbstractMonitor {
 				Log.d(TAG, "Traffic service has been deactivated");
 			}
 		}
-
+		
 		@Override
-		public synchronized void onDataReceived(MonitorListener listener, DataObject data) {
+		public void onDataReceived(MonitorListener listener, DataObject oldData, DataObject newData) {
 			if (listener instanceof TrafficListener) {
-				((TrafficListener) listener).onMobileTrafficChanged(data);
+				((TrafficListener) listener).onMobileTrafficChanged(newData);
 			}
-		}		
+		}
 	};
 	
 	private Timer mTimerTraffic = new Timer();
@@ -133,7 +129,24 @@ public class Traffic extends AbstractMonitor {
 	 * Activity-Service binder
 	 */
 	private final IBinder serviceBinder = new ServiceBinder();
+	
 	protected String TAG = "AdkintunMobile::Traffic";
+	protected int trafficUpdateInterval = TRAFFIC_UPDATE_INTERVAL;
+	
+	@Override
+	public void activate(int events, Bundle configuration) {
+		if ((events & MOBILE_TRAFFIC) == MOBILE_TRAFFIC) {
+			trafficUpdateInterval = configuration.getInt(TRAFFIC_UPDATE_INTERVAL_EXTRA, TRAFFIC_UPDATE_INTERVAL);
+			activate(mobileTrafficEvent);
+		}
+	}
+	
+	@Override
+	public void deactivate(int events) {
+		if ((events & MOBILE_TRAFFIC) == MOBILE_TRAFFIC) {
+			deactivate(mobileTrafficEvent);
+		}
+	}
 	
 	/**
 	 * Method that return an array with the downloaded/transmitted
@@ -174,7 +187,7 @@ public class Traffic extends AbstractMonitor {
 		return new long[]{-1,-1};
 		//TODO: Should we return a different value if a different version? */		
 	}
-	
+
 	/**
 	 * Method that return an array with the downloaded/transmitted
 	 * bytes of the mobile. 
@@ -195,7 +208,7 @@ public class Traffic extends AbstractMonitor {
 		}
 		
 	}
-	
+
 	/**
 	 * Method that returns an arrayList with the UIDs of
 	 * all the applications on the mobile. 
@@ -215,33 +228,9 @@ public class Traffic extends AbstractMonitor {
 		}
 		return uids;
 	}
-	
-	/**
-	 * Set the interval period of traffic measure in seconds.
-	 * For default is set on 10 seconds.
-	 * @param interval in seconds
-	 */
-	protected void setTrafficInterval(int interval){
-		trafficUpdateInterval = interval;
-	}
 
 	@Override
 	public IBinder onBind(Intent intent) {
 		return serviceBinder;
-	}
-	
-	@Override
-	public void activate(int events, Bundle configuration) {
-		if ((events & MOBILE_TRAFFIC) == MOBILE_TRAFFIC) {
-			trafficUpdateInterval = configuration.getInt(TRAFFIC_UPDATE_INTERVAL_EXTRA, TRAFFIC_UPDATE_INTERVAL);
-			activate(mobileTrafficEvent);
-		}
-	}
-
-	@Override
-	public void deactivate(int events) {
-		if ((events & MOBILE_TRAFFIC) == MOBILE_TRAFFIC) {
-			deactivate(mobileTrafficEvent);
-		}
 	}
 }

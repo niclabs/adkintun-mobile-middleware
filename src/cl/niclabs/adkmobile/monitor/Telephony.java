@@ -50,14 +50,14 @@ public class Telephony extends AbstractMonitor {
 		public static String TELEPHONY_GSM_CID = "gsm_cid";
 		public static String TELEPHONY_GSM_LAC = "gsm_lac";
 		public static String TELEPHONY_GSM_PSC = "gsm_psc";
-		public static String TELEPHONY_SIGNAL_STRENGTH = "signal_strength";
-		public static String TELEPHONY_SIGNAL_BER = "signal_ber";
-		public static String TELEPHONY_STANDARD = "telephony_std";
-		
+		public static String TELEPHONY_NEIGHBOR_GMS_PSC = "neighbor_gsm_psc";
 		public static String TELEPHONY_NEIGHBOR_GSM_CID = "neighbor_gsm_cid";
 		public static String TELEPHONY_NEIGHBOR_GSM_LAC = "neighbor_gsm_lac";
-		public static String TELEPHONY_NEIGHBOR_GMS_PSC = "neighbor_gsm_psc";
+		
 		public static String TELEPHONY_NEIGHBOR_SIGNAL_STRENGTH = "neighbor_signal_strenght";
+		public static String TELEPHONY_SIGNAL_BER = "signal_ber";
+		public static String TELEPHONY_SIGNAL_STRENGTH = "signal_strength";
+		public static String TELEPHONY_STANDARD = "telephony_std";
 
 		public static String TOWER_TYPE = "tower_type";
 		// TODO: TELEPHONY_STANDARD and TOWER_TYPE are not used, same thing for CDMA_ECIO, EVDO_ECIO
@@ -158,8 +158,6 @@ public class Telephony extends AbstractMonitor {
 				}
 			}
 			
-			setState(telephonyEvent, data);
-			
 			/* Notify listeners */
 			notifyListeners(telephonyEvent, data);
 
@@ -168,6 +166,11 @@ public class Telephony extends AbstractMonitor {
 		}
 
 		@Override
+		public void onDataConnectionStateChanged(int state, int networkType){
+    		
+    	}
+		
+		@Override
 		public void onSignalStrengthsChanged(SignalStrength signalStrength) {
 			super.onSignalStrengthsChanged(signalStrength);
 			synchronized (lastSignalStrength) {
@@ -175,17 +178,17 @@ public class Telephony extends AbstractMonitor {
 			}
 			/* TODO: add signal now to DB? */
 		}
-		
-		@Override
-		public void onDataConnectionStateChanged(int state, int networkType){
-    		
-    	}
 	}
 
 	private SignalStrength lastSignalStrength = null;
 
-	private TelephonyManager telephonyManager = null;
+	/**
+	 * Activity-Service binder
+	 */
+	private final IBinder serviceBinder = new ServiceBinder();
 	
+	protected String TAG = "AdkintunMobile::Telephony";
+
 	private MonitorEvent telephonyEvent = new BaseMonitorEvent() {
 		@Override
 		public synchronized void activate() {
@@ -211,29 +214,19 @@ public class Telephony extends AbstractMonitor {
 				Log.d(TAG, "Telephony service has been deactivated");
 			}
 		}
-
+		
 		@Override
-		public synchronized void onDataReceived(MonitorListener listener, DataObject data) {
+		public void onDataReceived(MonitorListener listener, DataObject oldData, DataObject newData) {
 			if (listener instanceof TelephonyListener) {
-				((TelephonyListener) listener).onMobileTelephonyChanged(data);
+				((TelephonyListener) listener).onMobileTelephonyChanged(newData);
 			}
 		}
 	};
 
-	/**
-	 * Activity-Service binder
-	 */
-	private final IBinder serviceBinder = new ServiceBinder();
-
-	protected String TAG = "AdkintunMobile::Telephony";
+	private TelephonyManager telephonyManager = null;
 	
 	private TelephonyStateListener telephonyStateListener = new TelephonyStateListener();
 
-	@Override
-	public IBinder onBind(Intent intent) {
-		return serviceBinder;
-	}
-	
 	@Override
 	public void activate(int events, Bundle configuration) {
 		if ((events & TELEPHONY) == TELEPHONY) {
@@ -248,4 +241,8 @@ public class Telephony extends AbstractMonitor {
 		}
 	}
 
+	@Override
+	public IBinder onBind(Intent intent) {
+		return serviceBinder;
+	}
 }

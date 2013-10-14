@@ -13,6 +13,11 @@ import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
  */
 public interface Monitor {
 	/**
+	 * Intent action for activating monitor events
+	 */
+	public static final String ACTIVATE = "monitor_event_activate";
+	
+	/**
 	 * Flag to represent all events
 	 */
 	public static final int ALL_EVENTS = 2147483647;
@@ -22,6 +27,16 @@ public interface Monitor {
 	 */
 	public static final int CONNECTIVITY = 1;
 	
+	/**
+	 * Intent action for deactivating monitor events
+	 */
+	public static final String DEACTIVATE = "monitor_event_deactivate";
+	
+	/**
+	 * Extra key for communicating the activated/deactivated events to the monitor
+	 */
+	public static final String EVENTS_EXTRA = "events_extra";
+
 	/**
 	 * Defines a mobile traffic event
 	 */
@@ -33,29 +48,46 @@ public interface Monitor {
 	public static final int WIFI_TRAFFIC = 4;
 	
 	/**
-	 * Defines a general traffic event (all traffic) 
+	 * Defines a general traffic event (to monitor all traffic) 
 	 */
 	public static final int TRAFFIC = MOBILE_TRAFFIC | WIFI_TRAFFIC;
-
+	
 	/**
 	 * Defines a telephony event
 	 */
 	public static final int TELEPHONY = 8;
 	
 	/**
-	 * Intent action for activating monitor events
+	 * Activate the specified events.
+	 * @param events
+	 * @param configuration additional configurations for the events
 	 */
-	public static final String ACTIVATE_EVENT = "monitor_event_activate";
+	public void activate(int events, Bundle configuration);
 	
 	/**
-	 * Intent action for deactivating monitor events
+	 * Activates the monitor for a given event
+	 * @param event
 	 */
-	public static final String DEACTIVATE_EVENT = "monitor_event_deactivate";
+	public void activate(MonitorEvent event);
 	
 	/**
-	 * Extra key for communicating the activated/deactivated events to the monitor
+	 * Deactivate the specified events
+	 * @param events
 	 */
-	public static final String EVENTS_EXTRA = "events_extra";
+	public void deactivate(int events);
+	
+	/**
+	 * Deactivates the monitor for a given event
+	 * @param event
+	 */
+	public void deactivate(MonitorEvent event);
+	
+	/**
+	 * Get the internal state of the specified event
+	 * @param event
+	 * @return
+	 */
+	public DataObject getState(MonitorEvent event);
 	
 	/**
 	 * Returns the activation status for a given event
@@ -65,45 +97,12 @@ public interface Monitor {
 	public boolean isActive(MonitorEvent event);
 	
 	/**
-	 * Activates the monitor for a given event
-	 * @param event
-	 */
-	public void activate(MonitorEvent event);
-	
-	/**
-	 * Activate the specified events 
-	 * @param events
-	 * @param configuration additional configurations for the events
-	 */
-	public void activate(int events, Bundle configuration);
-	
-	/**
-	 * Deactivates the monitor for a given event
-	 * @param event
-	 */
-	public void deactivate(MonitorEvent event);
-	
-	/**
-	 * Deactivate the specified events
-	 * @param events
-	 */
-	public void deactivate(int events);
-	
-	/**
 	 * Adds/remove a listener for a given event. 
 	 * 
 	 * If listen is false then the listener must be removed if active
 	 * 
-	 * @param event
 	 * @param listener
 	 * @param listen true to add listener
 	 */
-	public void listen(MonitorEvent event, MonitorListener listener, boolean listen);
-	
-	/**
-	 * Get the internal state of the specified event
-	 * @param event
-	 * @return
-	 */
-	public DataObject getState(MonitorEvent event);
+	public void listen(MonitorListener listener, boolean listen);
 }

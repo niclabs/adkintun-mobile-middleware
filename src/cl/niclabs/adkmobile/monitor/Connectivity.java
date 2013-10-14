@@ -174,9 +174,9 @@ public class Connectivity extends AbstractMonitor {
 		}
 		
 		@Override
-		public synchronized void onDataReceived(MonitorListener listener, DataObject data) {
+		public void onDataReceived(MonitorListener listener, DataObject oldData, DataObject newData) {
 			if (listener instanceof ConnectivityListener) {
-				((ConnectivityListener) listener).onConnectivityChanged(data);
+				((ConnectivityListener) listener).onConnectivityChanged(newData);
 				
 				// TODO: detect WiFi connected and notify the listener
 				// TODO: detect mobile connected
@@ -222,9 +222,6 @@ public class Connectivity extends AbstractMonitor {
 			// Log new state
 			Log.d(TAG, data.toString());
 
-			/* Update the current state */
-			setState(connectivityEvent, data);
-
 			/* Notify listeners */
 			notifyListeners(connectivityEvent, data);
 		}
@@ -239,12 +236,6 @@ public class Connectivity extends AbstractMonitor {
 	protected String TAG = "AdkintunMobile::Connectivity";
 
 	@Override
-	public IBinder onBind(Intent intent) {
-		Log.d(TAG, "Service has been bound");
-		return serviceBinder;
-	}
-
-	@Override
 	public void activate(int events, Bundle configuration) {
 		if ((events & CONNECTIVITY) == CONNECTIVITY) {
 			activate(connectivityEvent);
@@ -256,5 +247,11 @@ public class Connectivity extends AbstractMonitor {
 		if ((events & CONNECTIVITY) == CONNECTIVITY) {
 			deactivate(connectivityEvent);
 		}
+	}
+
+	@Override
+	public IBinder onBind(Intent intent) {
+		Log.d(TAG, "Service has been bound");
+		return serviceBinder;
 	}
 }
