@@ -32,7 +32,7 @@ public interface ConnectivityListener extends MonitorListener {
 	 * 
 	 * Should be called on starting the connectivity service if the device is roaming
 	 * 
-	 * @param dataRoamingEnabled if the roaming status has been changed
+	 * @param dataRoamingEnabled true if data roaming is enabled in the device
 	 */
 	public void onRoaming(boolean dataRoamingEnabled);
 }
