@@ -13,5 +13,5 @@ public interface TelephonyListener extends MonitorListener{
 	 * Inform the listener of a telephony change
 	 * @param trafficState the new telephony data
 	 */
-	public void onMobileTelephonyChanged(DataObject connectivityState);
+	public void onMobileTelephonyChanged(DataObject telephonyState);
 }
