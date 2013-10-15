@@ -17,8 +17,10 @@ import android.util.Log;
 import cl.niclabs.adkmobile.monitor.data.ContentValuesDataObject;
 import cl.niclabs.adkmobile.monitor.data.DataFields;
 import cl.niclabs.adkmobile.monitor.data.DataObject;
-import cl.niclabs.adkmobile.monitor.events.BaseMonitorEvent;
+import cl.niclabs.adkmobile.monitor.events.AbstractMonitorEvent;
+import cl.niclabs.adkmobile.monitor.events.BasicMonitorEventResult;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
+import cl.niclabs.adkmobile.monitor.events.MonitorEventResult;
 import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
 import cl.niclabs.adkmobile.monitor.listeners.TelephonyListener;
 
@@ -159,7 +161,7 @@ public class Telephony extends AbstractMonitor {
 			}
 			
 			/* Notify listeners and update internal state */
-			notifyListeners(telephonyEvent, data);
+			notifyListeners(telephonyEvent, new BasicMonitorEventResult(data));
 
 			/* Log the results */
 			Log.d(TAG, data.toString());
@@ -189,7 +191,7 @@ public class Telephony extends AbstractMonitor {
 	
 	protected String TAG = "AdkintunMobile::Telephony";
 
-	private MonitorEvent telephonyEvent = new BaseMonitorEvent() {
+	private MonitorEvent telephonyEvent = new AbstractMonitorEvent() {
 		@Override
 		public synchronized void activate() {
 			if (!isActive()) {
@@ -216,9 +218,9 @@ public class Telephony extends AbstractMonitor {
 		}
 		
 		@Override
-		public void onDataReceived(MonitorListener listener, DataObject oldData, DataObject newData) {
+		public void onDataReceived(MonitorListener listener, MonitorEventResult result) {
 			if (listener instanceof TelephonyListener) {
-				((TelephonyListener) listener).onMobileTelephonyChanged(newData);
+				((TelephonyListener) listener).onMobileTelephonyChanged(result.getData());
 			}
 		}
 	};

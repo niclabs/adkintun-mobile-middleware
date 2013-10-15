@@ -20,8 +20,10 @@ import android.util.Log;
 import cl.niclabs.adkmobile.monitor.data.ContentValuesDataObject;
 import cl.niclabs.adkmobile.monitor.data.DataFields;
 import cl.niclabs.adkmobile.monitor.data.DataObject;
-import cl.niclabs.adkmobile.monitor.events.BaseMonitorEvent;
+import cl.niclabs.adkmobile.monitor.events.AbstractMonitorEvent;
+import cl.niclabs.adkmobile.monitor.events.BasicMonitorEventResult;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
+import cl.niclabs.adkmobile.monitor.events.MonitorEventResult;
 import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
 import cl.niclabs.adkmobile.monitor.listeners.TrafficListener;
 
@@ -85,14 +87,14 @@ public class Traffic extends AbstractMonitor {
 			}
 
 			/* Notify listeners and update state */
-			notifyListeners(mobileTrafficEvent, data);
+			notifyListeners(mobileTrafficEvent, new BasicMonitorEventResult(data));
 			
 			/* Log the results */
 			if(DEBUG) Log.d(TAG, data.toString());
 		}
 	};
 
-	private MonitorEvent mobileTrafficEvent = new BaseMonitorEvent() {
+	private MonitorEvent mobileTrafficEvent = new AbstractMonitorEvent() {
 		@Override
 		public synchronized void activate() {
 			if (!isActive()) {
@@ -116,9 +118,9 @@ public class Traffic extends AbstractMonitor {
 		}
 		
 		@Override
-		public void onDataReceived(MonitorListener listener, DataObject oldData, DataObject newData) {
+		public void onDataReceived(MonitorListener listener, MonitorEventResult result) {
 			if (listener instanceof TrafficListener) {
-				((TrafficListener) listener).onMobileTrafficChanged(newData);
+				((TrafficListener) listener).onMobileTrafficChanged(result.getData());
 			}
 		}
 	};

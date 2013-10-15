@@ -10,7 +10,7 @@ package cl.niclabs.adkmobile.monitor.events;
  * @author Felipe Lalanne <flalanne@niclabs.cl>
  *
  */
-public abstract class BaseMonitorEvent implements MonitorEvent {
+public abstract class AbstractMonitorEvent implements MonitorEvent {
 	protected Boolean active = false;
 	
 	/**

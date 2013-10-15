@@ -9,12 +9,15 @@ import android.net.NetworkInfo;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import cl.niclabs.adkmobile.monitor.data.ContentValuesDataObject;
 import cl.niclabs.adkmobile.monitor.data.DataFields;
 import cl.niclabs.adkmobile.monitor.data.DataObject;
-import cl.niclabs.adkmobile.monitor.events.BaseMonitorEvent;
+import cl.niclabs.adkmobile.monitor.events.AbstractMonitorEvent;
+import cl.niclabs.adkmobile.monitor.events.BasicMonitorEventResult;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
+import cl.niclabs.adkmobile.monitor.events.MonitorEventResult;
 import cl.niclabs.adkmobile.monitor.listeners.ConnectivityListener;
 import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
 
@@ -30,6 +33,7 @@ public class Connectivity extends AbstractMonitor {
 	public static class ConnectivityData implements DataFields {
 		public static final String DETAILED_STATE = "detailed_state";
 		
+		public static final String IS_AVAILABLE = "is_available";
 		public static final String IS_CONNECTED = "is_connected";
 		public static final String IS_ROAMING = "is_roaming";
 		public static final String NETWORK_TYPE = "network_type";
@@ -43,6 +47,50 @@ public class Connectivity extends AbstractMonitor {
 		}
 	}
 	
+	protected class ConnectivityEventResult extends BasicMonitorEventResult {
+		protected boolean hasConnectedToWifi = false;
+		protected boolean hasConnectedToMobile = false;
+		protected boolean hasStartedRoaming = false;
+		protected boolean isDataRoamingEnabled = false;
+		
+		public ConnectivityEventResult(DataObject data) {
+			super(data);
+		}
+		
+		/**
+		 * 
+		 * @return true if the device has changed its connection to wifi
+		 */
+		public boolean hasConnectedToWifi() {
+			return hasConnectedToWifi;
+		}
+		
+		/**
+		 * 
+		 * @return true if the device has changed its connection to mobile 
+		 */
+		public boolean hasConnectedToMobile() {
+			return hasConnectedToMobile;
+		}
+		
+		/**
+		 * 
+		 * @return true if the device has started roaming
+		 */
+		public boolean hasStartedRoaming() {
+			return hasStartedRoaming;
+		}
+		
+		/**
+		 * 
+		 * @return true if data roaming is enabled 
+		 */
+		public boolean isDataRoamingEnabled() {
+			return isDataRoamingEnabled;
+		}
+		
+	}
+	
 	/**
 	 * The network detailed state for recording on the database
 	 * 
@@ -53,7 +101,7 @@ public class Connectivity extends AbstractMonitor {
 				5), DISCONNECTED(6), DISCONNECTING(7), FAILED(8), IDLE(9), OBTAINING_IP_ADDRESS(
 				10), OTHER(0), SCANNING(11), SUSPENDED(12), VERIFYING_POOR_LINK(13);
 		
-		public static NetworkState getType(NetworkInfo.DetailedState value) {
+		public static NetworkState valueOf(NetworkInfo.DetailedState value) {
 			switch(value) {
 			case AUTHENTICATING:
 				return AUTHENTICATING;
@@ -109,25 +157,49 @@ public class Connectivity extends AbstractMonitor {
 
 		/**
 		 * Get the network type from the ConnectivityManager constants
+		 * 
+		 * @param value connectivity identifier according to ConnectivityManager constants
 		 */
-		public static NetworkType getType(int value) {
+		public static NetworkType valueOf(int value) {
 			switch (value) {
-			case ConnectivityManager.TYPE_MOBILE:
-				return MOBILE;
-			case ConnectivityManager.TYPE_MOBILE_DUN:
-				return MOBILE_DUN;
-			case ConnectivityManager.TYPE_MOBILE_HIPRI:
-				return MOBILE_HIPRI;
-			case ConnectivityManager.TYPE_MOBILE_MMS:
-				return MOBILE_MMS;
-			case ConnectivityManager.TYPE_MOBILE_SUPL:
-				return MOBILE_SUPL;
-			case ConnectivityManager.TYPE_WIFI:
-				return WIFI;
-			case ConnectivityManager.TYPE_WIMAX:
-				return WIMAX;
+				case ConnectivityManager.TYPE_MOBILE:
+					return MOBILE;
+				case ConnectivityManager.TYPE_MOBILE_DUN:
+					return MOBILE_DUN;
+				case ConnectivityManager.TYPE_MOBILE_HIPRI:
+					return MOBILE_HIPRI;
+				case ConnectivityManager.TYPE_MOBILE_MMS:
+					return MOBILE_MMS;
+				case ConnectivityManager.TYPE_MOBILE_SUPL:
+					return MOBILE_SUPL;
+				case ConnectivityManager.TYPE_WIFI:
+					return WIFI;
+				case ConnectivityManager.TYPE_WIMAX:
+					return WIMAX;
 			}
 			return OTHER;
+		}
+		
+		public static NetworkType getType(int value) {
+			for (NetworkType n: NetworkType.values()) {
+				if (n.getValue() == value) {
+					return n;
+				}
+			}
+			return OTHER;
+		}
+		
+		public boolean isMobile() {
+			switch(this) {
+				case MOBILE:
+				case MOBILE_DUN:
+				case MOBILE_HIPRI:
+				case MOBILE_MMS:
+				case MOBILE_SUPL:
+					return true;
+				default:
+					return false;
+			}
 		}
 
 		int value;
@@ -147,7 +219,7 @@ public class Connectivity extends AbstractMonitor {
 		}
 	}
 
-	private MonitorEvent connectivityEvent = new BaseMonitorEvent() {
+	private MonitorEvent connectivityEvent = new AbstractMonitorEvent() {
 		@Override
 		public synchronized void activate() {
 			if (!isActive()) {
@@ -173,52 +245,164 @@ public class Connectivity extends AbstractMonitor {
 			}
 		}
 		
+		
+		
 		@Override
-		public void onDataReceived(MonitorListener listener, DataObject oldData, DataObject newData) {
+		public void onDataReceived(MonitorListener listener, MonitorEventResult result) {
 			if (listener instanceof ConnectivityListener) {
-				((ConnectivityListener) listener).onConnectivityChanged(newData);
+				ConnectivityListener connectivityListener = (ConnectivityListener) listener;
 				
-				// TODO: detect WiFi connected and notify the listener
-				// TODO: detect mobile connected
+				/* Notify result */
+				connectivityListener.onConnectivityChanged(result.getData());
+				
+				if (result instanceof ConnectivityEventResult) {
+					ConnectivityEventResult connectivityResult = (ConnectivityEventResult) result;
+					if (connectivityResult.hasConnectedToWifi()) {
+						connectivityListener.onWifiConnection();
+					}
+					else if (connectivityResult.hasConnectedToMobile()) {
+						connectivityListener.onMobileConnection();
+					}
+					
+					if (connectivityResult.hasStartedRoaming()) {
+						connectivityListener.onRoaming(connectivityResult.isDataRoamingEnabled());
+					}
+				}
 			}
 		}
 	};
 
 	private BroadcastReceiver connectivityMonitor = new BroadcastReceiver() {
+		boolean switchedNetwork			= false;
+		boolean switchedRoamingStatus	= false;
+		
+		/**
+		 * Detect a change in network status and notify the listener
+		 * 
+		 * @param listener
+		 * @param oldData
+		 * @param newData
+		 */
+		public void notifyNetworkStatusChange(DataObject oldData, DataObject newData) {
+			NetworkType newNetworkType = NetworkType.getType(newData.getInt(ConnectivityData.NETWORK_TYPE));
+			boolean isConnected = newData.getBoolean(ConnectivityData.IS_CONNECTED);
+			boolean isAvailable = newData.getBoolean(ConnectivityData.IS_AVAILABLE);
+			boolean isRoaming = newData.getBoolean(ConnectivityData.IS_ROAMING);
+			
+			ConnectivityEventResult result = new ConnectivityEventResult(newData);
+			
+			if (oldData != null) { // Connectivity status has changed
+				NetworkType oldNetworkType = NetworkType.getType(oldData.getInt(ConnectivityData.NETWORK_TYPE));
+				boolean wasRoaming = oldData.getBoolean(ConnectivityData.IS_ROAMING);
+				
+				// Detect WiFi connection
+				if (oldNetworkType != NetworkType.WIFI && newNetworkType == NetworkType.WIFI) {
+					if (DEBUG) Log.d(TAG, "Switched to WiFi");
+					switchedNetwork = true;
+				}
+				// Detect mobile connection
+				else if (!oldNetworkType.isMobile() && newNetworkType.isMobile()) {
+					if (DEBUG) Log.d(TAG, "Switched to mobile");
+					switchedNetwork = true;
+				}			
+				
+				if (!wasRoaming && isRoaming) {
+					switchedRoamingStatus = true;
+				}
+			}
+			else { // Service has just started
+				if (newNetworkType == NetworkType.WIFI || newNetworkType.isMobile()) switchedNetwork = true;
+				if (isRoaming) switchedRoamingStatus = true;
+			}
+
+			
+			// Detect change in connection status to IS_CONNECTED (it might happen on a different call to the method)
+			if (switchedNetwork && isConnected && isAvailable) {
+				if (newNetworkType.isMobile()) {
+					if (DEBUG) Log.d(TAG, "Connected to mobile");
+					result.hasConnectedToMobile = true;
+				}
+				else if (newNetworkType == NetworkType.WIFI) {
+					if (DEBUG) Log.d(TAG, "Connected to WiFi");
+					result.hasConnectedToWifi = true;
+				}
+				
+				/* Reset status */
+				switchedNetwork	 = false;
+			}
+			
+			// Detect change in roaming status
+			if (switchedRoamingStatus && newNetworkType != NetworkType.WIFI) {
+				//((ConnectivityListener) listener).onRoaming(isConnected && isAvailable);
+				result.hasStartedRoaming = true;
+				result.isDataRoamingEnabled = isConnected && isAvailable;
+				
+				/* Reset status */
+				switchedRoamingStatus = false;
+			}
+			
+			/* Notify the listeners */
+			notifyListeners(connectivityEvent, result);
+		}
+		
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			// Get the NetworkInfo object
 			ConnectivityManager connectivityManager = (ConnectivityManager) context
 					.getSystemService(Context.CONNECTIVITY_SERVICE);
-			NetworkInfo ni = connectivityManager.getActiveNetworkInfo();
 			
+			// TODO: On API level 17, the intent contains the extra EXTRA_NETWORK_TYPE 
+			// that can be used with ConnectivityManager.getNetworkInfo(int) in order
+			// to obtain the new network info
+			NetworkInfo ni = connectivityManager.getActiveNetworkInfo();
+					
 			/* When no network is active
 			 * the variable is null
 			 * TODO: should we record this? */
+			
+			/* Get old data */
+			DataObject oldData = getState(connectivityEvent);
+			
+			DataObject data = new ContentValuesDataObject();
+			
 			if (ni == null) {
-				if(DEBUG) Log.d(TAG, "No active network");
+				Log.w(TAG, "No active network");
+				
+				TelephonyManager telephony = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+			    if (telephony.isNetworkRoaming()) {
+			    	data.put(ConnectivityData.TIMESTAMP, System.currentTimeMillis());
+			    	data.put(ConnectivityData.IS_CONNECTED, false);
+			    	data.put(ConnectivityData.IS_ROAMING, true);
+			    	data.put(ConnectivityData.IS_AVAILABLE, false);
+			    	
+			    	// Log new state
+					if(DEBUG) Log.d(TAG, data.toString());
+
+					/* Notify listeners and update internal state */
+					notifyNetworkStatusChange(oldData, data);
+			    }
 				return; 
 			}
 
-			DataObject data = new ContentValuesDataObject();
 			data.put(ConnectivityData.TIMESTAMP, System.currentTimeMillis());
 			data.put(ConnectivityData.IS_CONNECTED,
 					ni.isConnectedOrConnecting());
 
 			NetworkType networkType;
-			if ((networkType = NetworkType.getType(ni.getType())) == NetworkType.OTHER) {
+			if ((networkType = NetworkType.valueOf(ni.getType())) == NetworkType.OTHER) {
 				data.put(ConnectivityData.NETWORK_TYPE_OTHER, ni.getType());
 			}
 			data.put(ConnectivityData.NETWORK_TYPE, networkType.getValue());
 			data.put(ConnectivityData.IS_ROAMING, ni.isRoaming());
+			data.put(ConnectivityData.IS_AVAILABLE, ni.isAvailable());
 			
-			data.put(ConnectivityData.DETAILED_STATE, NetworkState.getType(ni.getDetailedState()).getValue());
+			data.put(ConnectivityData.DETAILED_STATE, NetworkState.valueOf(ni.getDetailedState()).getValue());
 
 			// Log new state
 			if(DEBUG) Log.d(TAG, data.toString());
 
 			/* Notify listeners and update internal state */
-			notifyListeners(connectivityEvent, data);
+			notifyNetworkStatusChange(oldData, data);
 		}
 
 	};

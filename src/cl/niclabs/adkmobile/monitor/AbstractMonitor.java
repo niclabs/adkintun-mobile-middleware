@@ -14,6 +14,7 @@ import android.os.IBinder;
 import android.util.Log;
 import cl.niclabs.adkmobile.monitor.data.DataObject;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
+import cl.niclabs.adkmobile.monitor.events.MonitorEventResult;
 import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
 
 /**
@@ -105,18 +106,15 @@ public abstract class AbstractMonitor extends Service implements Monitor {
 	 * Must be called by sub-classes to notify listeners of data received 
 	 * 
 	 * @param eventType the event to which the data is related
-	 * @param data the new data received
+	 * @param result the result from the event
 	 */
-	protected void notifyListeners(MonitorEvent eventType, DataObject data) {
-		/* Get the previous state */
-		DataObject oldData = getState(eventType);
-		
+	protected void notifyListeners(MonitorEvent eventType, MonitorEventResult result) {
 		/* Update the internal state */
-		setState(eventType, data);
+		setState(eventType, result.getData());
 		
 		for (MonitorListener listener: listeners) {
 			/* Notify the listener */
-			eventType.onDataReceived(listener, oldData, data);
+			eventType.onDataReceived(listener, result);
 		}
 		/* Ignore if there are no listeners for the data type */
 	}

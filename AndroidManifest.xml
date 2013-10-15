@@ -13,6 +13,9 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
+        <service android:name="cl.niclabs.adkmobile.monitor.Connectivity"></service>
+        <service android:name="cl.niclabs.adkmobile.monitor.Telephony"></service>
+        <service android:name="cl.niclabs.adkmobile.monitor.Traffic"></service>
     </application>
 
 </manifest>
