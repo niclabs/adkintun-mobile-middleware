@@ -56,7 +56,7 @@ public class Telephony extends AbstractMonitor {
 		public static String TELEPHONY_NEIGHBOR_GSM_CID = "neighbor_gsm_cid";
 		public static String TELEPHONY_NEIGHBOR_GSM_LAC = "neighbor_gsm_lac";
 		
-		public static String TELEPHONY_NEIGHBOR_SIGNAL_STRENGTH = "neighbor_signal_strenght";
+		public static String TELEPHONY_NEIGHBOR_SIGNAL_STRENGTH = "neighbor_signal_strength";
 		public static String TELEPHONY_SIGNAL_BER = "signal_ber";
 		public static String TELEPHONY_SIGNAL_STRENGTH = "signal_strength";
 		public static String TELEPHONY_STANDARD = "telephony_std";
@@ -119,6 +119,7 @@ public class Telephony extends AbstractMonitor {
 				if( neighbors.size() > 0 ) {
                     for(NeighboringCellInfo neighbor : neighbors ) {
                     	
+                    	// TODO: This does not work, it has to go inside a list
                         data.put(TelephonyData.TIMESTAMP, System.currentTimeMillis());
                         data.put(TelephonyData.TELEPHONY_NEIGHBOR_GSM_CID, neighbor.getCid());
                         data.put(TelephonyData.TELEPHONY_NEIGHBOR_GSM_LAC, neighbor.getLac());

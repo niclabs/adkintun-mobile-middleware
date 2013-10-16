@@ -114,6 +114,8 @@ public abstract class AbstractMonitor extends Service implements Monitor {
 		
 		for (MonitorListener listener: listeners) {
 			/* Notify the listener */
+			
+			// TODO: Execute the method on a runnable and schedule on a ScheduledThreadPoolExecutor?
 			eventType.onDataReceived(listener, result);
 		}
 		/* Ignore if there are no listeners for the data type */
