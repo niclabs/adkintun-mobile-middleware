@@ -59,8 +59,8 @@ public abstract class AbstractMonitor extends Service implements Monitor {
 	protected String TAG = "AdkintunMobile";
 	
 	@Override
-	public void activate(MonitorEvent eventType) {
-		eventType.activate();
+	public boolean activate(MonitorEvent eventType) {
+		return eventType.activate();
 	}
 	
 	

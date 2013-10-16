@@ -15,8 +15,10 @@ import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
 public interface MonitorEvent {
 	/**
 	 * Activates the event
+	 * 
+	 * @return true if the event was activated correctly or is already active
 	 */
-	public void activate();
+	public boolean activate();
 	
 	/**
 	 * Deactivates the event

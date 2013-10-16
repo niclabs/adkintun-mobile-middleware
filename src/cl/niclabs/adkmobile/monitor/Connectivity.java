@@ -221,7 +221,7 @@ public class Connectivity extends AbstractMonitor {
 
 	private MonitorEvent connectivityEvent = new AbstractMonitorEvent() {
 		@Override
-		public synchronized void activate() {
+		public synchronized boolean activate() {
 			if (!isActive()) {
 				IntentFilter filter = new IntentFilter();
 				filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
@@ -230,8 +230,9 @@ public class Connectivity extends AbstractMonitor {
 				if(DEBUG) Log.d(TAG, "Connectivity service has been activated");
 				
 				// Do not forget
-				super.activate();
+				super.activate();				
 			}
+			return true;
 		}
 
 		@Override
@@ -415,10 +416,11 @@ public class Connectivity extends AbstractMonitor {
 	protected String TAG = "AdkintunMobile::Connectivity";
 
 	@Override
-	public void activate(int events, Bundle configuration) {
+	public boolean activate(int events, Bundle configuration) {
 		if ((events & CONNECTIVITY) == CONNECTIVITY) {
-			activate(connectivityEvent);
+			return activate(connectivityEvent);
 		}
+		return false;
 	}
 
 	@Override

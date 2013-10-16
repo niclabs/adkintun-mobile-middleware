@@ -23,10 +23,11 @@ public abstract class AbstractMonitorEvent implements MonitorEvent {
 	 * 
 	 */
 	@Override
-	public void activate() {
+	public boolean activate() {
 		synchronized(active) {
 			active = true;
 		}
+		return true;
 	}
 
 	/**

@@ -193,7 +193,7 @@ public class Telephony extends AbstractMonitor {
 
 	private MonitorEvent telephonyEvent = new AbstractMonitorEvent() {
 		@Override
-		public synchronized void activate() {
+		public synchronized boolean activate() {
 			if (!isActive()) {
 				telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
 				telephonyManager.listen(telephonyStateListener,
@@ -204,6 +204,7 @@ public class Telephony extends AbstractMonitor {
 				
 				Log.d(TAG, "Telephony service has been activated");
 			}
+			return true;
 		}
 
 		@Override
@@ -230,10 +231,11 @@ public class Telephony extends AbstractMonitor {
 	private TelephonyStateListener telephonyStateListener = new TelephonyStateListener();
 
 	@Override
-	public void activate(int events, Bundle configuration) {
+	public boolean activate(int events, Bundle configuration) {
 		if ((events & TELEPHONY) == TELEPHONY) {
-			activate(telephonyEvent);
+			return activate(telephonyEvent);
 		}
+		return false;
 	}
 
 	@Override
