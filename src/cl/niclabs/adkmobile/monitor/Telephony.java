@@ -1,9 +1,9 @@
 package cl.niclabs.adkmobile.monitor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Intent;
-import android.net.ConnectivityManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -15,7 +15,6 @@ import android.telephony.TelephonyManager;
 import android.telephony.cdma.CdmaCellLocation;
 import android.telephony.gsm.GsmCellLocation;
 import android.util.Log;
-import cl.niclabs.adkmobile.monitor.Connectivity.NetworkType;
 import cl.niclabs.adkmobile.monitor.data.ContentValuesDataObject;
 import cl.niclabs.adkmobile.monitor.data.DataFields;
 import cl.niclabs.adkmobile.monitor.data.DataObject;
@@ -50,6 +49,8 @@ public class Telephony extends AbstractMonitor {
 		public static String EVDO_DBM = "evdo_dbm";
 		public static String EVDO_ECIO = "evdo_ecio";
 		public static String EVDO_SNR = "evdo_snr";
+		
+		public static String TELEPHONY_NEIGHBOR_LIST = "neighbor_list";
 		
 		public static String TELEPHONY_GSM_CID = "gsm_cid";
 		public static String TELEPHONY_GSM_LAC = "gsm_lac";
@@ -188,19 +189,23 @@ public class Telephony extends AbstractMonitor {
 				/* TODO add neighbor list? */
 				List<NeighboringCellInfo> neighbors = telephonyManager.getNeighboringCellInfo();
 				if( neighbors.size() > 0 ) {
+					List<DataObject> dataNeighborlist = new ArrayList<DataObject>();
                     for(NeighboringCellInfo neighbor : neighbors ) {
                     	
+                    	DataObject dataNeighbor = new ContentValuesDataObject();
                     	// TODO: This does not work, it has to go inside a list
-                        data.put(TelephonyData.TIMESTAMP, System.currentTimeMillis());
-                        data.put(TelephonyData.TELEPHONY_NEIGHBOR_GSM_CID, neighbor.getCid());
-                        data.put(TelephonyData.TELEPHONY_NEIGHBOR_GSM_LAC, neighbor.getLac());
-                        data.put(TelephonyData.TELEPHONY_NEIGHBOR_GMS_PSC, neighbor.getPsc());
+                    	dataNeighbor.put(TelephonyData.TIMESTAMP, System.currentTimeMillis());
+                    	dataNeighbor.put(TelephonyData.TELEPHONY_NEIGHBOR_GSM_CID, neighbor.getCid());
+                    	dataNeighbor.put(TelephonyData.TELEPHONY_NEIGHBOR_GSM_LAC, neighbor.getLac());
+                    	dataNeighbor.put(TelephonyData.TELEPHONY_NEIGHBOR_GMS_PSC, neighbor.getPsc());
                         
                         if(neighbor.getRssi() != NeighboringCellInfo.UNKNOWN_RSSI){
                         		float signalNeighborStrength = (neighbor.getRssi()*2) - 113;
-                        		data.put(TelephonyData.TELEPHONY_NEIGHBOR_SIGNAL_STRENGTH,signalNeighborStrength);
-                        }                        
+                        		dataNeighbor.put(TelephonyData.TELEPHONY_NEIGHBOR_SIGNAL_STRENGTH,signalNeighborStrength);
+                        }
+                        dataNeighborlist.add(dataNeighbor);
                     }
+                    data.put(TelephonyData.TELEPHONY_NEIGHBOR_LIST,dataNeighborlist);
                 }
 
 			} else {
@@ -284,8 +289,8 @@ public class Telephony extends AbstractMonitor {
 			if (!isActive()) {
 				telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
 				telephonyManager.listen(telephonyStateListener,
-						PhoneStateListener.LISTEN_CELL_LOCATION
-								| PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
+						PhoneStateListener.LISTEN_CELL_LOCATION	| PhoneStateListener.LISTEN_SIGNAL_STRENGTHS 
+						| PhoneStateListener.LISTEN_DATA_CONNECTION_STATE);
 				
 				super.activate();
 				

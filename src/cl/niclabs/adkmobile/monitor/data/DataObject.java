@@ -1,6 +1,7 @@
 package cl.niclabs.adkmobile.monitor.data;
 
 import java.util.Iterator;
+import java.util.List;
 
 public abstract class DataObject {
 	
@@ -121,12 +122,20 @@ public abstract class DataObject {
 	 * @param v
 	 */
 	public abstract void put(String fieldName, long v); 
- 
+	
+	/**
+	 * Set the field with name fieldName to the specified byte array value.
+	 *
+	 * @param fieldname
+	 * @param v
+	 */
+	public abstract void put(String fieldName, List<DataObject> v);
 	/**
 	 * Set the field with name fieldName to the specified byte array value
 	 * @param fieldName
 	 * @param v
 	 */
+
 	public abstract void put(String fieldName, String v); 
 	
 	public String toString() {

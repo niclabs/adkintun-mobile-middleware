@@ -1,7 +1,10 @@
 package cl.niclabs.adkmobile.monitor.data;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import android.content.ContentValues;
@@ -9,10 +12,13 @@ import android.content.ContentValues;
 public class ContentValuesDataObject extends DataObject {
 	private ContentValues contentValues;
 	private Set<String> fieldNames;
+	private Map<String, List<DataObject>> neighborCells;
 	
 	public ContentValuesDataObject() {
 		contentValues = new ContentValues();
 		fieldNames = new HashSet<String>();
+		neighborCells = new HashMap<String,List<DataObject>>();
+		
 	}
 
 	@Override
@@ -115,5 +121,13 @@ public class ContentValuesDataObject extends DataObject {
 	public void put(String fieldName, String v) {
 		fieldNames.add(fieldName);
 		contentValues.put(fieldName, v);
+	}
+
+	@Override
+	public void put(String fieldName, List<DataObject> v) {
+		// TODO Auto-generated method stub.
+		fieldNames.add(fieldName);
+		neighborCells.put(fieldName,v);
+		
 	}
 }
