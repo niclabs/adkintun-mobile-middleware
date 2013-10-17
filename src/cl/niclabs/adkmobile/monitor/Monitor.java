@@ -58,6 +58,10 @@ public interface Monitor {
 	public static final int TELEPHONY = 8;
 	
 	/**
+	 * Defines a screen event
+	 */
+	public static final int SCREEN = 16;
+	/**
 	 * Activate the specified events.
 	 * @param events
 	 * @param configuration additional configurations for the events

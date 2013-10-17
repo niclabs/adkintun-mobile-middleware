@@ -80,6 +80,11 @@ public class ContentValuesDataObject extends DataObject {
 	public String getString(String fieldName) {
 		return contentValues.getAsString(fieldName);
 	}
+	
+	@Override
+	public Map<String, List<DataObject>> getList(String fieldName) {
+		return neighborCells;
+	}
 
 	@Override
 	public void put(String fieldName, boolean v) {
@@ -130,4 +135,5 @@ public class ContentValuesDataObject extends DataObject {
 		neighborCells.put(fieldName,v);
 		
 	}
+
 }

@@ -2,6 +2,7 @@ package cl.niclabs.adkmobile.monitor.data;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public abstract class DataObject {
 	
@@ -80,6 +81,16 @@ public abstract class DataObject {
 	 * @return
 	 */
 	public abstract String getString(String fieldName);
+	
+	/**
+	 * Get the value of the element with the specified fielName as a List of DataObjects.
+	 *
+	 * Must throw an exception if the field cannot be converted
+	 *
+	 * @param fieldName
+	 * @return
+	 */
+	public abstract Map<String,List<DataObject>> getList(String fieldName);
 	
     /**
      * Set the field with name fieldName to the specified boolean value 

@@ -324,7 +324,7 @@ public class Telephony extends AbstractMonitor {
 
 	@Override
 	public boolean activate(int events, Bundle configuration) {
-		if ((events & TELEPHONY) == TELEPHONY) {
+		if ((events & SCREEN) == SCREEN) {
 			return activate(telephonyEvent);
 		}
 		return false;
