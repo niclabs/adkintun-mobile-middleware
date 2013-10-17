@@ -3,6 +3,7 @@ package cl.niclabs.adkmobile.monitor;
 import java.util.List;
 
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -14,6 +15,7 @@ import android.telephony.TelephonyManager;
 import android.telephony.cdma.CdmaCellLocation;
 import android.telephony.gsm.GsmCellLocation;
 import android.util.Log;
+import cl.niclabs.adkmobile.monitor.Connectivity.NetworkType;
 import cl.niclabs.adkmobile.monitor.data.ContentValuesDataObject;
 import cl.niclabs.adkmobile.monitor.data.DataFields;
 import cl.niclabs.adkmobile.monitor.data.DataObject;
@@ -62,7 +64,67 @@ public class Telephony extends AbstractMonitor {
 		public static String TELEPHONY_STANDARD = "telephony_std";
 
 		public static String TOWER_TYPE = "tower_type";
+		public static String TELEPHONY_NETWORK_TYPE = "network_type";
+		public static String TELEPHONY_OPERATOR_NAME = "operator_name";
 		// TODO: TELEPHONY_STANDARD and TOWER_TYPE are not used, same thing for CDMA_ECIO, EVDO_ECIO
+	}
+	
+	/**
+	 * Network types as defined in android.telephony.TelephonyManager
+	 *
+	 * @author Administrador.
+	 *         Created 17-10-2013.
+	 */
+	public static enum NetworkType{
+		UMTS(1), HSDPA(2),EDGE(3),CDMA(4),GPRS(5),LTE(6),HSPA(7),HSPAP(8
+				), OTHER(9);
+		
+		/**
+		 * Get the network type from the TelephonyManager constants
+		 * 
+		 * @param value connectivity identifier according to TelephonyManager constants
+		 */
+		public static NetworkType valueOf(int value) {
+			switch (value) {
+				case TelephonyManager.NETWORK_TYPE_UMTS:
+					return UMTS;
+				case TelephonyManager.NETWORK_TYPE_HSDPA:
+					return HSDPA;
+				case TelephonyManager.NETWORK_TYPE_EDGE:
+					return EDGE;
+				case TelephonyManager.NETWORK_TYPE_CDMA:
+					return CDMA;
+				case TelephonyManager.NETWORK_TYPE_GPRS:
+					return GPRS;
+				case TelephonyManager.NETWORK_TYPE_LTE:
+					return LTE;
+				case TelephonyManager.NETWORK_TYPE_HSPA:
+					return HSPA;
+				case TelephonyManager.NETWORK_TYPE_HSPAP:
+					return HSPAP;
+			}
+			return OTHER;
+		}
+		
+		public static NetworkType getType(int value) {
+			for (NetworkType n: NetworkType.values()) {
+				if (n.getValue() == value) {
+					return n;
+				}
+			}
+			return OTHER;
+		}
+		
+		int value;
+
+		private NetworkType(int value) {
+			this.value = value;
+		}
+
+		public int getValue() {
+			return this.value;
+		}
+		
 	}
 
 	/**
@@ -95,6 +157,7 @@ public class Telephony extends AbstractMonitor {
 				data.put(TelephonyData.TELEPHONY_STANDARD, "gsm");
 				data.put(TelephonyData.TELEPHONY_GSM_CID, loc.getCid());
 				data.put(TelephonyData.TELEPHONY_GSM_LAC, loc.getLac());
+				data.put(TelephonyData.TELEPHONY_OPERATOR_NAME, telephonyManager.getNetworkOperatorName());
 				
 				if (lastSignalStrength != null) {
 					synchronized(lastSignalStrength) {
@@ -112,6 +175,14 @@ public class Telephony extends AbstractMonitor {
 						}
 					}
 				}
+				
+				if (lastNetworkType != null){
+					synchronized (lastNetworkType) {
+						data.put(TelephonyData.TELEPHONY_NETWORK_TYPE, lastNetworkType.getValue());
+					}
+					
+				}
+				
 				data.put(TelephonyData.TELEPHONY_GSM_PSC, loc.getPsc());
 
 				/* TODO add neighbor list? */
@@ -145,7 +216,11 @@ public class Telephony extends AbstractMonitor {
 						loc.getBaseStationLongitude());
 				data.put(TelephonyData.CDMA_BASE_LATITUDE,
 						loc.getBaseStationLatitude());
-				data.put(TelephonyData.CDMA_NETWORK_ID, loc.getNetworkId());
+				data.put(TelephonyData.CDMA_NETWORK_ID, 
+						loc.getNetworkId());
+				data.put(TelephonyData.TELEPHONY_OPERATOR_NAME, 
+						telephonyManager.getNetworkOperatorName());
+				
 				
 				if (lastSignalStrength != null) {
 					synchronized(lastSignalStrength) {
@@ -159,6 +234,13 @@ public class Telephony extends AbstractMonitor {
 								lastSignalStrength.getEvdoSnr());
 					}
 				}
+				
+				if (lastNetworkType != null){
+					synchronized (lastNetworkType) {
+						data.put(TelephonyData.TELEPHONY_NETWORK_TYPE, lastNetworkType.getValue());
+					}
+					
+				}
 			}
 			
 			/* Notify listeners and update internal state */
@@ -170,7 +252,10 @@ public class Telephony extends AbstractMonitor {
 
 		@Override
 		public void onDataConnectionStateChanged(int state, int networkType){
-    		
+    		super.onDataConnectionStateChanged(state, networkType);
+			synchronized (lastNetworkType) {
+				lastNetworkType = NetworkType.valueOf(networkType);
+			}
     	}
 		
 		@Override
@@ -184,6 +269,7 @@ public class Telephony extends AbstractMonitor {
 	}
 
 	private SignalStrength lastSignalStrength = null;
+	private NetworkType lastNetworkType = null;
 
 	/**
 	 * Activity-Service binder
