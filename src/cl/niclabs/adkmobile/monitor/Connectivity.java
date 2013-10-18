@@ -151,7 +151,7 @@ public class Connectivity extends AbstractMonitor {
 	 * 
 	 * @author Felipe Lalanne <flalanne@niclabs.cl>
 	 */
-	public static enum NetworkType {
+	public static enum ConnectionType {
 		MOBILE(1), MOBILE_DUN(2), MOBILE_HIPRI(3), MOBILE_MMS(4), MOBILE_SUPL(5), OTHER(0), WIFI(
 						6), WIMAX(7);
 
@@ -160,7 +160,7 @@ public class Connectivity extends AbstractMonitor {
 		 * 
 		 * @param value connectivity identifier according to ConnectivityManager constants
 		 */
-		public static NetworkType valueOf(int value) {
+		public static ConnectionType valueOf(int value) {
 			switch (value) {
 				case ConnectivityManager.TYPE_MOBILE:
 					return MOBILE;
@@ -180,8 +180,8 @@ public class Connectivity extends AbstractMonitor {
 			return OTHER;
 		}
 		
-		public static NetworkType getType(int value) {
-			for (NetworkType n: NetworkType.values()) {
+		public static ConnectionType getType(int value) {
+			for (ConnectionType n: ConnectionType.values()) {
 				if (n.getValue() == value) {
 					return n;
 				}
@@ -204,7 +204,7 @@ public class Connectivity extends AbstractMonitor {
 
 		int value;
 
-		private NetworkType(int value) {
+		private ConnectionType(int value) {
 			this.value = value;
 		}
 
@@ -285,7 +285,7 @@ public class Connectivity extends AbstractMonitor {
 		 * @param newData
 		 */
 		public void notifyNetworkStatusChange(DataObject oldData, DataObject newData) {
-			NetworkType newNetworkType = NetworkType.getType(newData.getInt(ConnectivityData.NETWORK_TYPE));
+			ConnectionType newNetworkType = ConnectionType.getType(newData.getInt(ConnectivityData.NETWORK_TYPE));
 			boolean isConnected = newData.getBoolean(ConnectivityData.IS_CONNECTED);
 			boolean isAvailable = newData.getBoolean(ConnectivityData.IS_AVAILABLE);
 			boolean isRoaming = newData.getBoolean(ConnectivityData.IS_ROAMING);
@@ -293,11 +293,11 @@ public class Connectivity extends AbstractMonitor {
 			ConnectivityEventResult result = new ConnectivityEventResult(newData);
 			
 			if (oldData != null) { // Connectivity status has changed
-				NetworkType oldNetworkType = NetworkType.getType(oldData.getInt(ConnectivityData.NETWORK_TYPE));
+				ConnectionType oldNetworkType = ConnectionType.getType(oldData.getInt(ConnectivityData.NETWORK_TYPE));
 				boolean wasRoaming = oldData.getBoolean(ConnectivityData.IS_ROAMING);
 				
 				// Detect WiFi connection
-				if (oldNetworkType != NetworkType.WIFI && newNetworkType == NetworkType.WIFI) {
+				if (oldNetworkType != ConnectionType.WIFI && newNetworkType == ConnectionType.WIFI) {
 					if (DEBUG) Log.d(TAG, "Switched to WiFi");
 					switchedNetwork = true;
 				}
@@ -312,7 +312,7 @@ public class Connectivity extends AbstractMonitor {
 				}
 			}
 			else { // Service has just started
-				if (newNetworkType == NetworkType.WIFI || newNetworkType.isMobile()) switchedNetwork = true;
+				if (newNetworkType == ConnectionType.WIFI || newNetworkType.isMobile()) switchedNetwork = true;
 				if (isRoaming) switchedRoamingStatus = true;
 			}
 
@@ -323,7 +323,7 @@ public class Connectivity extends AbstractMonitor {
 					if (DEBUG) Log.d(TAG, "Connected to mobile");
 					result.hasConnectedToMobile = true;
 				}
-				else if (newNetworkType == NetworkType.WIFI) {
+				else if (newNetworkType == ConnectionType.WIFI) {
 					if (DEBUG) Log.d(TAG, "Connected to WiFi");
 					result.hasConnectedToWifi = true;
 				}
@@ -333,7 +333,7 @@ public class Connectivity extends AbstractMonitor {
 			}
 			
 			// Detect change in roaming status
-			if (switchedRoamingStatus && newNetworkType != NetworkType.WIFI) {
+			if (switchedRoamingStatus && newNetworkType != ConnectionType.WIFI) {
 				//((ConnectivityListener) listener).onRoaming(isConnected && isAvailable);
 				result.hasStartedRoaming = true;
 				result.isDataRoamingEnabled = isConnected && isAvailable;
@@ -389,8 +389,8 @@ public class Connectivity extends AbstractMonitor {
 			data.put(ConnectivityData.IS_CONNECTED,
 					ni.isConnectedOrConnecting());
 
-			NetworkType networkType;
-			if ((networkType = NetworkType.valueOf(ni.getType())) == NetworkType.OTHER) {
+			ConnectionType networkType;
+			if ((networkType = ConnectionType.valueOf(ni.getType())) == ConnectionType.OTHER) {
 				data.put(ConnectivityData.NETWORK_TYPE_OTHER, ni.getType());
 			}
 			data.put(ConnectivityData.NETWORK_TYPE, networkType.getValue());

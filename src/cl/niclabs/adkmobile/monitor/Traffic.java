@@ -69,13 +69,13 @@ public class Traffic extends AbstractMonitor {
 	/**
 	 * Represents a mobile network for storage
 	 */
-	public static final int NETWORK_TYPE_MOBILE = Connectivity.NetworkType.MOBILE.getValue();
+	public static final int NETWORK_TYPE_MOBILE = Connectivity.ConnectionType.MOBILE.getValue();
 	
 	
 	/**
 	 * Represents a wifi network for storage
 	 */
-	public static final int NETWORK_TYPE_WIFI = Connectivity.NetworkType.WIFI.getValue();
+	public static final int NETWORK_TYPE_WIFI = Connectivity.ConnectionType.WIFI.getValue();
 	
 	private Context mContext = this;
 	
