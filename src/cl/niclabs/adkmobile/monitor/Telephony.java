@@ -29,7 +29,8 @@ import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
 import cl.niclabs.adkmobile.monitor.listeners.TelephonyListener;
 
 /**
- * TODO Put here a description of what this class does.
+ * Implements monitoring of Telephony services of the mobile.
+ * Since this class need ***** , it need the permission ****.
  * 
  * Requires permissions
  * - android.permission.ACCESS_COARSE_LOCATION
@@ -180,7 +181,7 @@ public class Telephony extends AbstractMonitor {
 			
 			// TODO: What if the telephony service is disabled
 
-			// assign the values to ContentValues variables
+			// assign the values to ContentValues variable
 			DataObject data = new ContentValuesDataObject();
 			
 			if (location instanceof GsmCellLocation) {
