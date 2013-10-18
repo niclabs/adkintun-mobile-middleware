@@ -12,13 +12,12 @@ import android.content.ContentValues;
 public class ContentValuesDataObject extends DataObject {
 	private ContentValues contentValues;
 	private Set<String> fieldNames;
-	private Map<String, List<DataObject>> neighborCells;
+	private Map<String, List<DataObject>> listElements;
 	
 	public ContentValuesDataObject() {
 		contentValues = new ContentValues();
 		fieldNames = new HashSet<String>();
-		neighborCells = new HashMap<String,List<DataObject>>();
-		
+		listElements = new HashMap<String,List<DataObject>>();
 	}
 
 	@Override
@@ -78,12 +77,35 @@ public class ContentValuesDataObject extends DataObject {
 
 	@Override
 	public String getString(String fieldName) {
-		return contentValues.getAsString(fieldName);
+		String value = contentValues.getAsString(fieldName);
+		
+		/*
+		 * This is here to be consistent with content values implementation. In
+		 * ContentValues, even if the fieldName is of type long,
+		 * getString(fieldName) will return the string representation. The same
+		 * has to occur with the list.
+		 */
+		if (value == null && listElements.containsKey(fieldName)) {
+			StringBuffer b = new StringBuffer();
+			Iterator<DataObject> iterator = listElements.get(fieldName).iterator();
+			b.append('[');
+			while (iterator.hasNext()) {
+				DataObject obj = iterator.next();
+				obj.toString(b);
+				if (iterator.hasNext()){
+					b.append(',');
+				}
+			}
+			b.append(']');
+			value = b.toString();
+		}
+		
+		return value;
 	}
 	
 	@Override
-	public Map<String, List<DataObject>> getList(String fieldName) {
-		return neighborCells;
+	public List<DataObject> getList(String fieldName) {
+		return listElements.get(fieldName);
 	}
 
 	@Override
@@ -132,8 +154,7 @@ public class ContentValuesDataObject extends DataObject {
 	public void put(String fieldName, List<DataObject> v) {
 		// TODO Auto-generated method stub.
 		fieldNames.add(fieldName);
-		neighborCells.put(fieldName,v);
-		
+		listElements.put(fieldName, v);
 	}
 
 }

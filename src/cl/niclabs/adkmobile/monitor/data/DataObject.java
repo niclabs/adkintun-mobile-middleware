@@ -2,7 +2,6 @@ package cl.niclabs.adkmobile.monitor.data;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 public abstract class DataObject {
 	
@@ -90,7 +89,7 @@ public abstract class DataObject {
 	 * @param fieldName
 	 * @return
 	 */
-	public abstract Map<String,List<DataObject>> getList(String fieldName);
+	public abstract List<DataObject> getList(String fieldName);
 	
     /**
      * Set the field with name fieldName to the specified boolean value 
@@ -107,63 +106,71 @@ public abstract class DataObject {
 	public abstract void put(String fieldName, byte[] v); 
 	
 	/**
-	 * Set the field with name fieldName to the specified byte array value
+	 * Set the field with name fieldName to the specified double value
 	 * @param fieldName
 	 * @param v
 	 */
 	public abstract void put(String fieldName, double v); 
     
 	/**
-	 * Set the field with name fieldName to the specified byte array value
+	 * Set the field with name fieldName to the specified float value
 	 * @param fieldName
 	 * @param v
 	 */
 	public abstract void put(String fieldName, float v); 
     
 	/**
-	 * Set the field with name fieldName to the specified byte array value
+	 * Set the field with name fieldName to the specified int value
 	 * @param fieldName
 	 * @param v
 	 */
 	public abstract void put(String fieldName, int v);
      
 	/**
-	 * Set the field with name fieldName to the specified byte array value
+	 * Set the field with name fieldName to the specified long value
 	 * @param fieldName
 	 * @param v
 	 */
 	public abstract void put(String fieldName, long v); 
 	
 	/**
-	 * Set the field with name fieldName to the specified byte array value.
+	 * Set the field with name fieldName to the specified list value.
 	 *
 	 * @param fieldname
 	 * @param v
 	 */
 	public abstract void put(String fieldName, List<DataObject> v);
+	
 	/**
-	 * Set the field with name fieldName to the specified byte array value
+	 * Set the field with name fieldName to the specified String value
 	 * @param fieldName
 	 * @param v
 	 */
-
 	public abstract void put(String fieldName, String v); 
 	
-	public String toString() {
+	/**
+	 * Write the object to the specified string buffer
+	 * @param b
+	 */
+	protected void toString(StringBuffer b) {
 		Iterator<String> fieldNames = getFieldNames();
-		StringBuffer b = new StringBuffer();
 		b.append('(');
 		while (fieldNames.hasNext()) {
 			String name = fieldNames.next();
 			b.append(name);
 			b.append('=');
 			b.append(getString(name)); // TODO: depends on the implementation
-			
+
 			if (fieldNames.hasNext()) {
 				b.append(',');
 			}
 		}
 		b.append(')');
+	}
+	
+	public String toString() {
+		StringBuffer b = new StringBuffer();
+		toString(b);
 		return b.toString();
 	}
 }
