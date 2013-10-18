@@ -3,6 +3,7 @@ package cl.niclabs.adkmobile.monitor;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
@@ -13,6 +14,7 @@ import android.os.IBinder;
 import android.telephony.CellLocation;
 import android.telephony.NeighboringCellInfo;
 import android.telephony.PhoneStateListener;
+import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.telephony.cdma.CdmaCellLocation;
@@ -84,6 +86,61 @@ public class Telephony extends AbstractMonitor {
 		public static String TELEPHONY_NETWORK_TYPE = "network_type";
 		public static String TELEPHONY_OPERATOR_MCC = "operator_mcc";
 		public static String TELEPHONY_OPERATOR_MNC = "operator_mnc";
+	}
+	
+	
+	/**
+	 * SIM States as defined in android.telephony.TelephonyManager
+	 *
+	 * @author Mauricio Castro <mauricio@niclabs.cl>.
+	 *         Created 17-10-2013.
+	 */
+	public static enum SIMState {
+		ABSENT(1), NETWORK_LOCKED(2), PIN_REQUIRED(3), PUK_REQUIRED(4), READY(5), UNKNOWN(6),
+		OTHER(0);
+		
+		public static SIMState valueOf(int value) {
+			switch (value) {
+				case TelephonyManager.SIM_STATE_ABSENT:
+				return ABSENT;
+				
+				case TelephonyManager.SIM_STATE_NETWORK_LOCKED:
+				return NETWORK_LOCKED;
+				
+				case TelephonyManager.SIM_STATE_PIN_REQUIRED:
+				return PIN_REQUIRED;
+				
+				case TelephonyManager.SIM_STATE_PUK_REQUIRED:
+				return PUK_REQUIRED;
+				
+				case TelephonyManager.SIM_STATE_READY:
+				return READY;
+				
+				case TelephonyManager.SIM_STATE_UNKNOWN:
+				return UNKNOWN;
+			}
+			
+			return null;
+		}
+		
+		public static SIMState getType(int value) {
+			for (SIMState n: SIMState.values()) {
+				if (n.getValue() == value) {
+					return n;
+				}
+			}
+			return OTHER;
+		}
+		
+		int value;
+		
+		private SIMState(int value) {
+			this.value = value;
+		}
+
+		public int getValue() {
+			return this.value;
+		}
 	}
 	
 	/**
@@ -158,8 +215,9 @@ public class Telephony extends AbstractMonitor {
 		public int getValue() {
 			return this.value;
 		}
-		
-	}
+			
+	};
+	
 
 	/**
 	 * TODO Class that got all the listener of PhoneStateListener Interface.
@@ -314,6 +372,12 @@ public class Telephony extends AbstractMonitor {
 				lastSignalStrength = signalStrength;
 			}
 			/* TODO: add signal now to DB? */
+		}
+		
+		@Override
+		public void onServiceStateChanged(ServiceState serviceState) {
+			// TODO Auto-generated method stub.
+			super.onServiceStateChanged(serviceState);
 		}
 	}
 

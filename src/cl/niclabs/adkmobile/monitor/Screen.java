@@ -60,7 +60,7 @@ public class Screen extends AbstractMonitor{
 				
 				/* Notify listeners and update internal state */
 				notifyListeners(screenEvent, new BasicMonitorEventResult(data));
-				Log.d(TAG,data.toString());				
+				if (DEBUG) Log.d(TAG,data.toString());				
 				
 			}
 			if (intent.getAction().equalsIgnoreCase(Intent.ACTION_SCREEN_OFF)){
@@ -76,7 +76,7 @@ public class Screen extends AbstractMonitor{
 				}
 				/* Notify listeners and update internal state */
 				notifyListeners(screenEvent, new BasicMonitorEventResult(data));
-				Log.d(TAG,data.toString());	
+				if (DEBUG) Log.d(TAG,data.toString());	
 				
 			}
 			if(intent.getAction().equals(Intent.ACTION_USER_PRESENT)){
@@ -87,7 +87,7 @@ public class Screen extends AbstractMonitor{
 				
 				/* Notify listeners and update internal state */
 				notifyListeners(screenEvent, new BasicMonitorEventResult(data));
-				Log.d(TAG,data.toString());	
+				if (DEBUG) Log.d(TAG,data.toString());	
 			}
 		}
 		
@@ -128,7 +128,7 @@ public class Screen extends AbstractMonitor{
 		@Override
 		public void onDataReceived(MonitorListener listener, MonitorEventResult result) {
 			if (listener instanceof ScreenListener) {
-				((ScreenListener) listener).onMobileTelephonyChanged(result.getData());
+				((ScreenListener) listener).onMobileScreenChanged(result.getData());
 			}
 		}
 		

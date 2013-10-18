@@ -10,8 +10,8 @@ import cl.niclabs.adkmobile.monitor.data.DataObject;
  */
 public interface ScreenListener  extends MonitorListener {
 	/**
-	 * Inform the listener of a telephony change
-	 * @param trafficState the new telephony data
+	 * Inform the listener of a screen change
+	 * @param Screen state the new telephony data
 	 */
-	public void onMobileTelephonyChanged(DataObject telephonyState);
+	public void onMobileScreenChanged(DataObject telephonyState);
 }
