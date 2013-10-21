@@ -5,6 +5,14 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import cl.niclabs.adkmobile.monitor.Monitor.ServiceBinder;
 
+/**
+ * Defines a ServiceConnection targeted to Monitors, in order to simplify binding
+ * and unbinding tasks
+ * 
+ * @author Felipe Lalanne <flalanne@niclabs.cl>
+ *
+ * @param <E> type of monitor for which this connection is meant  
+ */
 public abstract class MonitorConnection<E extends Monitor> implements ServiceConnection {
 	private E monitor;
 	
@@ -12,13 +20,13 @@ public abstract class MonitorConnection<E extends Monitor> implements ServiceCon
 	 * Is called when the monitor is bound
 	 * @param monitor
 	 */
-	public abstract void onServiceConnected(E monitor);
+	public abstract void onServiceConnected(E service);
 	
 	/**
 	 * Called on service crash
 	 * @param monitor
 	 */
-	public abstract void onServiceDisconnected(E monitor);
+	public abstract void onServiceDisconnected(E service);
 	
 	@Override
 	public void onServiceConnected(ComponentName name, IBinder service) {
