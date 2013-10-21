@@ -1,4 +1,4 @@
-package cl.niclabs.adkmobile.monitor.data;
+package cl.niclabs.adkmobile.data;
 
 import java.util.HashMap;
 import java.util.HashSet;

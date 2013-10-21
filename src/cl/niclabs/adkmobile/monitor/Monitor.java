@@ -1,7 +1,7 @@
 package cl.niclabs.adkmobile.monitor;
 
 import android.os.Bundle;
-import cl.niclabs.adkmobile.monitor.data.DataObject;
+import cl.niclabs.adkmobile.data.DataObject;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
 import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
 

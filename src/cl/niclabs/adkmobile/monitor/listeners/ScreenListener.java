@@ -1,6 +1,6 @@
 package cl.niclabs.adkmobile.monitor.listeners;
 
-import cl.niclabs.adkmobile.monitor.data.DataObject;
+import cl.niclabs.adkmobile.data.DataObject;
 
 /**
  * TODO Put here a description of what this class does.

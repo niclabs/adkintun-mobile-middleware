@@ -9,9 +9,9 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
-import cl.niclabs.adkmobile.monitor.data.ContentValuesDataObject;
-import cl.niclabs.adkmobile.monitor.data.DataFields;
-import cl.niclabs.adkmobile.monitor.data.DataObject;
+import cl.niclabs.adkmobile.data.ContentValuesDataObject;
+import cl.niclabs.adkmobile.data.DataFields;
+import cl.niclabs.adkmobile.data.DataObject;
 import cl.niclabs.adkmobile.monitor.events.AbstractMonitorEvent;
 import cl.niclabs.adkmobile.monitor.events.BasicMonitorEventResult;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
@@ -27,7 +27,7 @@ import cl.niclabs.adkmobile.monitor.listeners.ScreenListener;
  * @author Mauricio Castro <mauricio@niclabs.cl>.
  * Created 17-10-2013.
  */
-public class Screen extends AbstractMonitor{
+public class Screen extends AbstractMonitor {
 	
 	public static enum ScreenStatus {
 		ON(1), OFF(2), LOCKED(3), UNLOCKED(4);
