@@ -12,7 +12,6 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.TrafficStats;
-import android.os.Binder;
 import android.os.Build;
 import android.os.Build.VERSION;
 import android.os.Bundle;
@@ -48,12 +47,6 @@ public class Traffic extends AbstractMonitor {
 		public static String TCP_TX_BYTES = "tcp_tx_bytes";
 		public static String TCP_RX_SEGMENTS = "tcp_rx_segments";
 		public static String TCP_TX_SEGMENTS = "tcp_tx_segments";
-	}
-	
-	public class ServiceBinder extends Binder {
-		public Traffic getService() {
-			return Traffic.this;
-		}
 	}
 	
 	/**
@@ -379,7 +372,7 @@ public class Traffic extends AbstractMonitor {
 	/**
 	 * Activity-Service binder
 	 */
-	private final IBinder serviceBinder = new ServiceBinder();
+	private final IBinder serviceBinder = new ServiceBinder<Traffic>(this);
 	
 	protected String TAG = "AdkintunMobile::Traffic";
 	protected int trafficUpdateInterval = TRAFFIC_UPDATE_INTERVAL;

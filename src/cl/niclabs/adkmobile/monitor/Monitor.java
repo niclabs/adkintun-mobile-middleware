@@ -1,5 +1,6 @@
 package cl.niclabs.adkmobile.monitor;
 
+import android.os.Binder;
 import android.os.Bundle;
 import cl.niclabs.adkmobile.data.DataObject;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
@@ -110,4 +111,23 @@ public interface Monitor {
 	 * @param listen true to add listener
 	 */
 	public void listen(MonitorListener listener, boolean listen);
+	
+	/**
+	 * Defines a generic service binder for all monitors
+	 * @author Felipe Lalanne <flalanne@niclabs.cl>
+	 *
+	 * @param <E> the type of monitor for the service binder
+	 */
+	public static class ServiceBinder<E extends Monitor> extends Binder {
+		private E monitor;
+		
+		public ServiceBinder(E monitor) {
+			super();
+			this.monitor = monitor;
+		}
+		
+		public E getService() {
+			return monitor;
+		}
+	}
 }

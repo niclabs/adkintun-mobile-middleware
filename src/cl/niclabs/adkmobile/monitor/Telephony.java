@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.telephony.CellLocation;
@@ -37,14 +36,7 @@ import cl.niclabs.adkmobile.monitor.listeners.TelephonyListener;
  * 
  * @author Mauricio Castro. Created 04-10-2013.
  */
-public class Telephony extends AbstractMonitor {
-
-	public class ServiceBinder extends Binder {
-		public Telephony getService() {
-			return Telephony.this;
-		}
-	}
-	
+public class Telephony extends AbstractMonitor {	
 	public enum TelephonyStandard {
 		GSM(1), CDMA(2);
 		
@@ -325,7 +317,7 @@ public class Telephony extends AbstractMonitor {
 	/**
 	 * Activity-Service binder
 	 */
-	private final IBinder serviceBinder = new ServiceBinder();
+	private final IBinder serviceBinder = new ServiceBinder<Telephony>(this);
 	
 	protected String TAG = "AdkintunMobile::Telephony";
 	
