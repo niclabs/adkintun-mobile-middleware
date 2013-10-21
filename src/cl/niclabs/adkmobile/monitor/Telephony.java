@@ -30,11 +30,10 @@ import cl.niclabs.adkmobile.monitor.listeners.TelephonyListener;
 
 /**
  * Implements monitoring of Telephony services of the mobile.
- * Since this class need ***** , it need the permission ****.
  * 
  * Requires permissions
- * - android.permission.ACCESS_COARSE_LOCATION
- * - android.permission.READ_PHONE_STATE
+ * - android.permission.ACCESS_COARSE_LOCATION for obtaining the neighboring cell info
+ * - android.permission.READ_PHONE_STATE to get network info
  * 
  * @author Mauricio Castro. Created 04-10-2013.
  */

@@ -30,7 +30,7 @@ import android.util.Log;
 public class Screen extends AbstractMonitor{
 	
 	
-	public static class ScreenData implements DataFields{
+	public static class ScreenData implements DataFields {
 		
 		/* Define the field name for the Screen status */
 		public static String SCREEN_STATUS = "screen_status";
@@ -89,10 +89,7 @@ public class Screen extends AbstractMonitor{
 				notifyListeners(screenEvent, new BasicMonitorEventResult(data));
 				Log.d(TAG,data.toString());	
 			}
-		}
-		
-		
-		
+		}		
 	};
 
 	private final IBinder serviceBinder = new ServiceBinder();

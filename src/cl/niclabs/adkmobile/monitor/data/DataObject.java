@@ -1,14 +1,26 @@
 package cl.niclabs.adkmobile.monitor.data;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.List;
 
-public abstract class DataObject {
+import android.util.Log;
+
+public abstract class DataObject extends JsonSynchronizable {
+	public final String TAG = "AdkintunMobile::DataObject";
+	
+	/**
+	 * Get the value of the object with fieldName
+	 * 
+	 * @param fieldName
+	 * @return the value of the object or null if the object does not exist
+	 */
+	public abstract Object get(String fieldName);
 	
 	/**
 	 * Get the value of the element with the specified fieldName as a boolean. 
-	 * 
-	 * Must throw and exception if the field cannot be converted 
 	 * 
 	 * @param fieldName
 	 * @return
@@ -18,8 +30,6 @@ public abstract class DataObject {
 	/**
 	 * Get the value of the element with the specified fieldName as a byte array. 
 	 * 
-	 * Must throw and exception if the field cannot be converted 
-	 * 
 	 * @param fieldName
 	 * @return
 	 */
@@ -28,7 +38,6 @@ public abstract class DataObject {
 	/**
 	 * Get the value of the element with the specified fieldName as a double 
 	 * 
-	 * Must throw and exception if the field cannot be converted 
 	 * 
 	 * @param fieldName
 	 * @return
@@ -44,17 +53,13 @@ public abstract class DataObject {
 	/**
 	 * Get the value of the element with the specified fieldName as a float.
 	 * 
-	 * Must throw and exception if the field cannot be converted 
-	 * 
 	 * @param fieldName
 	 * @return
 	 */
 	public abstract float getFloat(String fieldName);
 	
 	/**
-	 * Get the value of the element with the specified fieldName as an int. 
-	 * 
-	 * Must throw and exception if the field cannot be converted 
+	 * Get the value of the element with the specified fieldName as an int. s
 	 * 
 	 * @param fieldName
 	 * @return
@@ -64,8 +69,6 @@ public abstract class DataObject {
 	/**
 	 * Get the value of the element with the specified fieldName as a long. 
 	 * 
-	 * Must throw and exception if the field cannot be converted 
-	 * 
 	 * @param fieldName
 	 * @return
 	 */
@@ -74,8 +77,6 @@ public abstract class DataObject {
 	/**
 	 * Get the value of the element with the specified fieldName as a String. 
 	 * 
-	 * Must throw and exception if the field cannot be converted 
-	 * 
 	 * @param fieldName
 	 * @return
 	 */
@@ -83,8 +84,6 @@ public abstract class DataObject {
 	
 	/**
 	 * Get the value of the element with the specified fielName as a List of DataObjects.
-	 *
-	 * Must throw an exception if the field cannot be converted
 	 *
 	 * @param fieldName
 	 * @return
@@ -172,5 +171,18 @@ public abstract class DataObject {
 		StringBuffer b = new StringBuffer();
 		toString(b);
 		return b.toString();
+	}
+	
+	/**
+	 * Write JSON to OutputStrem
+	 */
+	public void writeObject(OutputStream out) {
+		try {
+			writeObject(out, this);
+		} catch (UnsupportedEncodingException e) {
+			Log.e(TAG, e.getMessage());
+		} catch (IOException e) {
+			Log.e(TAG, e.getMessage());
+		}
 	}
 }
