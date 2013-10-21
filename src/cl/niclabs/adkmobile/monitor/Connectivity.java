@@ -41,10 +41,6 @@ public class Connectivity extends AbstractMonitor {
 		 * For devices with API level 13.
 		 */
 		public static final String NETWORK_TYPE_OTHER = "network_type_other";
-
-		private ConnectivityData() {
-
-		}
 	}
 	
 	protected class ConnectivityEventResult extends BasicMonitorEventResult {

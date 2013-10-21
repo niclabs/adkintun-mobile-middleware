@@ -1,14 +1,5 @@
 package cl.niclabs.adkmobile.monitor;
 
-import cl.niclabs.adkmobile.monitor.data.ContentValuesDataObject;
-import cl.niclabs.adkmobile.monitor.data.DataFields;
-import cl.niclabs.adkmobile.monitor.data.DataObject;
-import cl.niclabs.adkmobile.monitor.events.AbstractMonitorEvent;
-import cl.niclabs.adkmobile.monitor.events.BasicMonitorEventResult;
-import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
-import cl.niclabs.adkmobile.monitor.events.MonitorEventResult;
-import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
-import cl.niclabs.adkmobile.monitor.listeners.ScreenListener;
 import android.app.KeyguardManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -18,6 +9,15 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import cl.niclabs.adkmobile.monitor.data.ContentValuesDataObject;
+import cl.niclabs.adkmobile.monitor.data.DataFields;
+import cl.niclabs.adkmobile.monitor.data.DataObject;
+import cl.niclabs.adkmobile.monitor.events.AbstractMonitorEvent;
+import cl.niclabs.adkmobile.monitor.events.BasicMonitorEventResult;
+import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
+import cl.niclabs.adkmobile.monitor.events.MonitorEventResult;
+import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
+import cl.niclabs.adkmobile.monitor.listeners.ScreenListener;
 
 /**
  * Implement monitoring of the Screen status change. Screen is
@@ -29,16 +29,25 @@ import android.util.Log;
  */
 public class Screen extends AbstractMonitor{
 	
+	public static enum ScreenStatus {
+		ON(1), OFF(2), LOCKED(3), UNLOCKED(4);
+		
+		int value;
+		
+		private ScreenStatus(int value) {
+			this.value = value;
+		}
+		
+		public int getValue() {
+			return value;
+		}
+	}
+	
 	
 	public static class ScreenData implements DataFields {
 		
 		/* Define the field name for the Screen status */
 		public static String SCREEN_STATUS = "screen_status";
-		/* Define all kind of states */
-		public static String SCREEN_ON = "screen_on";
-		public static String SCREEN_OFF = "screen_off";
-		public static String SCREEN_LOCKED = "screen_locked";
-		public static String SCREEN_UNLOCKED = "screen_unlocked";
 	}
 	
 	public class ServiceBinder extends Binder {
@@ -52,46 +61,50 @@ public class Screen extends AbstractMonitor{
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			// TODO Auto-generated method stub.
-			if (intent.getAction().equalsIgnoreCase(Intent.ACTION_SCREEN_ON)){
+			if (intent.getAction().equalsIgnoreCase(Intent.ACTION_SCREEN_ON)) {
 				// assign the values to ContentValues variables
 				DataObject data = new ContentValuesDataObject();
-				
+
 				data.put(ScreenData.EVENT_TYPE, SCREEN);
-				data.put(ScreenData.TIMESTAMP,System.currentTimeMillis());
-				data.put(ScreenData.SCREEN_STATUS,ScreenData.SCREEN_ON);
-				
+				data.put(ScreenData.TIMESTAMP, System.currentTimeMillis());
+				data.put(ScreenData.SCREEN_STATUS, ScreenStatus.ON.getValue());
+
 				/* Notify listeners and update internal state */
 				notifyListeners(screenEvent, new BasicMonitorEventResult(data));
-				Log.d(TAG,data.toString());				
-				
+				Log.d(TAG, data.toString());
+
 			}
-			if (intent.getAction().equalsIgnoreCase(Intent.ACTION_SCREEN_OFF)){
+			if (intent.getAction().equalsIgnoreCase(Intent.ACTION_SCREEN_OFF)) {
 				// assign the values to ContentValues variables
 				DataObject data = new ContentValuesDataObject();
 				data.put(ScreenData.EVENT_TYPE, SCREEN);
-				data.put(ScreenData.TIMESTAMP,System.currentTimeMillis());
-				data.put(ScreenData.SCREEN_STATUS,ScreenData.SCREEN_OFF);
-				
+				data.put(ScreenData.TIMESTAMP, System.currentTimeMillis());
+				data.put(ScreenData.SCREEN_STATUS, ScreenStatus.OFF.getValue());
+
 				/* Verify that phone is actually locked */
-				KeyguardManager km = (KeyguardManager) context.getSystemService(KEYGUARD_SERVICE);
-				if(km.inKeyguardRestrictedInputMode()){
-					data.put(ScreenData.SCREEN_STATUS,ScreenData.SCREEN_LOCKED);
+				KeyguardManager km = (KeyguardManager) context
+						.getSystemService(KEYGUARD_SERVICE);
+				if (km.inKeyguardRestrictedInputMode()) {
+					// This is the correct status, OFF will never be displayed
+					data.put(ScreenData.SCREEN_STATUS,
+							ScreenStatus.LOCKED.getValue());
 				}
 				/* Notify listeners and update internal state */
 				notifyListeners(screenEvent, new BasicMonitorEventResult(data));
-				Log.d(TAG,data.toString());	
-				
+				Log.d(TAG, data.toString());
+
 			}
-			if(intent.getAction().equals(Intent.ACTION_USER_PRESENT)){
+			if (intent.getAction().equals(Intent.ACTION_USER_PRESENT)) {
 				// assign the values to ContentValues variables
 				DataObject data = new ContentValuesDataObject();
 				data.put(ScreenData.EVENT_TYPE, SCREEN);
-				data.put(ScreenData.TIMESTAMP,System.currentTimeMillis());
-				data.put(ScreenData.SCREEN_STATUS, ScreenData.SCREEN_UNLOCKED);
-				
+				data.put(ScreenData.TIMESTAMP, System.currentTimeMillis());
+				data.put(ScreenData.SCREEN_STATUS,
+						ScreenStatus.UNLOCKED.getValue());
+
 				/* Notify listeners and update internal state */
 				notifyListeners(screenEvent, new BasicMonitorEventResult(data));
-				Log.d(TAG,data.toString());	
+				Log.d(TAG, data.toString());
 			}
 		}		
 	};
