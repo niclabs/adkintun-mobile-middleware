@@ -118,6 +118,7 @@ public class Traffic extends AbstractMonitor {
 			long dMobileTxPackets = newMobileTxPackets - mobileTxPackets;
 			long dMobileRxPackets = newMobileRxPackets - mobileRxPackets;
 	
+			mobileData.put(TrafficData.EVENT_TYPE,  MOBILE_TRAFFIC);
 			mobileData.put(TrafficData.TIMESTAMP,System.currentTimeMillis());
 			mobileData.put(TrafficData.NETWORK_TYPE, NETWORK_TYPE_MOBILE);
 			mobileData.put(TrafficData.RX_BYTES, dMobileRxBytes);
@@ -196,6 +197,7 @@ public class Traffic extends AbstractMonitor {
 			long dWifiRxPackets = newWifiRxPackets - wifiRxPackets;				
 			long dWifiTxPackets = newWifiTxPackets - wifiTxPackets;
 			
+			wifiData.put(TrafficData.EVENT_TYPE,  WIFI_TRAFFIC);
 			wifiData.put(TrafficData.TIMESTAMP, System.currentTimeMillis());
 			wifiData.put(TrafficData.NETWORK_TYPE, NETWORK_TYPE_WIFI);
 			wifiData.put(TrafficData.RX_BYTES, dWifiRxBytes);

@@ -186,6 +186,7 @@ public class Telephony extends AbstractMonitor {
 			if (location instanceof GsmCellLocation) {
 				GsmCellLocation loc = (GsmCellLocation) location;
 
+				data.put(TelephonyData.EVENT_TYPE, TELEPHONY);
 				data.put(TelephonyData.TIMESTAMP, System.currentTimeMillis());
 				data.put(TelephonyData.TELEPHONY_STANDARD, TelephonyStandard.GSM.getValue());
 				data.put(TelephonyData.TELEPHONY_GSM_CID, loc.getCid());
@@ -253,6 +254,7 @@ public class Telephony extends AbstractMonitor {
 			} else {
 				CdmaCellLocation loc = (CdmaCellLocation) location;
 				
+				data.put(TelephonyData.EVENT_TYPE, TELEPHONY);
 				data.put(TelephonyData.TIMESTAMP, 
 						System.currentTimeMillis());
 				data.put(TelephonyData.TELEPHONY_STANDARD, TelephonyStandard.CDMA.getValue());

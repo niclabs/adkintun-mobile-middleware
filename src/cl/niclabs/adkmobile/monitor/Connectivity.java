@@ -371,6 +371,7 @@ public class Connectivity extends AbstractMonitor {
 				
 				TelephonyManager telephony = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
 			    if (telephony.isNetworkRoaming()) {
+			    	data.put(ConnectivityData.EVENT_TYPE,  CONNECTIVITY);
 			    	data.put(ConnectivityData.TIMESTAMP, System.currentTimeMillis());
 			    	data.put(ConnectivityData.IS_CONNECTED, false);
 			    	data.put(ConnectivityData.IS_ROAMING, true);
@@ -385,6 +386,7 @@ public class Connectivity extends AbstractMonitor {
 				return; 
 			}
 
+			data.put(ConnectivityData.EVENT_TYPE,  CONNECTIVITY);
 			data.put(ConnectivityData.TIMESTAMP, System.currentTimeMillis());
 			data.put(ConnectivityData.IS_CONNECTED,
 					ni.isConnectedOrConnecting());

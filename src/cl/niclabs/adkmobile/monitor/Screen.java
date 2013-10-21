@@ -24,8 +24,8 @@ import android.util.Log;
  * notified by the system as a broadcast for the ACTION_SCREEN_ON, ACTION_SCREEN_OFF,
  * ACTION_USER_PRESENT Intent.
  *
- * @author Administrador.
- *         Created 17-10-2013.
+ * @author Mauricio Castro <mauricio@niclabs.cl>.
+ * Created 17-10-2013.
  */
 public class Screen extends AbstractMonitor{
 	
@@ -55,6 +55,8 @@ public class Screen extends AbstractMonitor{
 			if (intent.getAction().equalsIgnoreCase(Intent.ACTION_SCREEN_ON)){
 				// assign the values to ContentValues variables
 				DataObject data = new ContentValuesDataObject();
+				
+				data.put(ScreenData.EVENT_TYPE, SCREEN);
 				data.put(ScreenData.TIMESTAMP,System.currentTimeMillis());
 				data.put(ScreenData.SCREEN_STATUS,ScreenData.SCREEN_ON);
 				
@@ -66,6 +68,7 @@ public class Screen extends AbstractMonitor{
 			if (intent.getAction().equalsIgnoreCase(Intent.ACTION_SCREEN_OFF)){
 				// assign the values to ContentValues variables
 				DataObject data = new ContentValuesDataObject();
+				data.put(ScreenData.EVENT_TYPE, SCREEN);
 				data.put(ScreenData.TIMESTAMP,System.currentTimeMillis());
 				data.put(ScreenData.SCREEN_STATUS,ScreenData.SCREEN_OFF);
 				
@@ -82,6 +85,7 @@ public class Screen extends AbstractMonitor{
 			if(intent.getAction().equals(Intent.ACTION_USER_PRESENT)){
 				// assign the values to ContentValues variables
 				DataObject data = new ContentValuesDataObject();
+				data.put(ScreenData.EVENT_TYPE, SCREEN);
 				data.put(ScreenData.TIMESTAMP,System.currentTimeMillis());
 				data.put(ScreenData.SCREEN_STATUS, ScreenData.SCREEN_UNLOCKED);
 				
@@ -133,7 +137,7 @@ public class Screen extends AbstractMonitor{
 	
 	@Override
 	public boolean activate(int events, Bundle configuration) {
-		if ((events & CONNECTIVITY) == CONNECTIVITY) {
+		if ((events & SCREEN) == SCREEN) {
 			return activate(screenEvent);
 		}
 		return false;
