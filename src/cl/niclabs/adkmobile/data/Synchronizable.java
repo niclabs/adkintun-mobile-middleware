@@ -14,13 +14,8 @@ import java.io.OutputStream;
 public interface Synchronizable {
 	/**
 	 * Writes the object in the output format onto the
-	 * provided output stream
+	 * provided output stream, closing the stream afterwards
 	 * @param out
 	 */
 	public void writeObject(OutputStream out);
-	
-	/**
-	 * TODO: define readObject (for receiving data)
-	 */
-	//public void readObject(InputStream in);
 }

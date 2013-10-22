@@ -8,7 +8,7 @@ import java.util.List;
 
 import android.util.Log;
 
-public abstract class DataObject extends JsonSynchronizable {
+public abstract class DataObject {
 	public final String TAG = "AdkintunMobile::DataObject";
 	
 	/**
@@ -178,7 +178,8 @@ public abstract class DataObject extends JsonSynchronizable {
 	 */
 	public void writeObject(OutputStream out) {
 		try {
-			writeObject(out, this);
+			DataObjectWriterFactory.getInstance().getDataObjectWriter()
+					.writeDataObject(out, this);
 		} catch (UnsupportedEncodingException e) {
 			Log.e(TAG, e.getMessage());
 		} catch (IOException e) {

@@ -10,20 +10,19 @@ import android.util.Base64;
 
 import com.google.gson.stream.JsonWriter;
 
-public class JsonHelper {
+public class JsonDataObjectWriter implements DataObjectWriter {
 	/**
 	 * Open a JsonWriter and write the object provided as input. It is responsibility of the user to close 
 	 * the writer later.
 	 * 
 	 * @param out
 	 * @param object
-	 * @return
 	 * @throws IOException
 	 */
-	public static JsonWriter writeDataObject(OutputStream out, DataObject object) throws IOException {
+	public void writeDataObject(OutputStream out, DataObject object) throws IOException {
 		JsonWriter writer = new JsonWriter(new OutputStreamWriter(out, "UTF-8"));
 		writeDataObject(writer, object);
-		return writer;
+		writer.close();
 	}
 	
 	/**
@@ -35,10 +34,10 @@ public class JsonHelper {
 	 * @return
 	 * @throws IOException
 	 */
-	public static JsonWriter writeList(OutputStream out, List<DataObject> list) throws IOException {
+	public void writeList(OutputStream out, List<DataObject> list) throws IOException {
 		JsonWriter writer = new JsonWriter(new OutputStreamWriter(out, "UTF-8"));
 		writeList(writer, list);
-		return writer;
+		writer.close();
 	}
 	
 	/**
@@ -48,7 +47,7 @@ public class JsonHelper {
 	 * @param object
 	 * @throws IOException
 	 */
-	public static void writeDataObject(JsonWriter writer, DataObject object) throws IOException {
+	protected void writeDataObject(JsonWriter writer, DataObject object) throws IOException {
 		writer.beginObject();
 		for (Iterator<String> it = object.getFieldNames(); it.hasNext(); ) {
 			String fieldName = it.next();
@@ -80,7 +79,7 @@ public class JsonHelper {
 	 * @param list
 	 * @throws IOException
 	 */
-	public static void writeList(JsonWriter writer, List<DataObject> list) throws IOException {
+	protected void writeList(JsonWriter writer, List<DataObject> list) throws IOException {
 		writer.beginArray();
 		for (DataObject obj: list) {
 			writeDataObject(writer, obj);
