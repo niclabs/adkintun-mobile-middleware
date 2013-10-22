@@ -10,8 +10,14 @@ import cl.niclabs.adkmobile.data.DataObject;
  */
 public interface TrafficListener extends MonitorListener {
 	/**
-	 * Inform the listener of a traffic change
+	 * Inform the listener of a mobile traffic change
 	 * @param trafficState the new traffic data
 	 */
 	public void onMobileTrafficChanged(DataObject trafficState);
+	
+	/**
+	 * Inform the listener of a WiFi traffic change
+	 * @param trafficState the new traffic data
+	 */
+	public void onWiFiTrafficChanged(DataObject trafficState);
 }

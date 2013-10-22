@@ -53,4 +53,9 @@ public class PersistenceService extends Service implements ConnectivityListener,
 	@Override
 	public void onWifiConnection() {
 	}
+
+	@Override
+	public void onWiFiTrafficChanged(DataObject trafficState) {
+		// TODO: Save traffic state
+	}
 }

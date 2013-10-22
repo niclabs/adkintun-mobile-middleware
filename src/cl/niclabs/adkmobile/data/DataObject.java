@@ -1,5 +1,6 @@
 package cl.niclabs.adkmobile.data;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
@@ -168,9 +169,9 @@ public abstract class DataObject {
 	}
 	
 	public String toString() {
-		StringBuffer b = new StringBuffer();
-		toString(b);
-		return b.toString();
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		writeObject(out);
+		return out.toString();
 	}
 	
 	/**

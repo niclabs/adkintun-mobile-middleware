@@ -362,7 +362,7 @@ public class Traffic extends AbstractMonitor {
 		@Override
 		public void onDataReceived(MonitorListener listener, MonitorEventResult result) {
 			if (listener instanceof TrafficListener) {
-				((TrafficListener) listener).onMobileTrafficChanged(result.getData());
+				((TrafficListener) listener).onWiFiTrafficChanged(result.getData());
 			}
 		}
 	};
