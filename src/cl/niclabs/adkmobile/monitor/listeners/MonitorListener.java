@@ -1,5 +1,7 @@
 package cl.niclabs.adkmobile.monitor.listeners;
 
+import cl.niclabs.adkmobile.dispatcher.Listener;
+
 /**
  * Interface to group all monitor listeners, it must be extended by each type of
  * event to provide the notification methods
@@ -7,5 +9,5 @@ package cl.niclabs.adkmobile.monitor.listeners;
  * @author Felipe Lalanne <flalanne@niclabs.cl>
  * 
  */
-public interface MonitorListener {
+public interface MonitorListener extends Listener {
 }

@@ -21,9 +21,7 @@ import cl.niclabs.adkmobile.data.ContentValuesDataObject;
 import cl.niclabs.adkmobile.data.DataFields;
 import cl.niclabs.adkmobile.data.DataObject;
 import cl.niclabs.adkmobile.monitor.events.AbstractMonitorEvent;
-import cl.niclabs.adkmobile.monitor.events.BasicMonitorEventResult;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
-import cl.niclabs.adkmobile.monitor.events.MonitorEventResult;
 import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
 import cl.niclabs.adkmobile.monitor.listeners.TelephonyListener;
 
@@ -288,7 +286,7 @@ public class Telephony extends AbstractMonitor {
 			}
 			
 			/* Notify listeners and update internal state */
-			notifyListeners(telephonyEvent, new BasicMonitorEventResult(data));
+			notifyListeners(telephonyEvent, data);
 
 			/* Log the results */
 			if (DEBUG) Log.d(TAG, data.toString());
@@ -357,9 +355,9 @@ public class Telephony extends AbstractMonitor {
 		}
 		
 		@Override
-		public void onDataReceived(MonitorListener listener, MonitorEventResult result) {
+		public void onDataReceived(MonitorListener listener, DataObject result) {
 			if (listener instanceof TelephonyListener) {
-				((TelephonyListener) listener).onMobileTelephonyChanged(result.getData());
+				((TelephonyListener) listener).onMobileTelephonyChanged(result);
 			}
 		}
 	};

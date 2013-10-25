@@ -26,10 +26,6 @@ public class PersistenceService extends Service implements ConnectivityListener,
 	}
 
 	@Override
-	public void onMobileConnection() {
-	}
-
-	@Override
 	public void onMobileTelephonyChanged(DataObject telephonyState) {
 		// TODO: Save telephony state
 	}
@@ -40,18 +36,10 @@ public class PersistenceService extends Service implements ConnectivityListener,
 	}
 
 	@Override
-	public void onRoaming(boolean dataRoamingEnabled) {
-	}
-
-	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		// TODO: bind to services and define listeners
 		
 		return super.onStartCommand(intent, flags, startId);
-	}
-
-	@Override
-	public void onWifiConnection() {
 	}
 
 	@Override

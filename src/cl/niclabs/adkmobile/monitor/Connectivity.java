@@ -14,9 +14,7 @@ import cl.niclabs.adkmobile.data.ContentValuesDataObject;
 import cl.niclabs.adkmobile.data.DataFields;
 import cl.niclabs.adkmobile.data.DataObject;
 import cl.niclabs.adkmobile.monitor.events.AbstractMonitorEvent;
-import cl.niclabs.adkmobile.monitor.events.BasicMonitorEventResult;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
-import cl.niclabs.adkmobile.monitor.events.MonitorEventResult;
 import cl.niclabs.adkmobile.monitor.listeners.ConnectivityListener;
 import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
 
@@ -40,50 +38,6 @@ public class Connectivity extends AbstractMonitor {
 		 * For devices with API level 13.
 		 */
 		public static final String NETWORK_TYPE_OTHER = "network_type_other";
-	}
-	
-	protected class ConnectivityEventResult extends BasicMonitorEventResult {
-		protected boolean hasConnectedToWifi = false;
-		protected boolean hasConnectedToMobile = false;
-		protected boolean hasStartedRoaming = false;
-		protected boolean isDataRoamingEnabled = false;
-		
-		public ConnectivityEventResult(DataObject data) {
-			super(data);
-		}
-		
-		/**
-		 * 
-		 * @return true if the device has changed its connection to wifi
-		 */
-		public boolean hasConnectedToWifi() {
-			return hasConnectedToWifi;
-		}
-		
-		/**
-		 * 
-		 * @return true if the device has changed its connection to mobile 
-		 */
-		public boolean hasConnectedToMobile() {
-			return hasConnectedToMobile;
-		}
-		
-		/**
-		 * 
-		 * @return true if the device has started roaming
-		 */
-		public boolean hasStartedRoaming() {
-			return hasStartedRoaming;
-		}
-		
-		/**
-		 * 
-		 * @return true if data roaming is enabled 
-		 */
-		public boolean isDataRoamingEnabled() {
-			return isDataRoamingEnabled;
-		}
-		
 	}
 	
 	/**
@@ -238,103 +192,17 @@ public class Connectivity extends AbstractMonitor {
 		
 		
 		@Override
-		public void onDataReceived(MonitorListener listener, MonitorEventResult result) {
+		public void onDataReceived(MonitorListener listener, DataObject result) {
 			if (listener instanceof ConnectivityListener) {
 				ConnectivityListener connectivityListener = (ConnectivityListener) listener;
 				
 				/* Notify result */
-				connectivityListener.onConnectivityChanged(result.getData());
-				
-				if (result instanceof ConnectivityEventResult) {
-					ConnectivityEventResult connectivityResult = (ConnectivityEventResult) result;
-					if (connectivityResult.hasConnectedToWifi()) {
-						connectivityListener.onWifiConnection();
-					}
-					else if (connectivityResult.hasConnectedToMobile()) {
-						connectivityListener.onMobileConnection();
-					}
-					
-					if (connectivityResult.hasStartedRoaming()) {
-						connectivityListener.onRoaming(connectivityResult.isDataRoamingEnabled());
-					}
-				}
+				connectivityListener.onConnectivityChanged(result);
 			}
 		}
 	};
 
 	private BroadcastReceiver connectivityMonitor = new BroadcastReceiver() {
-		boolean switchedNetwork			= false;
-		boolean switchedRoamingStatus	= false;
-		
-		/**
-		 * Detect a change in network status and notify the listener
-		 * 
-		 * @param listener
-		 * @param oldData
-		 * @param newData
-		 */
-		public void notifyNetworkStatusChange(DataObject oldData, DataObject newData) {
-			ConnectionType newNetworkType = ConnectionType.getType(newData.getInt(ConnectivityData.NETWORK_TYPE));
-			boolean isConnected = newData.getBoolean(ConnectivityData.IS_CONNECTED);
-			boolean isAvailable = newData.getBoolean(ConnectivityData.IS_AVAILABLE);
-			boolean isRoaming = newData.getBoolean(ConnectivityData.IS_ROAMING);
-			
-			ConnectivityEventResult result = new ConnectivityEventResult(newData);
-			
-			if (oldData != null) { // Connectivity status has changed
-				ConnectionType oldNetworkType = ConnectionType.getType(oldData.getInt(ConnectivityData.NETWORK_TYPE));
-				boolean wasRoaming = oldData.getBoolean(ConnectivityData.IS_ROAMING);
-				
-				// Detect WiFi connection
-				if (oldNetworkType != ConnectionType.WIFI && newNetworkType == ConnectionType.WIFI) {
-					if (DEBUG) Log.d(TAG, "Switched to WiFi");
-					switchedNetwork = true;
-				}
-				// Detect mobile connection
-				else if (!oldNetworkType.isMobile() && newNetworkType.isMobile()) {
-					if (DEBUG) Log.d(TAG, "Switched to mobile");
-					switchedNetwork = true;
-				}			
-				
-				if (!wasRoaming && isRoaming) {
-					switchedRoamingStatus = true;
-				}
-			}
-			else { // Service has just started
-				if (newNetworkType == ConnectionType.WIFI || newNetworkType.isMobile()) switchedNetwork = true;
-				if (isRoaming) switchedRoamingStatus = true;
-			}
-
-			
-			// Detect change in connection status to IS_CONNECTED (it might happen on a different call to the method)
-			if (switchedNetwork && isConnected && isAvailable) {
-				if (newNetworkType.isMobile()) {
-					if (DEBUG) Log.d(TAG, "Connected to mobile");
-					result.hasConnectedToMobile = true;
-				}
-				else if (newNetworkType == ConnectionType.WIFI) {
-					if (DEBUG) Log.d(TAG, "Connected to WiFi");
-					result.hasConnectedToWifi = true;
-				}
-				
-				/* Reset status */
-				switchedNetwork	 = false;
-			}
-			
-			// Detect change in roaming status
-			if (switchedRoamingStatus && newNetworkType != ConnectionType.WIFI) {
-				//((ConnectivityListener) listener).onRoaming(isConnected && isAvailable);
-				result.hasStartedRoaming = true;
-				result.isDataRoamingEnabled = isConnected && isAvailable;
-				
-				/* Reset status */
-				switchedRoamingStatus = false;
-			}
-			
-			/* Notify the listeners */
-			notifyListeners(connectivityEvent, result);
-		}
-		
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			// Get the NetworkInfo object
@@ -346,15 +214,12 @@ public class Connectivity extends AbstractMonitor {
 			// to obtain the new network info
 			NetworkInfo ni = connectivityManager.getActiveNetworkInfo();
 					
-			/* When no network is active
-			 * the variable is null
-			 * TODO: should we record this? */
-			
-			/* Get old data */
-			DataObject oldData = getState(connectivityEvent);
 			
 			DataObject data = new ContentValuesDataObject();
 			
+			/* When no network is active
+			 * the variable is null
+			 * TODO: should we record this? */
 			if (ni == null) {
 				Log.w(TAG, "No active network");
 				
@@ -370,7 +235,7 @@ public class Connectivity extends AbstractMonitor {
 					if(DEBUG) Log.d(TAG, data.toString());
 
 					/* Notify listeners and update internal state */
-					notifyNetworkStatusChange(oldData, data);
+					notifyListeners(connectivityEvent, data);
 			    }
 				return; 
 			}
@@ -394,7 +259,7 @@ public class Connectivity extends AbstractMonitor {
 			if(DEBUG) Log.d(TAG, data.toString());
 
 			/* Notify listeners and update internal state */
-			notifyNetworkStatusChange(oldData, data);
+			notifyListeners(connectivityEvent, data);
 		}
 
 	};

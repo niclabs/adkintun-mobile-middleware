@@ -1,5 +1,6 @@
 package cl.niclabs.adkmobile.monitor.events;
 
+import cl.niclabs.adkmobile.data.DataObject;
 import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
 
 /**
@@ -39,5 +40,5 @@ public interface MonitorEvent {
 	 * @param listener
 	 * @param result the result from the event
 	 */
-	public void onDataReceived(MonitorListener listener, MonitorEventResult result);
+	public void onDataReceived(MonitorListener listener, DataObject result);
 }

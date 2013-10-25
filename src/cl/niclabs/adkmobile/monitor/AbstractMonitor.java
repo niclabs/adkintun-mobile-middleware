@@ -1,9 +1,7 @@
 package cl.niclabs.adkmobile.monitor;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -13,8 +11,9 @@ import android.content.IntentFilter;
 import android.os.IBinder;
 import android.util.Log;
 import cl.niclabs.adkmobile.data.DataObject;
+import cl.niclabs.adkmobile.dispatcher.Dispatcher;
+import cl.niclabs.adkmobile.dispatcher.Notifier;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
-import cl.niclabs.adkmobile.monitor.events.MonitorEventResult;
 import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
 
 /**
@@ -47,14 +46,13 @@ public abstract class AbstractMonitor extends Service implements Monitor {
 	 */
 	private Map<MonitorEvent, DataObject> currentStates = new ConcurrentHashMap<MonitorEvent,DataObject>(4);
 	
-	protected boolean DEBUG = true;
 	
 	private MonitorEventController eventController = new MonitorEventController();
 	
-	/** 
-	 * List of listeners by event type 
+	/**
+	 * Dispatcher for monitor events
 	 */
-	private List<MonitorListener> listeners = new CopyOnWriteArrayList<MonitorListener>();
+	private Dispatcher<MonitorListener> dispatcher = new Dispatcher<MonitorListener>();
 	
 	protected String TAG = "AdkintunMobile";
 	
@@ -90,13 +88,7 @@ public abstract class AbstractMonitor extends Service implements Monitor {
 	
 	@Override
 	public void listen(MonitorListener listener, boolean listen) {
-		if (listen) {
-			listeners.add(listener);
-		}
-		else {
-			listeners.remove(listener);
-		}
-
+		dispatcher.listen(listener, listen);
 	}
 	
 	/**
@@ -108,17 +100,18 @@ public abstract class AbstractMonitor extends Service implements Monitor {
 	 * @param eventType the event to which the data is related
 	 * @param result the result from the event
 	 */
-	protected void notifyListeners(MonitorEvent eventType, MonitorEventResult result) {
+	protected void notifyListeners(final MonitorEvent eventType, final DataObject result) {
 		/* Update the internal state */
-		setState(eventType, result.getData());
+		setState(eventType, result);
 		
-		for (MonitorListener listener: listeners) {
-			/* Notify the listener */
+		dispatcher.notifyListeners(new Notifier<MonitorListener>() {
+			@Override
+			public void notify(MonitorListener listener) {
+				// TODO: Execute the method on a runnable and schedule on a ScheduledThreadPoolExecutor?
+				eventType.onDataReceived(listener, result);
+			}
 			
-			// TODO: Execute the method on a runnable and schedule on a ScheduledThreadPoolExecutor?
-			eventType.onDataReceived(listener, result);
-		}
-		/* Ignore if there are no listeners for the data type */
+		});
 	}
 	
 	@Override

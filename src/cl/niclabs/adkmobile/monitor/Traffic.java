@@ -21,9 +21,7 @@ import cl.niclabs.adkmobile.data.ContentValuesDataObject;
 import cl.niclabs.adkmobile.data.DataFields;
 import cl.niclabs.adkmobile.data.DataObject;
 import cl.niclabs.adkmobile.monitor.events.AbstractMonitorEvent;
-import cl.niclabs.adkmobile.monitor.events.BasicMonitorEventResult;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
-import cl.niclabs.adkmobile.monitor.events.MonitorEventResult;
 import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
 import cl.niclabs.adkmobile.monitor.listeners.TrafficListener;
 
@@ -157,7 +155,7 @@ public class Traffic extends AbstractMonitor {
 			}
 			
 			/* Notify listeners and update state */
-			notifyListeners(mobileTrafficEvent, new BasicMonitorEventResult(mobileData));
+			notifyListeners(mobileTrafficEvent, mobileData);
 			
 			/* Update state vars */
 			mobileRxBytes = newMobileRxBytes;
@@ -235,7 +233,7 @@ public class Traffic extends AbstractMonitor {
 				}
 			
 			/* Notify listeners and update state */
-			notifyListeners(mobileTrafficEvent, new BasicMonitorEventResult(wifiData));
+			notifyListeners(mobileTrafficEvent, wifiData);
 			
 			/* Update state vars */
 			wifiRxBytes = newWifiRxBytes;
@@ -299,9 +297,9 @@ public class Traffic extends AbstractMonitor {
 		}
 		
 		@Override
-		public void onDataReceived(MonitorListener listener, MonitorEventResult result) {
+		public void onDataReceived(MonitorListener listener, DataObject result) {
 			if (listener instanceof TrafficListener) {
-				((TrafficListener) listener).onMobileTrafficChanged(result.getData());
+				((TrafficListener) listener).onMobileTrafficChanged(result);
 			}
 		}
 	};
@@ -360,9 +358,9 @@ public class Traffic extends AbstractMonitor {
 		}
 		
 		@Override
-		public void onDataReceived(MonitorListener listener, MonitorEventResult result) {
+		public void onDataReceived(MonitorListener listener, DataObject result) {
 			if (listener instanceof TrafficListener) {
-				((TrafficListener) listener).onWiFiTrafficChanged(result.getData());
+				((TrafficListener) listener).onWiFiTrafficChanged(result);
 			}
 		}
 	};

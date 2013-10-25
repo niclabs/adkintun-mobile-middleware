@@ -12,9 +12,7 @@ import cl.niclabs.adkmobile.data.ContentValuesDataObject;
 import cl.niclabs.adkmobile.data.DataFields;
 import cl.niclabs.adkmobile.data.DataObject;
 import cl.niclabs.adkmobile.monitor.events.AbstractMonitorEvent;
-import cl.niclabs.adkmobile.monitor.events.BasicMonitorEventResult;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
-import cl.niclabs.adkmobile.monitor.events.MonitorEventResult;
 import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
 import cl.niclabs.adkmobile.monitor.listeners.ScreenListener;
 
@@ -63,7 +61,7 @@ public class Screen extends AbstractMonitor {
 				data.put(ScreenData.SCREEN_STATUS, ScreenStatus.ON.getValue());
 
 				/* Notify listeners and update internal state */
-				notifyListeners(screenEvent, new BasicMonitorEventResult(data));
+				notifyListeners(screenEvent, data);
 				Log.d(TAG, data.toString());
 
 			}
@@ -83,7 +81,7 @@ public class Screen extends AbstractMonitor {
 							ScreenStatus.LOCKED.getValue());
 				}
 				/* Notify listeners and update internal state */
-				notifyListeners(screenEvent, new BasicMonitorEventResult(data));
+				notifyListeners(screenEvent, data);
 				Log.d(TAG, data.toString());
 
 			}
@@ -96,7 +94,7 @@ public class Screen extends AbstractMonitor {
 						ScreenStatus.UNLOCKED.getValue());
 
 				/* Notify listeners and update internal state */
-				notifyListeners(screenEvent, new BasicMonitorEventResult(data));
+				notifyListeners(screenEvent, data);
 				Log.d(TAG, data.toString());
 			}
 		}		
@@ -133,9 +131,9 @@ public class Screen extends AbstractMonitor {
 		}
 		
 		@Override
-		public void onDataReceived(MonitorListener listener, MonitorEventResult result) {
+		public void onDataReceived(MonitorListener listener, DataObject result) {
 			if (listener instanceof ScreenListener) {
-				((ScreenListener) listener).onMobileTelephonyChanged(result.getData());
+				((ScreenListener) listener).onMobileTelephonyChanged(result);
 			}
 		}
 		

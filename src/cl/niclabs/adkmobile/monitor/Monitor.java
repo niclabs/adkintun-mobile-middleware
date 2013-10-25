@@ -14,6 +14,11 @@ import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
  */
 public interface Monitor {
 	/**
+	 * Define the debugging status of the application
+	 */
+	public static final boolean DEBUG = true;
+	
+	/**
 	 * Intent action for activating monitor events
 	 */
 	public static final String ACTIVATE = "monitor_event_activate";
