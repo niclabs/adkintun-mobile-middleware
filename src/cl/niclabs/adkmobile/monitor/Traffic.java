@@ -22,7 +22,6 @@ import cl.niclabs.adkmobile.data.DataFields;
 import cl.niclabs.adkmobile.data.DataObject;
 import cl.niclabs.adkmobile.monitor.events.AbstractMonitorEvent;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
-import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
 import cl.niclabs.adkmobile.monitor.listeners.TrafficListener;
 
 /**
@@ -32,7 +31,7 @@ import cl.niclabs.adkmobile.monitor.listeners.TrafficListener;
  * @author Mauricio Castro.
  *         Created 27-09-2013.
  */
-public class Traffic extends AbstractMonitor {
+public class Traffic extends AbstractMonitor<TrafficListener> {
 	
 	public static class TrafficData implements DataFields {
 		public static String NETWORK_TYPE = "network_type"; 
@@ -246,7 +245,7 @@ public class Traffic extends AbstractMonitor {
 		}
 	};
 
-	private MonitorEvent mobileTrafficEvent = new AbstractMonitorEvent() {
+	private MonitorEvent<TrafficListener> mobileTrafficEvent = new AbstractMonitorEvent<TrafficListener>() {
 		ScheduledFuture<?> future = null;
 		
 		@Override
@@ -297,14 +296,12 @@ public class Traffic extends AbstractMonitor {
 		}
 		
 		@Override
-		public void onDataReceived(MonitorListener listener, DataObject result) {
-			if (listener instanceof TrafficListener) {
-				((TrafficListener) listener).onMobileTrafficChanged(result);
-			}
+		public void onDataReceived(TrafficListener listener, DataObject result) {
+			listener.onMobileTrafficChanged(result);
 		}
 	};
 	
-	private MonitorEvent wifiTrafficEvent = new AbstractMonitorEvent() {
+	private MonitorEvent<TrafficListener> wifiTrafficEvent = new AbstractMonitorEvent<TrafficListener>() {
 		ScheduledFuture<?> future = null;
 		
 		@Override
@@ -358,10 +355,8 @@ public class Traffic extends AbstractMonitor {
 		}
 		
 		@Override
-		public void onDataReceived(MonitorListener listener, DataObject result) {
-			if (listener instanceof TrafficListener) {
-				((TrafficListener) listener).onWiFiTrafficChanged(result);
-			}
+		public void onDataReceived(TrafficListener listener, DataObject result) {
+			listener.onWiFiTrafficChanged(result);
 		}
 	};
 	

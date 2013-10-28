@@ -22,7 +22,6 @@ import cl.niclabs.adkmobile.data.DataFields;
 import cl.niclabs.adkmobile.data.DataObject;
 import cl.niclabs.adkmobile.monitor.events.AbstractMonitorEvent;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
-import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
 import cl.niclabs.adkmobile.monitor.listeners.TelephonyListener;
 
 /**
@@ -34,7 +33,7 @@ import cl.niclabs.adkmobile.monitor.listeners.TelephonyListener;
  * 
  * @author Mauricio Castro. Created 04-10-2013.
  */
-public class Telephony extends AbstractMonitor {	
+public class Telephony extends AbstractMonitor<TelephonyListener> {	
 	public enum TelephonyStandard {
 		GSM(1), CDMA(2);
 		
@@ -321,7 +320,7 @@ public class Telephony extends AbstractMonitor {
 	
 	private Context mContext = this;
 
-	private MonitorEvent telephonyEvent = new AbstractMonitorEvent() {
+	private MonitorEvent<TelephonyListener> telephonyEvent = new AbstractMonitorEvent<TelephonyListener>() {
 		@Override
 		public synchronized boolean activate() {
 			if (!isActive()) {
@@ -355,10 +354,8 @@ public class Telephony extends AbstractMonitor {
 		}
 		
 		@Override
-		public void onDataReceived(MonitorListener listener, DataObject result) {
-			if (listener instanceof TelephonyListener) {
-				((TelephonyListener) listener).onMobileTelephonyChanged(result);
-			}
+		public void onDataReceived(TelephonyListener listener, DataObject result) {
+			listener.onMobileTelephonyChanged(result);
 		}
 	};
 

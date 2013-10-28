@@ -12,8 +12,9 @@ import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
  * For a base implementation of this interface, @see BaseMonitorEvent
  * 
  * @author Felipe Lalanne <flalanne@niclabs.cl>
+ * @param <E> listeners associated to the monitor event
  */
-public interface MonitorEvent {
+public interface MonitorEvent<E extends MonitorListener> {
 	/**
 	 * Activates the event
 	 * 
@@ -40,5 +41,5 @@ public interface MonitorEvent {
 	 * @param listener
 	 * @param result the result from the event
 	 */
-	public void onDataReceived(MonitorListener listener, DataObject result);
+	public void onDataReceived(E listener, DataObject result);
 }

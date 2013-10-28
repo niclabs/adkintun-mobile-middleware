@@ -16,7 +16,6 @@ import cl.niclabs.adkmobile.data.DataObject;
 import cl.niclabs.adkmobile.monitor.events.AbstractMonitorEvent;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
 import cl.niclabs.adkmobile.monitor.listeners.ConnectivityListener;
-import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
 
 /**
  * Implements monitoring of Internet connectivity change. Connectivity is
@@ -26,7 +25,7 @@ import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
  * 
  * @author Felipe Lalanne <flalanne@niclabs.cl>
  */
-public class Connectivity extends AbstractMonitor {
+public class Connectivity extends AbstractMonitor<ConnectivityListener> {
 	public static class ConnectivityData implements DataFields {
 		public static final String DETAILED_STATE = "detailed_state";
 		
@@ -162,7 +161,7 @@ public class Connectivity extends AbstractMonitor {
 		}
 	};
 
-	private MonitorEvent connectivityEvent = new AbstractMonitorEvent() {
+	private MonitorEvent<ConnectivityListener> connectivityEvent = new AbstractMonitorEvent<ConnectivityListener>() {
 		@Override
 		public synchronized boolean activate() {
 			if (!isActive()) {
@@ -189,16 +188,10 @@ public class Connectivity extends AbstractMonitor {
 			}
 		}
 		
-		
-		
 		@Override
-		public void onDataReceived(MonitorListener listener, DataObject result) {
-			if (listener instanceof ConnectivityListener) {
-				ConnectivityListener connectivityListener = (ConnectivityListener) listener;
-				
-				/* Notify result */
-				connectivityListener.onConnectivityChanged(result);
-			}
+		public void onDataReceived(ConnectivityListener listener, DataObject result) {
+			/* Notify result */
+			listener.onConnectivityChanged(result);
 		}
 	};
 

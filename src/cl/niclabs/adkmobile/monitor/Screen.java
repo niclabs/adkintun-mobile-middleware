@@ -13,7 +13,6 @@ import cl.niclabs.adkmobile.data.DataFields;
 import cl.niclabs.adkmobile.data.DataObject;
 import cl.niclabs.adkmobile.monitor.events.AbstractMonitorEvent;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
-import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
 import cl.niclabs.adkmobile.monitor.listeners.ScreenListener;
 
 /**
@@ -24,7 +23,7 @@ import cl.niclabs.adkmobile.monitor.listeners.ScreenListener;
  * @author Mauricio Castro <mauricio@niclabs.cl>.
  * Created 17-10-2013.
  */
-public class Screen extends AbstractMonitor {
+public class Screen extends AbstractMonitor<ScreenListener> {
 	
 	public static enum ScreenStatus {
 		ON(1), OFF(2), LOCKED(3), UNLOCKED(4);
@@ -103,7 +102,7 @@ public class Screen extends AbstractMonitor {
 	private final IBinder serviceBinder = new ServiceBinder<Screen>(this);
 	protected String TAG = "AdkintunMobile::Screen";
 	
-	private MonitorEvent screenEvent = new AbstractMonitorEvent() {
+	private MonitorEvent<ScreenListener> screenEvent = new AbstractMonitorEvent<ScreenListener>() {
 		
 		@Override
 		public synchronized boolean activate() {
@@ -131,10 +130,8 @@ public class Screen extends AbstractMonitor {
 		}
 		
 		@Override
-		public void onDataReceived(MonitorListener listener, DataObject result) {
-			if (listener instanceof ScreenListener) {
-				((ScreenListener) listener).onMobileTelephonyChanged(result);
-			}
+		public void onDataReceived(ScreenListener listener, DataObject result) {
+			listener.onMobileTelephonyChanged(result);
 		}
 		
 	};

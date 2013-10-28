@@ -4,6 +4,7 @@ package cl.niclabs.adkmobile.dispatcher;
  * Defines the action to perform on notification of the listener
  * @author Felipe Lalanne <flalanne@niclabs.cl>
  *
+ * @param <E> Listener for the notifier to work on
  */
 public interface Notifier<E extends Listener> {
 	/**

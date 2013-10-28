@@ -24,8 +24,9 @@ import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
  * TODO: Verify thread safety of the methods in this class
  * 
  * @author Felipe Lalanne <flalanne@niclabs.cl>
+ * @param <E> listeners that the monitor handles
  */
-public abstract class AbstractMonitor extends Service implements Monitor {	
+public abstract class AbstractMonitor<E extends MonitorListener> extends Service implements Monitor<E> {	
 	protected class MonitorEventController extends BroadcastReceiver {
 		@Override
 		public void onReceive(Context context, Intent intent) {
@@ -44,7 +45,7 @@ public abstract class AbstractMonitor extends Service implements Monitor {
 	/**
 	 * Current state by eventType
 	 */
-	private Map<MonitorEvent, DataObject> currentStates = new ConcurrentHashMap<MonitorEvent,DataObject>(4);
+	private Map<MonitorEvent<E>, DataObject> currentStates = new ConcurrentHashMap<MonitorEvent<E>,DataObject>(4);
 	
 	
 	private MonitorEventController eventController = new MonitorEventController();
@@ -52,18 +53,18 @@ public abstract class AbstractMonitor extends Service implements Monitor {
 	/**
 	 * Dispatcher for monitor events
 	 */
-	private Dispatcher<MonitorListener> dispatcher = new Dispatcher<MonitorListener>();
+	private Dispatcher<E> dispatcher = new Dispatcher<E>();
 	
 	protected String TAG = "AdkintunMobile";
 	
 	@Override
-	public boolean activate(MonitorEvent eventType) {
+	public boolean activate(MonitorEvent<E> eventType) {
 		return eventType.activate();
 	}
 	
 	
 	@Override
-	public void deactivate(MonitorEvent eventType) {
+	public void deactivate(MonitorEvent<E> eventType) {
 		eventType.deactivate();
 	}
 	
@@ -73,7 +74,7 @@ public abstract class AbstractMonitor extends Service implements Monitor {
 	 * @return
 	 */
 	@Override
-	public DataObject getState(MonitorEvent eventType) {
+	public DataObject getState(MonitorEvent<E> eventType) {
 		return currentStates.get(eventType);
 	}
 	
@@ -82,12 +83,12 @@ public abstract class AbstractMonitor extends Service implements Monitor {
 	 * @param eventType
 	 * @return
 	 */
-	public boolean isActive(MonitorEvent eventType) {
+	public boolean isActive(MonitorEvent<E> eventType) {
 		return eventType.isActive();
 	}
 	
 	@Override
-	public void listen(MonitorListener listener, boolean listen) {
+	public void listen(E listener, boolean listen) {
 		dispatcher.listen(listener, listen);
 	}
 	
@@ -100,13 +101,13 @@ public abstract class AbstractMonitor extends Service implements Monitor {
 	 * @param eventType the event to which the data is related
 	 * @param result the result from the event
 	 */
-	protected void notifyListeners(final MonitorEvent eventType, final DataObject result) {
+	protected void notifyListeners(final MonitorEvent<E> eventType, final DataObject result) {
 		/* Update the internal state */
 		setState(eventType, result);
 		
-		dispatcher.notifyListeners(new Notifier<MonitorListener>() {
+		dispatcher.notifyListeners(new Notifier<E>() {
 			@Override
-			public void notify(MonitorListener listener) {
+			public void notify(E listener) {
 				// TODO: Execute the method on a runnable and schedule on a ScheduledThreadPoolExecutor?
 				eventType.onDataReceived(listener, result);
 			}
@@ -166,7 +167,7 @@ public abstract class AbstractMonitor extends Service implements Monitor {
 	 * @param eventType
 	 * @param state
 	 */
-	private void setState(MonitorEvent eventType, DataObject state) {
+	private void setState(MonitorEvent<E> eventType, DataObject state) {
 		currentStates.put(eventType, state);
 	}
 }

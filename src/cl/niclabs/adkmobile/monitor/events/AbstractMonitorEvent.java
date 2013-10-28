@@ -1,5 +1,7 @@
 package cl.niclabs.adkmobile.monitor.events;
 
+import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
+
 
 /**
  * Base implementation of the activation methods of monitor event.
@@ -10,7 +12,7 @@ package cl.niclabs.adkmobile.monitor.events;
  * @author Felipe Lalanne <flalanne@niclabs.cl>
  *
  */
-public abstract class AbstractMonitorEvent implements MonitorEvent {
+public abstract class AbstractMonitorEvent<E extends MonitorListener> implements MonitorEvent<E> {
 	protected Boolean active = false;
 	
 	/**

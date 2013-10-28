@@ -13,7 +13,7 @@ import cl.niclabs.adkmobile.monitor.Monitor.ServiceBinder;
  *
  * @param <E> type of monitor for which this connection is meant  
  */
-public abstract class MonitorConnection<E extends Monitor> implements ServiceConnection {
+public abstract class MonitorConnection<E extends Monitor<?>> implements ServiceConnection {
 	private E monitor;
 	
 	/**
@@ -30,7 +30,7 @@ public abstract class MonitorConnection<E extends Monitor> implements ServiceCon
 	
 	@Override
 	public void onServiceConnected(ComponentName name, IBinder service) {
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings("unchecked") // Necesary to remove unchecked cast warning
 		ServiceBinder<E> binder = (ServiceBinder<E>) service;
 		monitor = binder.getService();
 		onServiceConnected(binder.getService());

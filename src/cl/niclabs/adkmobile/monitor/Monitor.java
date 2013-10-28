@@ -10,9 +10,9 @@ import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
  * Defines a manager of monitor events, i.e. a monitor.
  * 
  * @author Felipe Lalanne <flalanne@niclabs.cl>
- *
+ * @param <E> listeners that the monitor handles
  */
-public interface Monitor {
+public interface Monitor<E extends MonitorListener> {
 	/**
 	 * Define the debugging status of the application
 	 */
@@ -79,7 +79,7 @@ public interface Monitor {
 	 * Activates the monitor for a given event
 	 * @param event
 	 */
-	public boolean activate(MonitorEvent event);
+	public boolean activate(MonitorEvent<E> event);
 	
 	/**
 	 * Deactivate the specified events
@@ -91,21 +91,21 @@ public interface Monitor {
 	 * Deactivates the monitor for a given event
 	 * @param event
 	 */
-	public void deactivate(MonitorEvent event);
+	public void deactivate(MonitorEvent<E> event);
 	
 	/**
 	 * Get the internal state of the specified event
 	 * @param event
 	 * @return
 	 */
-	public DataObject getState(MonitorEvent event);
+	public DataObject getState(MonitorEvent<E> event);
 	
 	/**
 	 * Returns the activation status for a given event
 	 * @param event
 	 * @return
 	 */
-	public boolean isActive(MonitorEvent event);
+	public boolean isActive(MonitorEvent<E> event);
 	
 	/**
 	 * Adds/remove a listener for a given event. 
@@ -115,7 +115,7 @@ public interface Monitor {
 	 * @param listener
 	 * @param listen true to add listener
 	 */
-	public void listen(MonitorListener listener, boolean listen);
+	public void listen(E listener, boolean listen);
 	
 	/**
 	 * Defines a generic service binder for all monitors
@@ -123,7 +123,7 @@ public interface Monitor {
 	 *
 	 * @param <E> the type of monitor for the service binder
 	 */
-	public static class ServiceBinder<E extends Monitor> extends Binder {
+	public static class ServiceBinder<E extends Monitor<?>> extends Binder {
 		private E monitor;
 		
 		public ServiceBinder(E monitor) {
