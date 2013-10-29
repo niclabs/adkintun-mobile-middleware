@@ -61,6 +61,7 @@ public interface Monitor {
 	 * Defines a screen event
 	 */
 	public static final int SCREEN = 16;
+	
 	/**
 	 * Activate the specified events.
 	 * @param events
