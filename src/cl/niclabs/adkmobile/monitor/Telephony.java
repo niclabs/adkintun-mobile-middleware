@@ -3,7 +3,6 @@ package cl.niclabs.adkmobile.monitor;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
@@ -361,16 +360,36 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 			synchronized(syncSignalStrength) {
 				lastSignalStrength = signalStrength;
 			}
-			/* TODO: add signal now to DB? */
 		}
 		
-		@Override
-		public void onServiceStateChanged(ServiceState serviceState) {
-			// TODO Auto-generated method stub.
-			super.onServiceStateChanged(serviceState);
-			
-		}
 	}
+	
+	private static void setSIMState(int sim_state){
+		simState = SIMState.getType(sim_state);
+		/* TODO should here put the DataObject with the SIM State? */
+	}
+	
+	/**
+	 * Return the SIM state of the phone when the service is on.
+	 * The state is returned by the Telephony.SIMState enum class.
+	 *
+	 * @return Enum with the state of the SIM
+	 */
+	public static SIMState getSIMState(){
+		if(simState != null)
+			return simState;
+		return null;
+	}
+	
+	public void checkSIMstate(){
+		int simState = TelephonyManager.SIM_STATE_UNKNOWN;
+		if (telephonyManager != null)
+			simState = telephonyManager.getSimState();
+		setSIMState(simState);
+		/* TODO should here put the DataObject with the SIM State? */
+	}
+	
+	public static SIMState simState = null;
 
 	private SignalStrength lastSignalStrength = null;
 	private Object syncSignalStrength = new Object();
@@ -400,6 +419,8 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 				if (ni != null) {
 					lastNetworkType = NetworkType.valueOf(ni.getType());
 				}
+				
+				checkSIMstate();
 				
 				if (DEBUG) Log.d(TAG, "Telephony service has been activated");
 				super.activate();
