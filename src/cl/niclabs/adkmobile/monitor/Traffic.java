@@ -12,20 +12,16 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.TrafficStats;
-import android.os.Binder;
 import android.os.Build;
 import android.os.Build.VERSION;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
-import cl.niclabs.adkmobile.monitor.data.ContentValuesDataObject;
-import cl.niclabs.adkmobile.monitor.data.DataFields;
-import cl.niclabs.adkmobile.monitor.data.DataObject;
+import cl.niclabs.adkmobile.data.ContentValuesDataObject;
+import cl.niclabs.adkmobile.data.DataFields;
+import cl.niclabs.adkmobile.data.DataObject;
 import cl.niclabs.adkmobile.monitor.events.AbstractMonitorEvent;
-import cl.niclabs.adkmobile.monitor.events.BasicMonitorEventResult;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
-import cl.niclabs.adkmobile.monitor.events.MonitorEventResult;
-import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
 import cl.niclabs.adkmobile.monitor.listeners.TrafficListener;
 
 /**
@@ -35,7 +31,7 @@ import cl.niclabs.adkmobile.monitor.listeners.TrafficListener;
  * @author Mauricio Castro.
  *         Created 27-09-2013.
  */
-public class Traffic extends AbstractMonitor {
+public class Traffic extends AbstractMonitor<TrafficListener> {
 	
 	public static class TrafficData implements DataFields {
 		public static String NETWORK_TYPE = "network_type"; 
@@ -48,12 +44,6 @@ public class Traffic extends AbstractMonitor {
 		public static String TCP_TX_BYTES = "tcp_tx_bytes";
 		public static String TCP_RX_SEGMENTS = "tcp_rx_segments";
 		public static String TCP_TX_SEGMENTS = "tcp_tx_segments";
-	}
-	
-	public class ServiceBinder extends Binder {
-		public Traffic getService() {
-			return Traffic.this;
-		}
 	}
 	
 	/**
@@ -118,6 +108,7 @@ public class Traffic extends AbstractMonitor {
 			long dMobileTxPackets = newMobileTxPackets - mobileTxPackets;
 			long dMobileRxPackets = newMobileRxPackets - mobileRxPackets;
 	
+			mobileData.put(TrafficData.EVENT_TYPE,  MOBILE_TRAFFIC);
 			mobileData.put(TrafficData.TIMESTAMP,System.currentTimeMillis());
 			mobileData.put(TrafficData.NETWORK_TYPE, NETWORK_TYPE_MOBILE);
 			mobileData.put(TrafficData.RX_BYTES, dMobileRxBytes);
@@ -163,7 +154,7 @@ public class Traffic extends AbstractMonitor {
 			}
 			
 			/* Notify listeners and update state */
-			notifyListeners(mobileTrafficEvent, new BasicMonitorEventResult(mobileData));
+			notifyListeners(mobileTrafficEvent, mobileData);
 			
 			/* Update state vars */
 			mobileRxBytes = newMobileRxBytes;
@@ -196,6 +187,7 @@ public class Traffic extends AbstractMonitor {
 			long dWifiRxPackets = newWifiRxPackets - wifiRxPackets;				
 			long dWifiTxPackets = newWifiTxPackets - wifiTxPackets;
 			
+			wifiData.put(TrafficData.EVENT_TYPE,  WIFI_TRAFFIC);
 			wifiData.put(TrafficData.TIMESTAMP, System.currentTimeMillis());
 			wifiData.put(TrafficData.NETWORK_TYPE, NETWORK_TYPE_WIFI);
 			wifiData.put(TrafficData.RX_BYTES, dWifiRxBytes);
@@ -240,7 +232,7 @@ public class Traffic extends AbstractMonitor {
 				}
 			
 			/* Notify listeners and update state */
-			notifyListeners(mobileTrafficEvent, new BasicMonitorEventResult(wifiData));
+			notifyListeners(mobileTrafficEvent, wifiData);
 			
 			/* Update state vars */
 			wifiRxBytes = newWifiRxBytes;
@@ -253,7 +245,7 @@ public class Traffic extends AbstractMonitor {
 		}
 	};
 
-	private MonitorEvent mobileTrafficEvent = new AbstractMonitorEvent() {
+	private MonitorEvent<TrafficListener> mobileTrafficEvent = new AbstractMonitorEvent<TrafficListener>() {
 		ScheduledFuture<?> future = null;
 		
 		@Override
@@ -304,14 +296,12 @@ public class Traffic extends AbstractMonitor {
 		}
 		
 		@Override
-		public void onDataReceived(MonitorListener listener, MonitorEventResult result) {
-			if (listener instanceof TrafficListener) {
-				((TrafficListener) listener).onMobileTrafficChanged(result.getData());
-			}
+		public void onDataReceived(TrafficListener listener, DataObject result) {
+			listener.onMobileTrafficChanged(result);
 		}
 	};
 	
-	private MonitorEvent wifiTrafficEvent = new AbstractMonitorEvent() {
+	private MonitorEvent<TrafficListener> wifiTrafficEvent = new AbstractMonitorEvent<TrafficListener>() {
 		ScheduledFuture<?> future = null;
 		
 		@Override
@@ -365,10 +355,8 @@ public class Traffic extends AbstractMonitor {
 		}
 		
 		@Override
-		public void onDataReceived(MonitorListener listener, MonitorEventResult result) {
-			if (listener instanceof TrafficListener) {
-				((TrafficListener) listener).onMobileTrafficChanged(result.getData());
-			}
+		public void onDataReceived(TrafficListener listener, DataObject result) {
+			listener.onWiFiTrafficChanged(result);
 		}
 	};
 	
@@ -377,7 +365,7 @@ public class Traffic extends AbstractMonitor {
 	/**
 	 * Activity-Service binder
 	 */
-	private final IBinder serviceBinder = new ServiceBinder();
+	private final IBinder serviceBinder = new ServiceBinder<Traffic>(this);
 	
 	protected String TAG = "AdkintunMobile::Traffic";
 	protected int trafficUpdateInterval = TRAFFIC_UPDATE_INTERVAL;

@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.telephony.CellLocation;
@@ -20,34 +19,23 @@ import android.telephony.TelephonyManager;
 import android.telephony.cdma.CdmaCellLocation;
 import android.telephony.gsm.GsmCellLocation;
 import android.util.Log;
-import cl.niclabs.adkmobile.monitor.data.ContentValuesDataObject;
-import cl.niclabs.adkmobile.monitor.data.DataFields;
-import cl.niclabs.adkmobile.monitor.data.DataObject;
+import cl.niclabs.adkmobile.data.ContentValuesDataObject;
+import cl.niclabs.adkmobile.data.DataFields;
+import cl.niclabs.adkmobile.data.DataObject;
 import cl.niclabs.adkmobile.monitor.events.AbstractMonitorEvent;
-import cl.niclabs.adkmobile.monitor.events.BasicMonitorEventResult;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
-import cl.niclabs.adkmobile.monitor.events.MonitorEventResult;
-import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
 import cl.niclabs.adkmobile.monitor.listeners.TelephonyListener;
 
 /**
  * Implements monitoring of Telephony services of the mobile.
- * Since this class need ***** , it need the permission ****.
  * 
  * Requires permissions
- * - android.permission.ACCESS_COARSE_LOCATION
- * - android.permission.READ_PHONE_STATE
+ * - android.permission.ACCESS_COARSE_LOCATION for obtaining the neighboring cell info
+ * - android.permission.READ_PHONE_STATE to get network info
  * 
  * @author Mauricio Castro. Created 04-10-2013.
  */
-public class Telephony extends AbstractMonitor {
-
-	public class ServiceBinder extends Binder {
-		public Telephony getService() {
-			return Telephony.this;
-		}
-	}
-	
+public class Telephony extends AbstractMonitor<TelephonyListener> {	
 	public enum TelephonyStandard {
 		GSM(1), CDMA(2);
 		
@@ -245,6 +233,7 @@ public class Telephony extends AbstractMonitor {
 			if (location instanceof GsmCellLocation) {
 				GsmCellLocation loc = (GsmCellLocation) location;
 
+				data.put(TelephonyData.EVENT_TYPE, TELEPHONY);
 				data.put(TelephonyData.TIMESTAMP, System.currentTimeMillis());
 				data.put(TelephonyData.TELEPHONY_STANDARD, TelephonyStandard.GSM.getValue());
 				data.put(TelephonyData.TELEPHONY_GSM_CID, loc.getCid());
@@ -312,6 +301,7 @@ public class Telephony extends AbstractMonitor {
 			} else {
 				CdmaCellLocation loc = (CdmaCellLocation) location;
 				
+				data.put(TelephonyData.EVENT_TYPE, TELEPHONY);
 				data.put(TelephonyData.TIMESTAMP, 
 						System.currentTimeMillis());
 				data.put(TelephonyData.TELEPHONY_STANDARD, TelephonyStandard.CDMA.getValue());
@@ -353,7 +343,7 @@ public class Telephony extends AbstractMonitor {
 			}
 			
 			/* Notify listeners and update internal state */
-			notifyListeners(telephonyEvent, new BasicMonitorEventResult(data));
+			notifyListeners(telephonyEvent, data);
 
 			/* Log the results */
 			if (DEBUG) Log.d(TAG, data.toString());
@@ -389,13 +379,13 @@ public class Telephony extends AbstractMonitor {
 	/**
 	 * Activity-Service binder
 	 */
-	private final IBinder serviceBinder = new ServiceBinder();
+	private final IBinder serviceBinder = new ServiceBinder<Telephony>(this);
 	
 	protected String TAG = "AdkintunMobile::Telephony";
 	
 	private Context mContext = this;
 
-	private MonitorEvent telephonyEvent = new AbstractMonitorEvent() {
+	private MonitorEvent<TelephonyListener> telephonyEvent = new AbstractMonitorEvent<TelephonyListener>() {
 		@Override
 		public synchronized boolean activate() {
 			if (!isActive()) {
@@ -429,10 +419,8 @@ public class Telephony extends AbstractMonitor {
 		}
 		
 		@Override
-		public void onDataReceived(MonitorListener listener, MonitorEventResult result) {
-			if (listener instanceof TelephonyListener) {
-				((TelephonyListener) listener).onMobileTelephonyChanged(result.getData());
-			}
+		public void onDataReceived(TelephonyListener listener, DataObject result) {
+			listener.onMobileTelephonyChanged(result);
 		}
 	};
 

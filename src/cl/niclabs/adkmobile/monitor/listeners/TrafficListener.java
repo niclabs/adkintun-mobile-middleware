@@ -1,6 +1,6 @@
 package cl.niclabs.adkmobile.monitor.listeners;
 
-import cl.niclabs.adkmobile.monitor.data.DataObject;
+import cl.niclabs.adkmobile.data.DataObject;
 
 /**
  * TODO Put here a description of what this class does.
@@ -10,8 +10,14 @@ import cl.niclabs.adkmobile.monitor.data.DataObject;
  */
 public interface TrafficListener extends MonitorListener {
 	/**
-	 * Inform the listener of a traffic change
+	 * Inform the listener of a mobile traffic change
 	 * @param trafficState the new traffic data
 	 */
 	public void onMobileTrafficChanged(DataObject trafficState);
+	
+	/**
+	 * Inform the listener of a WiFi traffic change
+	 * @param trafficState the new traffic data
+	 */
+	public void onWiFiTrafficChanged(DataObject trafficState);
 }

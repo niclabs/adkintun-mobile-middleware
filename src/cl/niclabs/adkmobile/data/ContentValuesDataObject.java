@@ -1,4 +1,4 @@
-package cl.niclabs.adkmobile.monitor.data;
+package cl.niclabs.adkmobile.data;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,10 +21,19 @@ public class ContentValuesDataObject extends DataObject {
 	}
 
 	@Override
+	public Object get(String fieldName) {
+		Object obj = contentValues.get(fieldName);
+		if (obj != null) {
+			return obj;
+		}
+		return listElements.get(fieldName);
+	}
+	
+	@Override
 	public boolean getBoolean(String fieldName) {
 		Boolean result = contentValues.getAsBoolean(fieldName);
 		if (result != null) {
-			return result.booleanValue();
+			return result;
 		}
 		return false;
 	}

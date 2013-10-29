@@ -1,4 +1,4 @@
-package cl.niclabs.adkmobile.monitor.data;
+package cl.niclabs.adkmobile.data;
 
 import android.provider.BaseColumns;
 
@@ -10,5 +10,6 @@ import android.provider.BaseColumns;
  *
  */
 public interface DataFields extends BaseColumns {
+	public static final String EVENT_TYPE = "event_type";
 	public static final String TIMESTAMP = "timestamp";
 }
