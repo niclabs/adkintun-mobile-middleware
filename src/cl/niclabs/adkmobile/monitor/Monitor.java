@@ -69,6 +69,11 @@ public interface Monitor<E extends MonitorListener> {
 	public static final int SCREEN = 16;
 	
 	/**
+	 * Dfines a phone status event.
+	 */
+	public static final int PHONESTATUS = 32;
+	
+	/**
 	 * Activate the specified events.
 	 * @param events
 	 * @param configuration additional configurations for the events
