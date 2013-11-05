@@ -1,5 +1,6 @@
 package cl.niclabs.adkmobile.monitor.listeners;
 
+
 import cl.niclabs.adkmobile.data.DataObject;
 
 /**
