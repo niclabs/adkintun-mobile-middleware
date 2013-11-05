@@ -131,7 +131,7 @@ public class Screen extends AbstractMonitor<ScreenListener> {
 		
 		@Override
 		public void onDataReceived(ScreenListener listener, DataObject result) {
-			listener.onMobileTelephonyChanged(result);
+			listener.onScreenStatusChanged(result);
 		}
 		
 	};
