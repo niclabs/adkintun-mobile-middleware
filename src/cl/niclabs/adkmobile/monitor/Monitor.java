@@ -46,17 +46,17 @@ public interface Monitor<E extends MonitorListener> {
 	/**
 	 * Defines a mobile traffic event
 	 */
-	public static final int MOBILE_TRAFFIC = 2;
+	public static final int TRAFFIC_MOBILE = 2;
 	
 	/**
 	 * Defines a wifi traffic event
 	 */
-	public static final int WIFI_TRAFFIC = 4;
+	public static final int TRAFFIC_WIFI = 4;
 	
 	/**
 	 * Defines a general traffic event (to monitor all traffic) 
 	 */
-	public static final int TRAFFIC = MOBILE_TRAFFIC | WIFI_TRAFFIC;
+	public static final int TRAFFIC = TRAFFIC_MOBILE | TRAFFIC_WIFI;
 	
 	/**
 	 * Defines a telephony event
@@ -71,7 +71,12 @@ public interface Monitor<E extends MonitorListener> {
 	/**
 	 * Defines a location event
 	 */
-	public static final int LOCATION = 32;
+	public static final int LOCATION = 64;
+	
+	/**
+	 * Dfines a phone status event.
+	 */
+	public static final int PHONESTATUS = 32;
 	
 	/**
 	 * Activate the specified events.

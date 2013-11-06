@@ -60,7 +60,6 @@ public class Screen extends AbstractMonitor<ScreenListener> {
 				data.put(ScreenData.SCREEN_STATUS, ScreenStatus.ON.getValue());
 
 				/* Notify listeners and update internal state */
-
 				notifyListeners(screenEvent, data);
 				Log.d(TAG, data.toString());
 
@@ -81,7 +80,6 @@ public class Screen extends AbstractMonitor<ScreenListener> {
 							ScreenStatus.LOCKED.getValue());
 				}
 				/* Notify listeners and update internal state */
-
 				notifyListeners(screenEvent, data);
 				Log.d(TAG, data.toString());
 
@@ -95,7 +93,6 @@ public class Screen extends AbstractMonitor<ScreenListener> {
 						ScreenStatus.UNLOCKED.getValue());
 
 				/* Notify listeners and update internal state */
-
 				notifyListeners(screenEvent, data);
 				Log.d(TAG, data.toString());
 			}
@@ -134,7 +131,7 @@ public class Screen extends AbstractMonitor<ScreenListener> {
 		
 		@Override
 		public void onDataReceived(ScreenListener listener, DataObject result) {
-			listener.onMobileScreenChanged(result);
+			listener.onScreenStatusChanged(result);
 		}
 		
 	};

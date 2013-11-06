@@ -73,6 +73,8 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 		public static String TELEPHONY_NETWORK_TYPE = "network_type";
 		public static String TELEPHONY_OPERATOR_MCC = "operator_mcc";
 		public static String TELEPHONY_OPERATOR_MNC = "operator_mnc";
+		
+		public static String TELEPHONY_SIM_STATE = "sim_state";
 	}
 	
 	
@@ -364,9 +366,15 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 		
 	}
 	
-	private static void setSIMState(int sim_state){
+	private void setSIMState(int sim_state){
 		simState = SIMState.getType(sim_state);
-		/* TODO should here put the DataObject with the SIM State? */
+		
+		DataObject data = new ContentValuesDataObject();
+		data.put(TelephonyData.TIMESTAMP, System.currentTimeMillis());
+		data.put(TelephonyData.TELEPHONY_SIM_STATE,simState.getValue());
+		
+		notifyListeners(telephonyEvent, data);
+		
 	}
 	
 	/**
@@ -386,7 +394,7 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 		if (telephonyManager != null)
 			simState = telephonyManager.getSimState();
 		setSIMState(simState);
-		/* TODO should here put the DataObject with the SIM State? */
+		
 	}
 	
 	public static SIMState simState = null;

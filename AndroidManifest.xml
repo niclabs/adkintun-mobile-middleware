@@ -17,6 +17,13 @@
         <service android:name="cl.niclabs.adkmobile.monitor.Telephony">
         </service>
         <service android:name="cl.niclabs.adkmobile.monitor.Traffic"></service>
+        <receiver android:name="cl.niclabs.adkmobile.monitor.PhoneStatus$AutoStart">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </receiver>
+        <service android:name="cl.niclabs.adkmobile.monitor.Screen"></service>
     </application>
 
 </manifest>
