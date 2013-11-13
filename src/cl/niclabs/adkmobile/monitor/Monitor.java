@@ -69,14 +69,26 @@ public interface Monitor<E extends MonitorListener> {
 	public static final int SCREEN = 16;
 	
 	/**
-	 * Defines a location event
-	 */
-	public static final int LOCATION = 64;
-	
-	/**
-	 * Dfines a phone status event.
+	 * Defines a phone status event.
 	 */
 	public static final int PHONESTATUS = 32;
+	
+	/**
+	 * Defines a gps location event
+	 */
+	public static final int LOCATION_GPS = 64;
+	
+	/**
+	 * Defines a network location event
+	 */
+	public static final int LOCATION_NETWORK = 128;
+	
+	/**
+	 * Defines a general location event (to monitor best location available)
+	 */
+	public static final int LOCATION = LOCATION_GPS | LOCATION_NETWORK;
+	
+	
 	
 	/**
 	 * Activate the specified events.
