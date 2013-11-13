@@ -54,9 +54,14 @@ public interface Monitor<E extends MonitorListener> {
 	public static final int TRAFFIC_WIFI = 4;
 	
 	/**
+	 * Defines a application traffic event
+	 */
+	public static final int TRAFFIC_APPLICATION = 256;
+	
+	/**
 	 * Defines a general traffic event (to monitor all traffic) 
 	 */
-	public static final int TRAFFIC = TRAFFIC_MOBILE | TRAFFIC_WIFI;
+	public static final int TRAFFIC = TRAFFIC_MOBILE | TRAFFIC_WIFI | TRAFFIC_APPLICATION;
 	
 	/**
 	 * Defines a telephony event

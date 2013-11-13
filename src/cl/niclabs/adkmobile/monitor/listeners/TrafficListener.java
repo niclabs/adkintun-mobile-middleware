@@ -21,4 +21,11 @@ public interface TrafficListener extends MonitorListener {
 	 * @param trafficState the new traffic data
 	 */
 	public void onWiFiTrafficChanged(DataObject trafficState);
+	
+	/**
+	 * Inform the listener of a WiFi traffic change
+	 * @param uid UID of a running process
+	 * @param trafficState the new traffic data of the process with uid UID
+	 */
+	public void onApplicationTrafficChanged(DataObject trafficState);
 }
