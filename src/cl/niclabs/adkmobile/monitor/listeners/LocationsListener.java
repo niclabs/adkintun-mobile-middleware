@@ -10,7 +10,7 @@ import cl.niclabs.adkmobile.data.DataObject;
  */
 public interface LocationsListener extends MonitorListener{
 	
-//	public void onStatusChanged(DataObject locationState);
-	public void onLocationChanged(DataObject locationState);
+	public void onGPSLocationChanged(DataObject locationState);
+	public void onNetworkLocationChanged(DataObject locationState);
 
 }
