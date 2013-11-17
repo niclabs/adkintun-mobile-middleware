@@ -597,6 +597,9 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 				case SimState.TYPE:
 					listener.onSimStateChange(stateChange);
 					break;
+				case AirplaneModeState.TYPE:
+					listener.onAirplaneModeChange(stateChange);
+					break;
 				}
 			}
 		}
