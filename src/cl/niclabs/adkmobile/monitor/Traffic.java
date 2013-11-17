@@ -659,8 +659,6 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 		for (RunningAppProcessInfo ra : runningProcesses) {
 			if (!uids.contains(ra.uid)) {
 				uids.add(ra.uid);
-				if (DEBUG)
-					Log.d(TAG, ra.uid + " => " + ra.processName);
 			}
 		}
 		return uids;
