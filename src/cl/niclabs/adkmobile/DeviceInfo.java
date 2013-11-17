@@ -1,24 +1,24 @@
-package cl.niclabs.adkmobile.os;
+package cl.niclabs.adkmobile;
 
 import android.content.Context;
 import android.os.Build;
 import android.telephony.TelephonyManager;
 
-public class Device extends Build {
+public class DeviceInfo extends Build {
 
 	// private static final String TAG = "AdkintunMobile::Device";
 	private static TelephonyManager telephonyManager;
 
-	private static Device instance = null;
+	private static DeviceInfo instance = null;
 
-	private Device(Context context) {
+	private DeviceInfo(Context context) {
 		telephonyManager = (TelephonyManager) context
 				.getSystemService(Context.TELEPHONY_SERVICE);
 	}
 
-	public Device getInstance(Context context) {
+	public DeviceInfo getInstance(Context context) {
 		if (instance == null)
-			instance = new Device(context);
+			instance = new DeviceInfo(context);
 		return instance;
 	}
 

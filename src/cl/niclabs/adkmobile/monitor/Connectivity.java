@@ -10,9 +10,8 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import cl.niclabs.adkmobile.data.ContentValuesDataObject;
-import cl.niclabs.adkmobile.data.DataFields;
-import cl.niclabs.adkmobile.data.DataObject;
+import cl.niclabs.adkmobile.monitor.data.ConnectivityObservation;
+import cl.niclabs.adkmobile.monitor.data.Observation;
 import cl.niclabs.adkmobile.monitor.events.AbstractMonitorEvent;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
 import cl.niclabs.adkmobile.monitor.listeners.ConnectivityListener;
@@ -25,20 +24,7 @@ import cl.niclabs.adkmobile.monitor.listeners.ConnectivityListener;
  * 
  * @author Felipe Lalanne <flalanne@niclabs.cl>
  */
-public class Connectivity extends AbstractMonitor<ConnectivityListener> {
-	public static class ConnectivityData implements DataFields {
-		public static final String DETAILED_STATE = "detailed_state";
-		
-		public static final String IS_AVAILABLE = "is_available";
-		public static final String IS_CONNECTED = "is_connected";
-		public static final String IS_ROAMING = "is_roaming";
-		public static final String NETWORK_TYPE = "network_type";
-		/**
-		 * For devices with API level 13.
-		 */
-		public static final String NETWORK_TYPE_OTHER = "network_type_other";
-	}
-	
+public class Connectivity extends AbstractMonitor<ConnectivityListener> {	
 	/**
 	 * The network detailed state for recording on the database
 	 * 
@@ -88,7 +74,16 @@ public class Connectivity extends AbstractMonitor<ConnectivityListener> {
 			this.value = value;
 		}
 		
-		public int getValue() {
+		public static NetworkState getInstance(int value) {
+			for (NetworkState n: NetworkState.values()) {
+				if (n.value() == value) {
+					return n;
+				}
+			}
+			return OTHER;
+		}
+		
+		public int value() {
 			return this.value;
 		}
 	}
@@ -128,9 +123,9 @@ public class Connectivity extends AbstractMonitor<ConnectivityListener> {
 			return OTHER;
 		}
 		
-		public static ConnectionType getType(int value) {
+		public static ConnectionType getInstance(int value) {
 			for (ConnectionType n: ConnectionType.values()) {
-				if (n.getValue() == value) {
+				if (n.value() == value) {
 					return n;
 				}
 			}
@@ -156,7 +151,7 @@ public class Connectivity extends AbstractMonitor<ConnectivityListener> {
 			this.value = value;
 		}
 
-		public int getValue() {
+		public int value() {
 			return this.value;
 		}
 	};
@@ -189,26 +184,22 @@ public class Connectivity extends AbstractMonitor<ConnectivityListener> {
 		}
 		
 		@Override
-		public void onDataReceived(ConnectivityListener listener, DataObject result) {
+		public void onDataReceived(ConnectivityListener listener, Observation result) {
 			/* Notify result */
-			listener.onConnectivityChanged(result);
+			listener.onConnectivityChange((ConnectivityObservation) result);
 		}
 	};
 
 	private BroadcastReceiver connectivityMonitor = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			// Get the NetworkInfo object
-			ConnectivityManager connectivityManager = (ConnectivityManager) context
-					.getSystemService(Context.CONNECTIVITY_SERVICE);
-			
 			// TODO: On API level 17, the intent contains the extra EXTRA_NETWORK_TYPE 
 			// that can be used with ConnectivityManager.getNetworkInfo(int) in order
 			// to obtain the new network info
+			// Get the NetworkInfo object
 			NetworkInfo ni = connectivityManager.getActiveNetworkInfo();
 					
-			
-			DataObject data = new ContentValuesDataObject();
+			ConnectivityObservation data = new ConnectivityObservation(System.currentTimeMillis());
 			
 			/* When no network is active
 			 * the variable is null
@@ -218,11 +209,9 @@ public class Connectivity extends AbstractMonitor<ConnectivityListener> {
 				
 				TelephonyManager telephony = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
 			    if (telephony.isNetworkRoaming()) {
-			    	data.put(ConnectivityData.EVENT_TYPE,  CONNECTIVITY);
-			    	data.put(ConnectivityData.TIMESTAMP, System.currentTimeMillis());
-			    	data.put(ConnectivityData.IS_CONNECTED, false);
-			    	data.put(ConnectivityData.IS_ROAMING, true);
-			    	data.put(ConnectivityData.IS_AVAILABLE, false);
+			    	data.setConnected(false);
+			    	data.setRoaming(true);
+			    	data.setAvailable(false);  
 			    	
 			    	// Log new state
 					if(DEBUG) Log.d(TAG, data.toString());
@@ -233,20 +222,16 @@ public class Connectivity extends AbstractMonitor<ConnectivityListener> {
 				return; 
 			}
 
-			data.put(ConnectivityData.EVENT_TYPE,  CONNECTIVITY);
-			data.put(ConnectivityData.TIMESTAMP, System.currentTimeMillis());
-			data.put(ConnectivityData.IS_CONNECTED,
-					ni.isConnectedOrConnecting());
+			data.setConnected(ni.isConnectedOrConnecting());
 
-			ConnectionType networkType;
-			if ((networkType = ConnectionType.valueOf(ni.getType())) == ConnectionType.OTHER) {
-				data.put(ConnectivityData.NETWORK_TYPE_OTHER, ni.getType());
+			ConnectionType connectionType;
+			if ((connectionType = ConnectionType.valueOf(ni.getType())) == ConnectionType.OTHER) {
+				data.setConnectionTypeOther(ni.getType());
 			}
-			data.put(ConnectivityData.NETWORK_TYPE, networkType.getValue());
-			data.put(ConnectivityData.IS_ROAMING, ni.isRoaming());
-			data.put(ConnectivityData.IS_AVAILABLE, ni.isAvailable());
-			
-			data.put(ConnectivityData.DETAILED_STATE, NetworkState.valueOf(ni.getDetailedState()).getValue());
+			data.setConnectionType(connectionType);
+			data.setRoaming(ni.isRoaming());
+			data.setAvailable(ni.isAvailable());
+			data.setDetailedState(NetworkState.valueOf(ni.getDetailedState()));
 
 			// Log new state
 			if(DEBUG) Log.d(TAG, data.toString());
@@ -263,6 +248,8 @@ public class Connectivity extends AbstractMonitor<ConnectivityListener> {
 	private final IBinder serviceBinder = new ServiceBinder<Connectivity>(this);
 
 	protected String TAG = "AdkintunMobile::Connectivity";
+	
+	private ConnectivityManager connectivityManager;
 
 	@Override
 	public boolean activate(int events, Bundle configuration) {
@@ -283,5 +270,12 @@ public class Connectivity extends AbstractMonitor<ConnectivityListener> {
 	public IBinder onBind(Intent intent) {
 		if(DEBUG) Log.d(TAG, "Service has been bound");
 		return serviceBinder;
+	}
+
+	@Override
+	public void onCreate() {
+		super.onCreate();
+		
+		connectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
 	}
 }

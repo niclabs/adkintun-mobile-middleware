@@ -2,7 +2,8 @@ package cl.niclabs.adkmobile.monitor;
 
 import android.os.Binder;
 import android.os.Bundle;
-import cl.niclabs.adkmobile.data.DataObject;
+import cl.niclabs.adkmobile.AdkintunMobileApp;
+import cl.niclabs.adkmobile.monitor.data.Observation;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
 import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
 
@@ -16,7 +17,7 @@ public interface Monitor<E extends MonitorListener> {
 	/**
 	 * Define the debugging status of the application
 	 */
-	public static final boolean DEBUG = true;
+	public static final boolean DEBUG = AdkintunMobileApp.DEBUG;
 	
 	/**
 	 * Intent action for activating monitor events
@@ -44,6 +45,11 @@ public interface Monitor<E extends MonitorListener> {
 	public static final String EVENTS_EXTRA = "events_extra";
 
 	/**
+	 * Defines the event for device boot/shutdown
+	 */
+	public static final int DEVICE = 1;
+	
+	/**
 	 * Defines a mobile traffic event
 	 */
 	public static final int TRAFFIC_MOBILE = 2;
@@ -56,7 +62,7 @@ public interface Monitor<E extends MonitorListener> {
 	/**
 	 * Defines a application traffic event
 	 */
-	public static final int TRAFFIC_APPLICATION = 256;
+	public static final int TRAFFIC_APPLICATION = 8;
 	
 	/**
 	 * Defines a general traffic event (to monitor all traffic) 
@@ -66,17 +72,12 @@ public interface Monitor<E extends MonitorListener> {
 	/**
 	 * Defines a telephony event
 	 */
-	public static final int TELEPHONY = 8;
+	public static final int TELEPHONY = 16;
 	
 	/**
 	 * Defines a screen event
 	 */
-	public static final int SCREEN = 16;
-	
-	/**
-	 * Defines a phone status event.
-	 */
-	public static final int PHONESTATUS = 32;
+	public static final int SCREEN = 32;
 	
 	/**
 	 * Defines a gps location event
@@ -126,7 +127,7 @@ public interface Monitor<E extends MonitorListener> {
 	 * @param event
 	 * @return
 	 */
-	public DataObject getState(MonitorEvent<E> event);
+	public Observation getState(MonitorEvent<E> event);
 	
 	/**
 	 * Returns the activation status for a given event

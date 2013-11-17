@@ -1,15 +1,14 @@
 package cl.niclabs.adkmobile.monitor.proxies;
 
-import static cl.niclabs.adkmobile.monitor.Monitor.DEBUG;
+import static cl.niclabs.adkmobile.AdkintunMobileApp.DEBUG;
 import android.util.Log;
-import cl.niclabs.adkmobile.data.DataObject;
 import cl.niclabs.adkmobile.dispatcher.Notifier;
 import cl.niclabs.adkmobile.monitor.Connectivity.ConnectionType;
-import cl.niclabs.adkmobile.monitor.Connectivity.ConnectivityData;
+import cl.niclabs.adkmobile.monitor.data.ConnectivityObservation;
 import cl.niclabs.adkmobile.monitor.listeners.ConnectivityListener;
 
 public class ConnectivityStatus extends MonitorProxy<ConnectivityStatusListener> implements ConnectivityListener {
-	private DataObject data;
+	private ConnectivityObservation data;
 	
 	protected String TAG = "AdkintunMobile::ConectivityStatus";
 	
@@ -23,15 +22,15 @@ public class ConnectivityStatus extends MonitorProxy<ConnectivityStatusListener>
 	 * @param oldData
 	 * @param newData
 	 */
-	private void detectNetworkStatusChange(DataObject oldData, DataObject newData) {
-		ConnectionType newNetworkType = ConnectionType.getType(newData.getInt(ConnectivityData.NETWORK_TYPE));
-		boolean isConnected = newData.getBoolean(ConnectivityData.IS_CONNECTED);
-		boolean isAvailable = newData.getBoolean(ConnectivityData.IS_AVAILABLE);
-		boolean isRoaming = newData.getBoolean(ConnectivityData.IS_ROAMING);
+	private void detectNetworkStatusChange(ConnectivityObservation oldData, ConnectivityObservation newData) {
+		ConnectionType newNetworkType = newData.getConnectionType();
+		boolean isConnected = newData.isConnected();
+		boolean isAvailable = newData.isAvailable();
+		boolean isRoaming = newData.isRoaming();
 		
 		if (oldData != null) { // Connectivity status has changed
-			ConnectionType oldNetworkType = ConnectionType.getType(oldData.getInt(ConnectivityData.NETWORK_TYPE));
-			boolean wasRoaming = oldData.getBoolean(ConnectivityData.IS_ROAMING);
+			ConnectionType oldNetworkType = oldData.getConnectionType();
+			boolean wasRoaming = oldData.isRoaming();
 			
 			// Detect WiFi connection
 			if (oldNetworkType != ConnectionType.WIFI && newNetworkType == ConnectionType.WIFI) {
@@ -97,7 +96,7 @@ public class ConnectivityStatus extends MonitorProxy<ConnectivityStatusListener>
 	}
 	
 	@Override
-	public void onConnectivityChanged(DataObject connectivityState) {
+	public void onConnectivityChange(ConnectivityObservation connectivityState) {
 		detectNetworkStatusChange(data, connectivityState);
 		data = connectivityState;
 	}

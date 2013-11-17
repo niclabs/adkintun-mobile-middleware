@@ -82,8 +82,8 @@ public class Persistent<E extends Persistent<E>> extends SugarRecord<E> implemen
 
         List<Field> toStore = new ArrayList<Field>();
         for (Field field : typeFields) {
-			if (!field.isAnnotationPresent(Ignore.class)
-					|| !field.isAnnotationPresent(DoNotSerialize.class)
+			if ((!field.isAnnotationPresent(Ignore.class)
+					&& !field.isAnnotationPresent(DoNotSerialize.class))
 					|| isListOf(Persistent.class, field)) {
                 toStore.add(field);
             }

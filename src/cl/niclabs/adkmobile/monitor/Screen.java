@@ -8,9 +8,8 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
-import cl.niclabs.adkmobile.data.ContentValuesDataObject;
-import cl.niclabs.adkmobile.data.DataFields;
-import cl.niclabs.adkmobile.data.DataObject;
+import cl.niclabs.adkmobile.monitor.data.Observation;
+import cl.niclabs.adkmobile.monitor.data.StateChange;
 import cl.niclabs.adkmobile.monitor.events.AbstractMonitorEvent;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
 import cl.niclabs.adkmobile.monitor.listeners.ScreenListener;
@@ -25,25 +24,18 @@ import cl.niclabs.adkmobile.monitor.listeners.ScreenListener;
  */
 public class Screen extends AbstractMonitor<ScreenListener> {
 	
-	public static enum ScreenStatus {
+	public static enum State {
 		ON(1), OFF(2), LOCKED(3), UNLOCKED(4);
 		
 		int value;
 		
-		private ScreenStatus(int value) {
+		private State(int value) {
 			this.value = value;
 		}
 		
-		public int getValue() {
+		public int value() {
 			return value;
 		}
-	}
-	
-	
-	public static class ScreenData implements DataFields {
-		
-		/* Define the field name for the Screen status */
-		public static String SCREEN_STATUS = "screen_status";
 	}
 	
 	private BroadcastReceiver screenMonitor = new BroadcastReceiver(){
@@ -52,12 +44,8 @@ public class Screen extends AbstractMonitor<ScreenListener> {
 		public void onReceive(Context context, Intent intent) {
 			// TODO Auto-generated method stub.
 			if (intent.getAction().equalsIgnoreCase(Intent.ACTION_SCREEN_ON)) {
-				// assign the values to ContentValues variables
-				DataObject data = new ContentValuesDataObject();
-
-				data.put(ScreenData.EVENT_TYPE, SCREEN);
-				data.put(ScreenData.TIMESTAMP, System.currentTimeMillis());
-				data.put(ScreenData.SCREEN_STATUS, ScreenStatus.ON.getValue());
+				StateChange data = new StateChange(SCREEN, System.currentTimeMillis());
+				data.setState(State.ON.value());
 
 				/* Notify listeners and update internal state */
 				notifyListeners(screenEvent, data);
@@ -65,19 +53,15 @@ public class Screen extends AbstractMonitor<ScreenListener> {
 
 			}
 			if (intent.getAction().equalsIgnoreCase(Intent.ACTION_SCREEN_OFF)) {
-				// assign the values to ContentValues variables
-				DataObject data = new ContentValuesDataObject();
-				data.put(ScreenData.EVENT_TYPE, SCREEN);
-				data.put(ScreenData.TIMESTAMP, System.currentTimeMillis());
-				data.put(ScreenData.SCREEN_STATUS, ScreenStatus.OFF.getValue());
+				StateChange data = new StateChange(SCREEN, System.currentTimeMillis());
+				data.setState(State.OFF.value());
 
 				/* Verify that phone is actually locked */
 				KeyguardManager km = (KeyguardManager) context
 						.getSystemService(KEYGUARD_SERVICE);
 				if (km.inKeyguardRestrictedInputMode()) {
 					// This is the correct status, OFF will never be displayed
-					data.put(ScreenData.SCREEN_STATUS,
-							ScreenStatus.LOCKED.getValue());
+					data.setState(State.LOCKED.value());
 				}
 				/* Notify listeners and update internal state */
 				notifyListeners(screenEvent, data);
@@ -86,11 +70,8 @@ public class Screen extends AbstractMonitor<ScreenListener> {
 			}
 			if (intent.getAction().equals(Intent.ACTION_USER_PRESENT)) {
 				// assign the values to ContentValues variables
-				DataObject data = new ContentValuesDataObject();
-				data.put(ScreenData.EVENT_TYPE, SCREEN);
-				data.put(ScreenData.TIMESTAMP, System.currentTimeMillis());
-				data.put(ScreenData.SCREEN_STATUS,
-						ScreenStatus.UNLOCKED.getValue());
+				StateChange data = new StateChange(SCREEN, System.currentTimeMillis());
+				data.setState(State.UNLOCKED.value());
 
 				/* Notify listeners and update internal state */
 				notifyListeners(screenEvent, data);
@@ -130,8 +111,8 @@ public class Screen extends AbstractMonitor<ScreenListener> {
 		}
 		
 		@Override
-		public void onDataReceived(ScreenListener listener, DataObject result) {
-			listener.onScreenStatusChanged(result);
+		public void onDataReceived(ScreenListener listener, Observation result) {
+			listener.onScreenStateChange((StateChange)result);
 		}
 		
 	};

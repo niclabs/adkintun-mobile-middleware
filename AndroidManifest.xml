@@ -25,9 +25,12 @@
         <service android:name="cl.niclabs.adkmobile.monitor.Traffic" >
         </service>
 
-        <receiver android:name="cl.niclabs.adkmobile.monitor.PhoneStatus$AutoStart" >
+        <receiver android:name="cl.niclabs.adkmobile.monitor.Device" 
+            android:enabled="true"
+        	android:permission="android.permission.RECEIVE_BOOT_COMPLETED" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.ACTION_SHUTDOWN" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
@@ -35,7 +38,7 @@
 
         <service android:name="cl.niclabs.adkmobile.monitor.Screen" >
         </service>
-        <service android:name="cl.niclabs.adkmobile.monitor.Locations" >
+        <service android:name="cl.niclabs.adkmobile.monitor.Location" >
         </service>
     </application>
 

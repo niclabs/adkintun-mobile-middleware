@@ -10,9 +10,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
 import android.util.Log;
-import cl.niclabs.adkmobile.data.DataObject;
 import cl.niclabs.adkmobile.dispatcher.Dispatcher;
 import cl.niclabs.adkmobile.dispatcher.Notifier;
+import cl.niclabs.adkmobile.monitor.data.Observation;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
 import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
 
@@ -42,7 +42,7 @@ public abstract class AbstractMonitor<E extends MonitorListener> extends Service
 	/**
 	 * Current state by eventType
 	 */
-	private Map<MonitorEvent<E>, DataObject> currentStates = new ConcurrentHashMap<MonitorEvent<E>,DataObject>(4);
+	private Map<MonitorEvent<E>, Observation> currentStates = new ConcurrentHashMap<MonitorEvent<E>,Observation>(4);
 	
 	
 	private MonitorEventController eventController = new MonitorEventController();
@@ -71,7 +71,7 @@ public abstract class AbstractMonitor<E extends MonitorListener> extends Service
 	 * @return
 	 */
 	@Override
-	public DataObject getState(MonitorEvent<E> eventType) {
+	public Observation getState(MonitorEvent<E> eventType) {
 		return currentStates.get(eventType);
 	}
 	
@@ -98,7 +98,7 @@ public abstract class AbstractMonitor<E extends MonitorListener> extends Service
 	 * @param eventType the event to which the data is related
 	 * @param result the result from the event
 	 */
-	protected void notifyListeners(final MonitorEvent<E> eventType, final DataObject result) {
+	protected void notifyListeners(final MonitorEvent<E> eventType, final Observation result) {
 		/* Update the internal state */
 		setState(eventType, result);
 		
@@ -164,7 +164,7 @@ public abstract class AbstractMonitor<E extends MonitorListener> extends Service
 	 * @param eventType
 	 * @param state
 	 */
-	private void setState(MonitorEvent<E> eventType, DataObject state) {
+	private void setState(MonitorEvent<E> eventType, Observation state) {
 		currentStates.put(eventType, state);
 	}
 }

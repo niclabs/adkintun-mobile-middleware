@@ -13,11 +13,11 @@ import com.orm.SugarApp;
  * 
  * <code>
  * <application android:label="@string/app_name" android:icon="@drawable/icon"
-android:name="cl.niclabs.adkmobile.Application">
+android:name="cl.niclabs.adkmobile.AdkintunMobileApp">
  * </code>
  * 
  * @author Felipe Lalanne <flalanne@niclabs.cl>
  */
-public class AdkintunMobileApplication extends SugarApp {
+public class AdkintunMobileApp extends SugarApp {
 	public static final boolean DEBUG = true;
 }
