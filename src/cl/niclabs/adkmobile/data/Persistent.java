@@ -23,6 +23,10 @@ import com.orm.dsl.Ignore;
  * @param <E> persistent object 
  */
 public class Persistent<E extends Persistent<E>> extends SugarRecord<E> implements Serializable<E> {
+	/**
+	 * IMPORTANT: Extending methods must add the default constructor in order to
+	 * create the table associated with the Persitent object
+	 */
 	public Persistent() {
 		super();
 	}

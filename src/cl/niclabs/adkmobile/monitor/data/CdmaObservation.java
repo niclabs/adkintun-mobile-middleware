@@ -16,6 +16,12 @@ public class CdmaObservation extends TelephonyObservation<CdmaObservation> {
 	private int networkId;
 	private int systemId;
 
+	/**
+	 * Required by Sugar ORM. Create instance with creation time as timestamp
+	 */
+	public CdmaObservation() {
+		this.setTelephonyStandard(Standard.CDMA);
+	}
 
 	public CdmaObservation(long timestamp) {
 		super(timestamp);

@@ -9,6 +9,10 @@ public abstract class TelephonyObservation<E extends TelephonyObservation<E>> ex
 	protected int networkType;
 	protected Integer signalStrength;
 	protected int telephonyStandard;
+	
+	public TelephonyObservation() {
+		super(Monitor.TELEPHONY, System.currentTimeMillis());
+	}
 
 	public TelephonyObservation(long timestamp) {
 		super(Monitor.TELEPHONY, timestamp);

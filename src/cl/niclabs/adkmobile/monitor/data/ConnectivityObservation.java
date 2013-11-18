@@ -16,6 +16,14 @@ public class ConnectivityObservation extends AbstractObservation<ConnectivityObs
 	private int connectionType;
 	private Integer connectionTypeOther;
 	
+	/**
+	 * Required by Sugar ORM. Creates a new connectivity observation with
+	 * time of creation as the event timestamp 
+	 */
+	public ConnectivityObservation() {
+		super(Monitor.CONNECTIVITY, System.currentTimeMillis());
+	}
+	
 	public ConnectivityObservation(long timestamp) {
 		super(Monitor.CONNECTIVITY, timestamp);
 	}

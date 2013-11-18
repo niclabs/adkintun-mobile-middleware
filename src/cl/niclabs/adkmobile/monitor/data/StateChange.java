@@ -4,6 +4,14 @@ public class StateChange extends AbstractObservation<StateChange> {
 	private int state;
 	private Integer type;
 	
+	/**
+	 * Required by Sugar ORM. Create instance with creation time as timestamp
+	 * and eventType as 0. Usage of this constructor is not recommended.
+	 */
+	public StateChange() {
+		super(0, System.currentTimeMillis());
+	}
+	
 	public StateChange(int eventType, long timestamp) {
 		super(eventType, timestamp);
 	}

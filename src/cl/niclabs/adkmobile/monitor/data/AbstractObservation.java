@@ -11,8 +11,14 @@ import cl.niclabs.adkmobile.data.Persistent;
  */
 public abstract class AbstractObservation<E extends AbstractObservation<E>>
 		extends Persistent<E> implements Observation {
-	private int eventType;
-	private long timestamp;
+	protected int eventType;
+	protected long timestamp;
+	
+	/**
+	 * Required by Sugar ORM. 
+	 */
+	public AbstractObservation() {
+	}
 
 	public AbstractObservation(int eventType, long timestamp) {
 		this.eventType = eventType;

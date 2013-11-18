@@ -16,7 +16,14 @@ public class LocationObservation extends AbstractObservation<LocationObservation
 	private String provider;
 
 	private float speed;
-
+	
+	/**
+	 * Required by Sugar ORM. Create instance with creation time as timestamp
+	 */
+	public LocationObservation() {
+		super(Monitor.LOCATION, System.currentTimeMillis());
+	}
+	
 	public LocationObservation(long timestamp) {
 		super(Monitor.LOCATION, timestamp);
 	}

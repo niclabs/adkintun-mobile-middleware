@@ -14,6 +14,13 @@ public class GsmObservation extends TelephonyObservation<GsmObservation> {
 	
 	private Double signalBer;
 
+	/**
+	 * Required by Sugar ORM. Create instance with creation time as timestamp
+	 */
+	public GsmObservation() {
+		this.setTelephonyStandard(Standard.GSM);
+	}
+	
 	public GsmObservation(long timestamp) {
 		super(timestamp);
 		this.setTelephonyStandard(Standard.GSM);

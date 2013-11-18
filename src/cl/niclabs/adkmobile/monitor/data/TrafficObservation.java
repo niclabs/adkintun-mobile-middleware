@@ -1,5 +1,7 @@
 package cl.niclabs.adkmobile.monitor.data;
 
+import cl.niclabs.adkmobile.monitor.Monitor;
+
 public class TrafficObservation extends AbstractObservation<TrafficObservation> {
 	private int networkType;
 	private long rxBytes;
@@ -14,6 +16,15 @@ public class TrafficObservation extends AbstractObservation<TrafficObservation> 
 	private Long txPackets;
 	
 	private Integer uid;
+	
+	/**
+	 * Required by Sugar ORM. Create instance with creation time as timestamp
+	 * and eventType as Monitor.TRAFFIC. Usage of this constructor is not
+	 * recommended.
+	 */
+	public TrafficObservation() {
+		super(Monitor.TRAFFIC, System.currentTimeMillis());
+	}
 	
 	public TrafficObservation(int eventType, long timestamp) {
 		super(eventType, timestamp);
