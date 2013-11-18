@@ -6,7 +6,7 @@ import cl.niclabs.adkmobile.monitor.data.TelephonyObservation;
 /**
  * TODO Put here a description of what this class does.
  *
- * @author Administrador.
+ * @author Mauricio Castro.
  *         Created 04-10-2013.
  */
 public interface TelephonyListener extends MonitorListener{

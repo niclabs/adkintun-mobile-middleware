@@ -21,6 +21,9 @@ import cl.niclabs.adkmobile.monitor.listeners.LocationListener;
  * the system as a listener. Version adapted from Locations.java in the Aware
  * Framework
  * 
+ * It requires permissions android.permission.ACCESS_COARSE_LOCATION to use LOCATION_NETWORK event,
+ * and android.permission.ACCESS_FINE_LOCATION to use LOCATION_GPS event
+ * 
  * @author nico <nicolas@niclabs.cl>. Created 5-11-2013.
  */
 public class Location extends AbstractMonitor<LocationListener> {

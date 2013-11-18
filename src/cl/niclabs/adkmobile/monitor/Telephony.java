@@ -55,6 +55,29 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 		}
 	}
 	
+	public static enum StateType {
+		SIM_STATE(1), SERVICE_STATE(2), DATA_CONNECTION_STATE(3), AIRPLANE_MODE_STATE(4), OTHER(0);
+		
+		private int value;
+		
+		private StateType(int value) {
+			this.value = value;
+		}
+		
+		public int value() {
+			return value;
+		}
+		
+		public static StateType getInstance(int value) {
+			for (StateType n: StateType.values()) {
+				if (n.value() == value) {
+					return n;
+				}
+			}
+			return OTHER;
+		}
+	}
+	
 	/**
 	 * SIM States as defined in android.telephony.TelephonyManager
 	 *
@@ -64,8 +87,6 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 	public static enum SimState {
 		ABSENT(1), NETWORK_LOCKED(2), PIN_REQUIRED(3), PUK_REQUIRED(4), READY(5), UNKNOWN(6),
 		OTHER(0);
-		
-		public static final int TYPE = 1;
 		
 		/**
 		 * Get the SIM state from TelephonyManager SIM_STATE values
@@ -113,8 +134,6 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 	public static enum ServiceState {
 		EMERGENCY_ONLY(1), IN_SERVICE(2), OUT_OF_SERVICE(3), POWER_OFF(4), UNKNOWN(0);
 		
-		public static final int TYPE = 2;
-		
 		/**
 		 * Get the SIM state from TelephonyManager SIM_STATE values
 		 * @param value
@@ -147,8 +166,6 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 	
 	public static enum DataConnectionState {
 		DISCONNECTED(1), CONNECTING(2), CONNECTED(3), SUSPENDED(4), UNKNOWN(0); 
-		
-		public static final int TYPE = 3;
 		
 		/**
 		 * Get the SIM state from TelephonyManager SIM_STATE values
@@ -234,9 +251,9 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 			return OTHER;
 		}
 		
-		public static NetworkType getType(int value) {
+		public static NetworkType getInstance(int value) {
 			for (NetworkType n: NetworkType.values()) {
-				if (n.getValue() == value) {
+				if (n.value() == value) {
 					return n;
 				}
 			}
@@ -249,16 +266,14 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 			this.value = value;
 		}
 
-		public int getValue() {
+		public int value() {
 			return this.value;
 		}	
 	};
 	
 	public static enum AirplaneModeState {
 		ON(1), OFF(2);
-		
-		public static final int TYPE = 4;
-		
+	
 		int value;
 		
 		private AirplaneModeState(int value){
@@ -302,13 +317,14 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 				
 				/* TODO: This will probably fail if there is no network */
 				String operator = telephonyManager.getNetworkOperator();
-				if (operator.length() == 6) {
+				try {
 					int mcc = Integer.valueOf(operator.substring(0,3));
-					int mnc = Integer.valueOf(operator.substring(3));
-					
 					data.setMcc(mcc);
+					
+					int mnc = Integer.valueOf(operator.substring(3));
 					data.setMnc(mnc);
 				}
+				catch (IndexOutOfBoundsException e) {}
 				
 				if (lastSignalStrength != null) {
 					synchronized(syncSignalStrength) {
@@ -378,13 +394,14 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 				
 				/* TODO: This will probably fail if there is no network */
 				String operator = telephonyManager.getSimOperator();
-				if (operator.length() == 6) {
+				try {
 					int mcc = Integer.valueOf(operator.substring(0,3));
-					int mnc = Integer.valueOf(operator.substring(3));
-					
 					data.setMcc(mcc);
+					
+					int mnc = Integer.valueOf(operator.substring(3));
 					data.setMnc(mnc);
 				}
+				catch (IndexOutOfBoundsException e) {}
 				
 				if (lastSignalStrength != null) {
 					synchronized(syncSignalStrength) {
@@ -406,25 +423,6 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 				/* Log the results */
 				if (DEBUG) Log.d(TAG, data.toString());
 			}
-			
-			
-			/**
-			 * Check the SIM state for changes
-			 */
-			int simState = telephonyManager.getSimState();
-			
-			if (simState != lastSimState.value()) {
-				StateChange stateChange = new StateChange(TELEPHONY, System.currentTimeMillis());
-				stateChange.setType(SimState.TYPE);
-				stateChange.setState(lastSimState.value());
-				
-				/* Notify the state */
-				notifyListeners(telephonyEvent, stateChange);
-				
-				if (DEBUG) Log.d(TAG, stateChange.toString());
-				
-				lastSimState = SimState.valueOf(simState);
-			}
 		}
 
 		@Override
@@ -435,13 +433,30 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 			
 			// Report the new DataConnectionState
 			StateChange stateChange = new StateChange(TELEPHONY, System.currentTimeMillis());
-			stateChange.setType(DataConnectionState.TYPE);
+			stateChange.setType(StateType.DATA_CONNECTION_STATE.value());
 			stateChange.setState(DataConnectionState.valueOf(state).value());
 			
 			/* Notify the state */
 			notifyListeners(telephonyEvent, stateChange);
 			
 			if (DEBUG) Log.d(TAG, stateChange.toString());
+			
+			/**
+			 * Check the SIM state for changes
+			 */		
+			int simState = telephonyManager.getSimState(); 
+			if (simState != lastSimState.value()) {
+				StateChange simStateChange = new StateChange(TELEPHONY, System.currentTimeMillis());
+				simStateChange.setType(StateType.SIM_STATE.value());
+				simStateChange.setState(lastSimState.value());
+				
+				/* Notify the state */
+				notifyListeners(telephonyEvent, simStateChange);
+				
+				if (DEBUG) Log.d(TAG, simStateChange.toString());
+				
+				lastSimState = SimState.valueOf(simState);
+			}
     	}
 		
 		@Override
@@ -459,26 +474,43 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 			
 			// Report the new ServiceState
 			StateChange stateChange = new StateChange(TELEPHONY, System.currentTimeMillis());
-			stateChange.setType(ServiceState.TYPE);
+			stateChange.setType(StateType.SERVICE_STATE.value());
 			stateChange.setState(ServiceState.valueOf(serviceState).value());
 			
 			/* Notify the state */
 			notifyListeners(telephonyEvent, stateChange);
 			
 			if (DEBUG) Log.d(TAG, stateChange.toString());
+			
+			
+			/**
+			 * Check the SIM state for changes
+			 */		
+			int simState = telephonyManager.getSimState(); 
+			if (simState != lastSimState.value()) {
+				StateChange simStateChange = new StateChange(TELEPHONY, System.currentTimeMillis());
+				simStateChange.setType(StateType.SIM_STATE.value());
+				simStateChange.setState(lastSimState.value());
+				
+				/* Notify the state */
+				notifyListeners(telephonyEvent, simStateChange);
+				
+				if (DEBUG) Log.d(TAG, simStateChange.toString());
+				
+				lastSimState = SimState.valueOf(simState);
+			}
 		}
 		
 	}
 	
 	private BroadcastReceiver airplaneModeMonitor = new BroadcastReceiver(){
-
 		@SuppressWarnings("deprecation")
 		@SuppressLint("NewApi")
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (intent.getAction().equals(Intent.ACTION_AIRPLANE_MODE_CHANGED)){
 				StateChange data = new StateChange(TELEPHONY, System.currentTimeMillis());
-				data.setType(AirplaneModeState.TYPE);
+				data.setType(StateType.AIRPLANE_MODE_STATE.value());
 				int mode;
 				
 				/* Check the version of the API, if is below to Jelly_Bean,
@@ -555,7 +587,7 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 				lastSimState = SimState.valueOf(simState);
 				
 				StateChange stateChange = new StateChange(TELEPHONY, System.currentTimeMillis());
-				stateChange.setType(SimState.TYPE);
+				stateChange.setType(StateType.SIM_STATE.value());
 				stateChange.setState(lastSimState.value());
 				
 				/* Notify the initial state */
@@ -587,18 +619,21 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 			}
 			else if (result instanceof StateChange) {
 				StateChange stateChange = (StateChange)result;
-				switch(stateChange.geType()) {
-				case ServiceState.TYPE:
+				StateType type = StateType.getInstance(stateChange.getType());
+				switch(type) {
+				case SERVICE_STATE:
 					listener.onServiceStateChange(stateChange);
 					break;
-				case DataConnectionState.TYPE:
+				case DATA_CONNECTION_STATE:
 					listener.onDataConnectionStateChange(stateChange);
 					break;
-				case SimState.TYPE:
+				case SIM_STATE:
 					listener.onSimStateChange(stateChange);
 					break;
-				case AirplaneModeState.TYPE:
+				case AIRPLANE_MODE_STATE:
 					listener.onAirplaneModeChange(stateChange);
+					break;
+				default:
 					break;
 				}
 			}

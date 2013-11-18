@@ -43,11 +43,6 @@ public interface Monitor<E extends MonitorListener> {
 	 * Extra key for communicating the activated/deactivated events to the monitor
 	 */
 	public static final String EVENTS_EXTRA = "events_extra";
-
-	/**
-	 * Defines the event for device boot/shutdown
-	 */
-	public static final int DEVICE = 1;
 	
 	/**
 	 * Defines a mobile traffic event
@@ -88,6 +83,11 @@ public interface Monitor<E extends MonitorListener> {
 	 * Defines a network location event
 	 */
 	public static final int LOCATION_NETWORK = 128;
+	
+	/**
+	 * Defines the event for device boot/shutdown
+	 */
+	public static final int DEVICE = 256;
 	
 	/**
 	 * Defines a general location event (to monitor best location available)

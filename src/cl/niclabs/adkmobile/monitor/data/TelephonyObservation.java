@@ -61,7 +61,7 @@ public abstract class TelephonyObservation<E extends TelephonyObservation<E>> ex
 	}
 
 	public void setNetworkType(Telephony.NetworkType networkType) {
-		this.networkType = networkType.getValue();
+		this.networkType = networkType.value();
 	}
 
 	public void setSignalStrength(int signalStrength) {

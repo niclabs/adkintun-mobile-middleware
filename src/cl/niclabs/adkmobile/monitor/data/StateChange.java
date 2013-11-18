@@ -22,7 +22,7 @@ public class StateChange extends AbstractObservation<StateChange> {
 	 * 
 	 * @return type of state
 	 */
-	public Integer geType() {
+	public Integer getType() {
 		return type;
 	}
 
