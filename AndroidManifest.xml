@@ -1,15 +1,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.adkintunsensorlibrary"
+    package="cl.niclabs.adkmobile"
     android:versionCode="1"
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="9"
-        android:targetSdkVersion="17" />
+        android:minSdkVersion="8"
+        android:targetSdkVersion="18" />
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 
     <application
         android:allowBackup="true"
@@ -22,7 +23,9 @@
         </service>
         <service android:name="cl.niclabs.adkmobile.monitor.Traffic" >
         </service>
-        <service android:name="cl.niclabs.adkmobile.monitor.Traffic" >
+        <service android:name="cl.niclabs.adkmobile.monitor.Screen" >
+        </service>
+        <service android:name="cl.niclabs.adkmobile.monitor.Location" >
         </service>
 
         <receiver android:name="cl.niclabs.adkmobile.monitor.Device" 
@@ -35,11 +38,5 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
-
-        <service android:name="cl.niclabs.adkmobile.monitor.Screen" >
-        </service>
-        <service android:name="cl.niclabs.adkmobile.monitor.Location" >
-        </service>
     </application>
-
 </manifest>

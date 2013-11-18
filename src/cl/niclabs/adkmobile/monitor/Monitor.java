@@ -85,16 +85,14 @@ public interface Monitor<E extends MonitorListener> {
 	public static final int LOCATION_NETWORK = 128;
 	
 	/**
-	 * Defines the event for device boot/shutdown
-	 */
-	public static final int DEVICE = 256;
-	
-	/**
 	 * Defines a general location event (to monitor best location available)
 	 */
 	public static final int LOCATION = LOCATION_GPS | LOCATION_NETWORK;
 	
-	
+	/**
+	 * Defines the event for device boot/shutdown
+	 */
+	public static final int DEVICE = 256;
 	
 	/**
 	 * Activate the specified events.
