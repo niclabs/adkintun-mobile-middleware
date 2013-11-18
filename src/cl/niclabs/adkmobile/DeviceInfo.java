@@ -53,7 +53,7 @@ public class DeviceInfo extends AbstractSerializable<DeviceInfo> {
 	 * @param context of the application
 	 * @return an instance of this device info
 	 */
-	public DeviceInfo getInstance(Context context) {
+	public static DeviceInfo getInstance(Context context) {
 		if (instance == null)
 			instance = new DeviceInfo(context);
 		return instance;
