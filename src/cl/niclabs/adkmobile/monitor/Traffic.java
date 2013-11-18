@@ -3,7 +3,6 @@ package cl.niclabs.adkmobile.monitor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import android.annotation.SuppressLint;
@@ -27,6 +26,7 @@ import cl.niclabs.adkmobile.monitor.data.constants.ConnectionType;
 import cl.niclabs.adkmobile.monitor.events.AbstractMonitorEvent;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
 import cl.niclabs.adkmobile.monitor.listeners.TrafficListener;
+import cl.niclabs.adkmobile.utils.Scheduler;
 
 /**
  * Implements monitoring of Rx & Tx bytes. Traffic is notified by the system as
@@ -361,7 +361,7 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 					mobileTcpTxSegments = tcpData[3];
 				}
 
-				future = taskThreadPool.scheduleAtFixedRate(mobileTask, 0,
+				future = Scheduler.getInstance().scheduleAtFixedRate(mobileTask, 0,
 						TRAFFIC_UPDATE_INTERVAL, TimeUnit.SECONDS);
 				super.activate();
 
@@ -429,7 +429,7 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 					wifiTcpTxSegments = tcpData[3];
 				}
 
-				future = taskThreadPool.scheduleAtFixedRate(wifiTask, 0,
+				future = Scheduler.getInstance().scheduleAtFixedRate(wifiTask, 0,
 						TRAFFIC_UPDATE_INTERVAL, TimeUnit.SECONDS);
 				super.activate();
 
@@ -482,7 +482,7 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 				appTxPackets = new SparseArray<Long>();
 				uids = new ArrayList<Integer>();
 
-				future = taskThreadPool.scheduleAtFixedRate(appTask, 0,
+				future = Scheduler.getInstance().scheduleAtFixedRate(appTask, 0,
 						TRAFFIC_UPDATE_INTERVAL, TimeUnit.SECONDS);
 				super.activate();
 
@@ -509,9 +509,6 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 			listener.onApplicationTrafficChange((TrafficObservation) result);
 		}
 	};
-
-	private ScheduledThreadPoolExecutor taskThreadPool = new ScheduledThreadPoolExecutor(
-			3);
 	
 	/**
 	 * Activity-Service binder
@@ -677,6 +674,6 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 		super.onDestroy();
 
 		/* Shutdown the thread pool */
-		taskThreadPool.shutdown();
+		//taskThreadPool.shutdown();
 	}
 }

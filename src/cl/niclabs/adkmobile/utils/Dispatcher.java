@@ -1,4 +1,4 @@
-package cl.niclabs.adkmobile.dispatcher;
+package cl.niclabs.adkmobile.utils;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -38,9 +38,16 @@ public class Dispatcher<E extends Listener> {
 	 * Notify the listeners 
 	 * @param notifier controller to perform the notification actions
 	 */
-	public void notifyListeners(Notifier<E> notifier) {
-		for (E listener: listeners) {
-			notifier.notify(listener);
+	public void notifyListeners(final Notifier<E> notifier) {
+		for (final E listener: listeners) {
+			// Notify the listener in a new thread
+			Scheduler.getInstance().execute(new Runnable() {
+				@Override
+				public void run() {
+					notifier.notify(listener);
+				}
+			});
+			
 		}
 	}
 }

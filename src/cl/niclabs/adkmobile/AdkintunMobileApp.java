@@ -1,5 +1,7 @@
 package cl.niclabs.adkmobile;
 
+import cl.niclabs.adkmobile.utils.Scheduler;
+
 import com.orm.SugarApp;
 
 /**
@@ -19,5 +21,21 @@ android:name="cl.niclabs.adkmobile.AdkintunMobileApp">
  * @author Felipe Lalanne <flalanne@niclabs.cl>
  */
 public class AdkintunMobileApp extends SugarApp {
-	public static final boolean DEBUG = true;
+	/**
+	 * Debugging status of the application
+	 */
+	public static boolean DEBUG = true;
+	
+	/**
+	 * Library version
+	 */
+	public static final String VERSION = "1.0b";
+
+	@Override
+	public void onTerminate() {
+		super.onTerminate();
+		
+		// Shutdown the scheduler
+		Scheduler.getInstance().shutdown();
+	}
 }
