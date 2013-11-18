@@ -150,6 +150,7 @@ public class Persistent<E extends Persistent<E>> extends SugarRecord<E> implemen
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		try {
 			serializer.serialize(out, this);
+			out.close();
 		} catch (IOException e) {
 		}
 		return out.toString();
