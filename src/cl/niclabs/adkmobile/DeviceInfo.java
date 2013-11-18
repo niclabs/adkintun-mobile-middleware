@@ -1,89 +1,163 @@
 package cl.niclabs.adkmobile;
 
+
 import android.content.Context;
 import android.os.Build;
 import android.telephony.TelephonyManager;
+import cl.niclabs.adkmobile.data.AbstractSerializable;
+import cl.niclabs.adkmobile.data.DoNotSerialize;
 
-public class DeviceInfo extends Build {
-
-	// private static final String TAG = "AdkintunMobile::Device";
+public class DeviceInfo extends AbstractSerializable<DeviceInfo> {
+	@DoNotSerialize
 	private static TelephonyManager telephonyManager;
 
+	@DoNotSerialize
 	private static DeviceInfo instance = null;
-
+	
+	private long timestamp;
+	private String deviceId;
+	private String board;
+	private String brand;
+	private String device;
+	private String buildId;
+	private String hardware;
+	private String manufacturer;
+	private String model;
+	private String product;
+	private String release;
+	private String releaseType;
+	private Integer sdk;
+	
 	private DeviceInfo(Context context) {
 		telephonyManager = (TelephonyManager) context
 				.getSystemService(Context.TELEPHONY_SERVICE);
+		
+		timestamp = System.currentTimeMillis();
+		deviceId = telephonyManager.getDeviceId();
+		board = Build.BOARD;
+		brand = Build.BRAND;
+		device = Build.DEVICE;
+		buildId = Build.DISPLAY;
+		hardware = Build.HARDWARE;
+		manufacturer = Build.MANUFACTURER;
+		model = Build.MODEL;
+		product = Build.PRODUCT;
+		release = Build.VERSION.RELEASE;
+		releaseType = Build.TYPE;
+		sdk = Build.VERSION.SDK_INT;
+		
 	}
 
+	/**
+	 * 
+	 * @param context of the application
+	 * @return an instance of this device info
+	 */
 	public DeviceInfo getInstance(Context context) {
 		if (instance == null)
 			instance = new DeviceInfo(context);
 		return instance;
 	}
 
-	public int getVersionSDK() {
-		return VERSION.SDK_INT;
+	/**
+	 * Returns an unique device id (IMEI for GSM, ESN for CDMA)
+	 * @return unique device id
+	 */
+	public String getDeviceId() {
+		return deviceId;
 	}
 
-	public String getVersionRelease() {
-		return VERSION.RELEASE;
+	/**
+	 * @return Name of the underlying board
+	 */
+	public String getBoard() {
+		return board;
 	}
 
-	public String getID() {
-		return telephonyManager.getDeviceId();
+	/**
+	 * @return carrier that the device is customized to
+	 */
+	public String getBrand() {
+		return brand;
 	}
 
-	public String getDeviceSoftwareVersion() {
-		return telephonyManager.getDeviceSoftwareVersion();
+	/**
+	 * 
+	 * @return name of the industrial design
+	 */
+	public String getDevice() {
+		return device;
+	}
+	
+	/**
+	 * 
+	 * @return build id 
+	 */
+	public String getBuildId() {
+		return buildId;
 	}
 
-	public String getNetworkCountryIso() {
-		return telephonyManager.getNetworkCountryIso();
+	/**
+	 * 
+	 * @return name of the hardware
+	 */
+	public String getHardware() {
+		return hardware;
 	}
 
-	public String getNetworkOperator() {
-		return telephonyManager.getNetworkOperator();
+	/**
+	 * 
+	 * @return manufacturer of the device
+	 */
+	public String getManufacturer() {
+		return manufacturer;
 	}
 
-	public String getNetworkOperatorName() {
-		return telephonyManager.getNetworkOperatorName();
+	/**
+	 * 
+	 * @return model of the device
+	 */
+	public String getModel() {
+		return model;
 	}
 
-	public String getSubscriberId() {
-		return telephonyManager.getSubscriberId();
+	/**
+	 * 
+	 * @return name of the product
+	 */
+	public String getProduct() {
+		return product;
 	}
 
-	public String getSimCountryIso() {
-		return telephonyManager.getSimCountryIso();
+	/**
+	 * 
+	 * @return version release string
+	 */
+	public String getRelease() {
+		return release;
 	}
 
-	public String getSimOperator() {
-		return telephonyManager.getSimOperator();
+	/**
+	 * 
+	 * @return release type
+	 */
+	public String getReleaseType() {
+		return releaseType;
 	}
 
-	public String getSimOperatorName() {
-		return telephonyManager.getSimOperatorName();
+	/**
+	 * 
+	 * @return SDK number
+	 */
+	public Integer getSdk() {
+		return sdk;
 	}
 
-	public String getSimSerialNumber() {
-		return telephonyManager.getSimSerialNumber();
+	/**
+	 * 
+	 * @return time that this instance was taken
+	 */
+	public long getTimestamp() {
+		return timestamp;
 	}
-
-	public int getPhoneType() {
-		return telephonyManager.getPhoneType();
-	}
-
-	public String getOsArchitecture() {
-		return System.getProperty("os.arch");
-	}
-
-	public String getOsName() {
-		return System.getProperty("os.name");
-	}
-
-	public String getOsVersion() {
-		return System.getProperty("os.version");
-	}
-
 }
