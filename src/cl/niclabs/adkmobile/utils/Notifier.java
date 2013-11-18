@@ -1,4 +1,4 @@
-package cl.niclabs.adkmobile.dispatcher;
+package cl.niclabs.adkmobile.utils;
 
 /**
  * Defines the action to perform on notification of the listener

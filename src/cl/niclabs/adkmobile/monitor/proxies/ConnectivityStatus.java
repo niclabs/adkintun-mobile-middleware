@@ -2,10 +2,10 @@ package cl.niclabs.adkmobile.monitor.proxies;
 
 import static cl.niclabs.adkmobile.AdkintunMobileApp.DEBUG;
 import android.util.Log;
-import cl.niclabs.adkmobile.dispatcher.Notifier;
 import cl.niclabs.adkmobile.monitor.data.ConnectivityObservation;
 import cl.niclabs.adkmobile.monitor.data.constants.ConnectionType;
 import cl.niclabs.adkmobile.monitor.listeners.ConnectivityListener;
+import cl.niclabs.adkmobile.utils.Notifier;
 
 public class ConnectivityStatus extends MonitorProxy<ConnectivityStatusListener> implements ConnectivityListener {
 	private ConnectivityObservation data;

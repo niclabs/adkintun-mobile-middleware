@@ -1,6 +1,6 @@
 package cl.niclabs.adkmobile.monitor.proxies;
 
-import cl.niclabs.adkmobile.dispatcher.Listener;
+import cl.niclabs.adkmobile.utils.Listener;
 
 /**
  * Base interface for proxy listeners.

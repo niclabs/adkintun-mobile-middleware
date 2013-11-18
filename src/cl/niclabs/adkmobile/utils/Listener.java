@@ -1,4 +1,4 @@
-package cl.niclabs.adkmobile.dispatcher;
+package cl.niclabs.adkmobile.utils;
 
 /**
  * Base interface for all listeners 

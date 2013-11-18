@@ -10,11 +10,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
 import android.util.Log;
-import cl.niclabs.adkmobile.dispatcher.Dispatcher;
-import cl.niclabs.adkmobile.dispatcher.Notifier;
 import cl.niclabs.adkmobile.monitor.data.Observation;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
 import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
+import cl.niclabs.adkmobile.utils.Dispatcher;
+import cl.niclabs.adkmobile.utils.Notifier;
 
 /**
  * Base class for all monitoring services. It allows implementing classes to
