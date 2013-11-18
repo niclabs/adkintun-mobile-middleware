@@ -1,8 +1,10 @@
 package cl.niclabs.adkmobile.monitor.data;
 
+import cl.niclabs.adkmobile.monitor.data.constants.StateType;
+
 public class StateChange extends AbstractObservation<StateChange> {
 	private int state;
-	private Integer type;
+	private Integer stateType;
 	
 	/**
 	 * Required by Sugar ORM. Create instance with creation time as timestamp
@@ -30,15 +32,15 @@ public class StateChange extends AbstractObservation<StateChange> {
 	 * 
 	 * @return type of state
 	 */
-	public Integer getType() {
-		return type;
+	public StateType getStateType() {
+		return StateType.getInstance(stateType);
 	}
 
 	public void setState(int state) {
 		this.state = state;
 	}
 
-	public void setType(Integer stateType) {
-		this.type = stateType;
+	public void setStateType(StateType stateType) {
+		this.stateType = stateType.value();
 	}
 }

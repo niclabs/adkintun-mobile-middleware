@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import cl.niclabs.adkmobile.monitor.Telephony.Standard;
+import cl.niclabs.adkmobile.monitor.data.constants.TelephonyStandard;
 
 public class GsmObservation extends TelephonyObservation<GsmObservation> {
 	private int gsmCid;
 	private int gsmLac;
-	private int gsmPsc;
+	private Integer gsmPsc;
 	private List<NeighborAntenna> neighborList;
 	
 	private Double signalBer;
@@ -18,12 +18,12 @@ public class GsmObservation extends TelephonyObservation<GsmObservation> {
 	 * Required by Sugar ORM. Create instance with creation time as timestamp
 	 */
 	public GsmObservation() {
-		this.setTelephonyStandard(Standard.GSM);
+		this.setTelephonyStandard(TelephonyStandard.GSM);
 	}
 	
 	public GsmObservation(long timestamp) {
 		super(timestamp);
-		this.setTelephonyStandard(Standard.GSM);
+		this.setTelephonyStandard(TelephonyStandard.GSM);
 	}
 
 	/**
@@ -43,7 +43,7 @@ public class GsmObservation extends TelephonyObservation<GsmObservation> {
 	/**
 	 * @return primary scrambling code for UMTS, or -1 if unkown or GSM
 	 */
-	public int getGsmPsc() {
+	public Integer getGsmPsc() {
 		return gsmPsc;
 	}
 
@@ -89,7 +89,7 @@ public class GsmObservation extends TelephonyObservation<GsmObservation> {
 		this.gsmLac = gsmLac;
 	}
 
-	public void setGsmPsc(int gsmPsc) {
+	public void setGsmPsc(Integer gsmPsc) {
 		this.gsmPsc = gsmPsc;
 	}
 

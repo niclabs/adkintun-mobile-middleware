@@ -10,6 +10,8 @@ import android.os.IBinder;
 import android.util.Log;
 import cl.niclabs.adkmobile.monitor.data.Observation;
 import cl.niclabs.adkmobile.monitor.data.StateChange;
+import cl.niclabs.adkmobile.monitor.data.constants.ScreenState;
+import cl.niclabs.adkmobile.monitor.data.constants.StateType;
 import cl.niclabs.adkmobile.monitor.events.AbstractMonitorEvent;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
 import cl.niclabs.adkmobile.monitor.listeners.ScreenListener;
@@ -24,20 +26,6 @@ import cl.niclabs.adkmobile.monitor.listeners.ScreenListener;
  */
 public class Screen extends AbstractMonitor<ScreenListener> {
 	
-	public static enum State {
-		ON(1), OFF(2), LOCKED(3), UNLOCKED(4);
-		
-		int value;
-		
-		private State(int value) {
-			this.value = value;
-		}
-		
-		public int value() {
-			return value;
-		}
-	}
-	
 	private BroadcastReceiver screenMonitor = new BroadcastReceiver(){
 
 		@Override
@@ -45,7 +33,8 @@ public class Screen extends AbstractMonitor<ScreenListener> {
 			// TODO Auto-generated method stub.
 			if (intent.getAction().equalsIgnoreCase(Intent.ACTION_SCREEN_ON)) {
 				StateChange data = new StateChange(SCREEN, System.currentTimeMillis());
-				data.setState(State.ON.value());
+				data.setStateType(StateType.SCREEN);
+				data.setState(ScreenState.ON.value());
 
 				/* Notify listeners and update internal state */
 				notifyListeners(screenEvent, data);
@@ -54,14 +43,15 @@ public class Screen extends AbstractMonitor<ScreenListener> {
 			}
 			if (intent.getAction().equalsIgnoreCase(Intent.ACTION_SCREEN_OFF)) {
 				StateChange data = new StateChange(SCREEN, System.currentTimeMillis());
-				data.setState(State.OFF.value());
+				data.setStateType(StateType.SCREEN);
+				data.setState(ScreenState.OFF.value());
 
 				/* Verify that phone is actually locked */
 				KeyguardManager km = (KeyguardManager) context
 						.getSystemService(KEYGUARD_SERVICE);
 				if (km.inKeyguardRestrictedInputMode()) {
 					// This is the correct status, OFF will never be displayed
-					data.setState(State.LOCKED.value());
+					data.setState(ScreenState.LOCKED.value());
 				}
 				/* Notify listeners and update internal state */
 				notifyListeners(screenEvent, data);
@@ -71,7 +61,8 @@ public class Screen extends AbstractMonitor<ScreenListener> {
 			if (intent.getAction().equals(Intent.ACTION_USER_PRESENT)) {
 				// assign the values to ContentValues variables
 				StateChange data = new StateChange(SCREEN, System.currentTimeMillis());
-				data.setState(State.UNLOCKED.value());
+				data.setStateType(StateType.SCREEN);
+				data.setState(ScreenState.UNLOCKED.value());
 
 				/* Notify listeners and update internal state */
 				notifyListeners(screenEvent, data);

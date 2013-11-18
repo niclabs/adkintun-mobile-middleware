@@ -1,6 +1,6 @@
 package cl.niclabs.adkmobile.monitor.data;
 
-import cl.niclabs.adkmobile.monitor.Telephony.Standard;
+import cl.niclabs.adkmobile.monitor.data.constants.TelephonyStandard;
 
 public class CdmaObservation extends TelephonyObservation<CdmaObservation> {
 	private int cdmaBaseLatitude;
@@ -20,12 +20,12 @@ public class CdmaObservation extends TelephonyObservation<CdmaObservation> {
 	 * Required by Sugar ORM. Create instance with creation time as timestamp
 	 */
 	public CdmaObservation() {
-		this.setTelephonyStandard(Standard.CDMA);
+		this.setTelephonyStandard(TelephonyStandard.CDMA);
 	}
 
 	public CdmaObservation(long timestamp) {
 		super(timestamp);
-		this.setTelephonyStandard(Standard.CDMA);
+		this.setTelephonyStandard(TelephonyStandard.CDMA);
 	}
 
 	/**

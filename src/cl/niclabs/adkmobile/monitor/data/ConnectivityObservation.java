@@ -1,7 +1,8 @@
 package cl.niclabs.adkmobile.monitor.data;
 
-import cl.niclabs.adkmobile.monitor.Connectivity;
 import cl.niclabs.adkmobile.monitor.Monitor;
+import cl.niclabs.adkmobile.monitor.data.constants.ConnectionType;
+import cl.niclabs.adkmobile.monitor.data.constants.NetworkState;
 
 /**
  * Defines an observation for the connectivity monitor
@@ -29,13 +30,13 @@ public class ConnectivityObservation extends AbstractObservation<ConnectivityObs
 	}
 	
 	/**
-	 * @return the detailed network state. See {@link Connectivity.NetworkState} for more details.
+	 * @return the detailed network state. See {@link NetworkState} for more details.
 	 */
-	public Connectivity.NetworkState getDetailedState() {
-		return Connectivity.NetworkState.getInstance(detailedState);
+	public NetworkState getDetailedState() {
+		return NetworkState.getInstance(detailedState);
 	}
 	
-	public void setDetailedState(Connectivity.NetworkState detailedState) {
+	public void setDetailedState(NetworkState detailedState) {
 		this.detailedState = detailedState.value();
 	}
 	
@@ -77,11 +78,11 @@ public class ConnectivityObservation extends AbstractObservation<ConnectivityObs
 	/**
 	 * @return the network type (mobile, wifi, etc). See Connectivity.ConnectionType for more details
 	 */
-	public Connectivity.ConnectionType getConnectionType() {
-		return Connectivity.ConnectionType.getInstance(connectionType);
+	public ConnectionType getConnectionType() {
+		return ConnectionType.getInstance(connectionType);
 	}
 	
-	public void setConnectionType(Connectivity.ConnectionType connectionType) {
+	public void setConnectionType(ConnectionType connectionType) {
 		this.connectionType = connectionType.value();
 	}
 	

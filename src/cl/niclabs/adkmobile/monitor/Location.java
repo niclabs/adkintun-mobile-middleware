@@ -9,9 +9,11 @@ import android.location.LocationProvider;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
-import cl.niclabs.adkmobile.monitor.data.Observation;
 import cl.niclabs.adkmobile.monitor.data.LocationObservation;
+import cl.niclabs.adkmobile.monitor.data.Observation;
 import cl.niclabs.adkmobile.monitor.data.StateChange;
+import cl.niclabs.adkmobile.monitor.data.constants.LocationState;
+import cl.niclabs.adkmobile.monitor.data.constants.StateType;
 import cl.niclabs.adkmobile.monitor.events.AbstractMonitorEvent;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
 import cl.niclabs.adkmobile.monitor.listeners.LocationListener;
@@ -47,20 +49,6 @@ public class Location extends AbstractMonitor<LocationListener> {
 		return locData;
 	}
 
-	public static enum State {
-		ENABLED(1), DISABLED(0);
-		
-		private int value;
-		
-		private State(int value) {
-			this.value = value;
-		}
-		
-		public int value() {
-			return this.value;
-		}
-	}
-	
 	/**
 	 * This listener will keep track for failed GPS location requests
 	 */
@@ -75,7 +63,8 @@ public class Location extends AbstractMonitor<LocationListener> {
 				break;
 			case GpsStatus.GPS_EVENT_STARTED:
 				stateChange = new StateChange(LOCATION_GPS, System.currentTimeMillis());
-				stateChange.setState(State.ENABLED.value());
+				stateChange.setStateType(StateType.LOCATION);
+				stateChange.setState(LocationState.ENABLED.value());
 				notifyListeners(gpsLocationEvent, stateChange);
 				
 				if (DEBUG) Log.d(TAG, stateChange.toString());
@@ -91,7 +80,8 @@ public class Location extends AbstractMonitor<LocationListener> {
 
 				/* Notify state change */
 				stateChange = new StateChange(LOCATION_GPS, System.currentTimeMillis());
-				stateChange.setState(State.DISABLED.value());
+				stateChange.setStateType(StateType.LOCATION);
+				stateChange.setState(LocationState.DISABLED.value());
 				notifyListeners(gpsLocationEvent, stateChange);
 				
 				/* Log the results */
@@ -245,14 +235,16 @@ public class Location extends AbstractMonitor<LocationListener> {
 			if (provider.equals(LocationManager.GPS_PROVIDER)) {
 				/* Notify state change */
 				stateChange = new StateChange(LOCATION_GPS, System.currentTimeMillis());
-				stateChange.setState(State.DISABLED.value());
+				stateChange.setState(LocationState.DISABLED.value());
+				stateChange.setStateType(StateType.LOCATION);
 				notifyListeners(gpsLocationEvent, stateChange);
 				if (DEBUG) Log.d(TAG, stateChange.toString());
 			}
 			else if (provider.equals(LocationManager.NETWORK_PROVIDER)) {
 				/* Notify state change */
 				stateChange = new StateChange(LOCATION_NETWORK, System.currentTimeMillis());
-				stateChange.setState(State.DISABLED.value());
+				stateChange.setState(LocationState.DISABLED.value());
+				stateChange.setStateType(StateType.LOCATION);
 				notifyListeners(networkLocationEvent, stateChange);
 				if (DEBUG) Log.d(TAG, stateChange.toString());
 			}
@@ -264,14 +256,16 @@ public class Location extends AbstractMonitor<LocationListener> {
 			if (provider.equals(LocationManager.GPS_PROVIDER)) {
 				/* Notify state change */
 				stateChange = new StateChange(LOCATION_GPS, System.currentTimeMillis());
-				stateChange.setState(State.ENABLED.value());
+				stateChange.setState(LocationState.ENABLED.value());
+				stateChange.setStateType(StateType.LOCATION);
 				notifyListeners(gpsLocationEvent, stateChange);
 				if (DEBUG) Log.d(TAG, stateChange.toString());
 			}
 			else if (provider.equals(LocationManager.NETWORK_PROVIDER)) {
 				/* Notify state change */
 				stateChange = new StateChange(LOCATION_NETWORK, System.currentTimeMillis());
-				stateChange.setState(State.ENABLED.value());
+				stateChange.setState(LocationState.ENABLED.value());
+				stateChange.setStateType(StateType.LOCATION);
 				notifyListeners(networkLocationEvent, stateChange);
 				if (DEBUG) Log.d(TAG, stateChange.toString());
 			}

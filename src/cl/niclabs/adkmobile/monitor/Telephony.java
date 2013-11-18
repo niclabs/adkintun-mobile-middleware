@@ -28,6 +28,12 @@ import cl.niclabs.adkmobile.monitor.data.NeighborAntenna;
 import cl.niclabs.adkmobile.monitor.data.Observation;
 import cl.niclabs.adkmobile.monitor.data.StateChange;
 import cl.niclabs.adkmobile.monitor.data.TelephonyObservation;
+import cl.niclabs.adkmobile.monitor.data.constants.AirplaneModeState;
+import cl.niclabs.adkmobile.monitor.data.constants.NetworkType;
+import cl.niclabs.adkmobile.monitor.data.constants.ServiceState;
+import cl.niclabs.adkmobile.monitor.data.constants.SimState;
+import cl.niclabs.adkmobile.monitor.data.constants.StateType;
+import cl.niclabs.adkmobile.monitor.data.constants.TelephonyStandard;
 import cl.niclabs.adkmobile.monitor.events.AbstractMonitorEvent;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
 import cl.niclabs.adkmobile.monitor.listeners.TelephonyListener;
@@ -41,255 +47,9 @@ import cl.niclabs.adkmobile.monitor.listeners.TelephonyListener;
  * 
  * @author Mauricio Castro. Created 04-10-2013.
  */
-public class Telephony extends AbstractMonitor<TelephonyListener> {	
-	public enum Standard {
-		GSM(1), CDMA(2);
-		
-		int value;
-		private Standard(int value) {
-			this.value = value;
-		}
-		
-		public int value() {
-			return value;
-		}
-	}
-	
-	public static enum StateType {
-		SIM_STATE(1), SERVICE_STATE(2), DATA_CONNECTION_STATE(3), AIRPLANE_MODE_STATE(4), OTHER(0);
-		
-		private int value;
-		
-		private StateType(int value) {
-			this.value = value;
-		}
-		
-		public int value() {
-			return value;
-		}
-		
-		public static StateType getInstance(int value) {
-			for (StateType n: StateType.values()) {
-				if (n.value() == value) {
-					return n;
-				}
-			}
-			return OTHER;
-		}
-	}
-	
+public class Telephony extends AbstractMonitor<TelephonyListener> {
 	/**
-	 * SIM States as defined in android.telephony.TelephonyManager
-	 *
-	 * @author Mauricio Castro <mauricio@niclabs.cl>.
-	 *         Created 17-10-2013.
-	 */
-	public static enum SimState {
-		ABSENT(1), NETWORK_LOCKED(2), PIN_REQUIRED(3), PUK_REQUIRED(4), READY(5), UNKNOWN(6),
-		OTHER(0);
-		
-		/**
-		 * Get the SIM state from TelephonyManager SIM_STATE values
-		 * @param value
-		 * @return
-		 */
-		public static SimState valueOf(int value) {
-			switch (value) {
-			case TelephonyManager.SIM_STATE_ABSENT:
-				return ABSENT;
-
-			case TelephonyManager.SIM_STATE_NETWORK_LOCKED:
-				return NETWORK_LOCKED;
-
-			case TelephonyManager.SIM_STATE_PIN_REQUIRED:
-				return PIN_REQUIRED;
-
-			case TelephonyManager.SIM_STATE_PUK_REQUIRED:
-				return PUK_REQUIRED;
-
-			case TelephonyManager.SIM_STATE_READY:
-				return READY;
-
-			case TelephonyManager.SIM_STATE_UNKNOWN:
-				return UNKNOWN;
-			}
-			
-			return UNKNOWN;
-		}
-		
-		int value;
-		
-		private SimState(int value) {
-			this.value = value;
-		}
-
-		public int value() {
-			return this.value;
-		}
-	}
-	
-	/**
-	 * ServiceState as defined in android.telephony.ServiceState
-	 */
-	public static enum ServiceState {
-		EMERGENCY_ONLY(1), IN_SERVICE(2), OUT_OF_SERVICE(3), POWER_OFF(4), UNKNOWN(0);
-		
-		/**
-		 * Get the SIM state from TelephonyManager SIM_STATE values
-		 * @param value
-		 * @return
-		 */
-		public static ServiceState valueOf(android.telephony.ServiceState state) {
-			switch(state.getState()) {
-			case android.telephony.ServiceState.STATE_EMERGENCY_ONLY:
-				return EMERGENCY_ONLY;
-			case android.telephony.ServiceState.STATE_IN_SERVICE:
-				return IN_SERVICE;
-			case android.telephony.ServiceState.STATE_OUT_OF_SERVICE:
-				return EMERGENCY_ONLY;
-			case android.telephony.ServiceState.STATE_POWER_OFF:
-				return POWER_OFF;
-			}
-			return UNKNOWN;
-		}
-		
-		int value;
-		
-		private ServiceState(int value) {
-			this.value = value;
-		}
-
-		public int value() {
-			return this.value;
-		}
-	}
-	
-	public static enum DataConnectionState {
-		DISCONNECTED(1), CONNECTING(2), CONNECTED(3), SUSPENDED(4), UNKNOWN(0); 
-		
-		/**
-		 * Get the SIM state from TelephonyManager SIM_STATE values
-		 * @param value
-		 * @return
-		 */
-		public static DataConnectionState valueOf(int value) {
-			switch(value) {
-			case TelephonyManager.DATA_DISCONNECTED:
-				return DISCONNECTED;
-			case TelephonyManager.DATA_CONNECTING:
-				return CONNECTING;
-			case TelephonyManager.DATA_CONNECTED:
-				return CONNECTED;
-			case TelephonyManager.DATA_SUSPENDED:
-				return SUSPENDED;
-			}
-			return UNKNOWN;
-		}
-		
-		int value;
-		
-		private DataConnectionState(int value) {
-			this.value = value;
-		}
-
-		public int value() {
-			return this.value;
-		}
-	}
-	
-	/**
-	 * Network types as defined in android.telephony.TelephonyManager
-	 *
-	 * @author Mauricio Castro <mauricio@niclabs.cl>.
-	 *         Created 17-10-2013.
-	 */
-	public static enum NetworkType {
-		RTT(1), CDMA(2), EDGE(3), EHRPD(4), EVDO_0(5), EVDO_A(6), EVDO_B(7), GPRS(
-				8), HSDPA(9), HSPA(10), HSPAP(11), HSUPA(12), IDEN(13), LTE(14), UMTS(
-				15), UNKNOWN(16), OTHER(0);
-		
-		/**
-		 * Get the network type from the TelephonyManager constants
-		 * 
-		 * @param value connectivity identifier according to TelephonyManager constants
-		 */
-		public static NetworkType valueOf(int value) {
-			switch (value) {
-				case TelephonyManager.NETWORK_TYPE_1xRTT:
-					return RTT;
-				case TelephonyManager.NETWORK_TYPE_CDMA:
-					return CDMA;
-				case TelephonyManager.NETWORK_TYPE_EDGE:
-					return EDGE;
-				case TelephonyManager.NETWORK_TYPE_EHRPD:
-					return EHRPD;
-				case TelephonyManager.NETWORK_TYPE_EVDO_0:
-					return EVDO_0;
-				case TelephonyManager.NETWORK_TYPE_EVDO_A:
-					return EVDO_A;
-				case TelephonyManager.NETWORK_TYPE_EVDO_B:
-					return EVDO_B;
-				case TelephonyManager.NETWORK_TYPE_GPRS:
-					return GPRS;
-				case TelephonyManager.NETWORK_TYPE_HSDPA:
-					return HSDPA;
-				case TelephonyManager.NETWORK_TYPE_HSPA:
-					return HSPA;
-				case TelephonyManager.NETWORK_TYPE_HSPAP:
-					return HSPAP;
-				case TelephonyManager.NETWORK_TYPE_HSUPA:
-					return HSUPA;
-				case TelephonyManager.NETWORK_TYPE_IDEN:
-					return IDEN;
-				case TelephonyManager.NETWORK_TYPE_LTE:
-					return LTE;
-				case TelephonyManager.NETWORK_TYPE_UMTS:
-					return UMTS;
-				case TelephonyManager.NETWORK_TYPE_UNKNOWN:
-					return UNKNOWN;
-			}
-			return OTHER;
-		}
-		
-		public static NetworkType getInstance(int value) {
-			for (NetworkType n: NetworkType.values()) {
-				if (n.value() == value) {
-					return n;
-				}
-			}
-			return OTHER;
-		}
-		
-		int value;
-
-		private NetworkType(int value) {
-			this.value = value;
-		}
-
-		public int value() {
-			return this.value;
-		}	
-	};
-	
-	public static enum AirplaneModeState {
-		ON(1), OFF(2);
-	
-		int value;
-		
-		private AirplaneModeState(int value){
-			this.value = value;
-		}
-				
-		public int value() {
-			return value;
-		}
-	}
-	
-
-	/**
-	 * TODO Class that got all the listener of PhoneStateListener Interface.
-	 * Describe what to do when a event occurs. This events can be signal
-	 * strength change, tower location change.
+	 * Listens to telephony events and notifies the listeners
 	 * 
 	 * @author Mauricio Castro. Created 04-10-2013.
 	 */
@@ -300,6 +60,8 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 		 */
 		double gsmBerTable [] = {0.14, 0.28, 0.57, 1.13, 2.26, 4.53, 9.05, 18.10};
 			
+		
+		@SuppressLint("NewApi")
 		@Override
 		public void onCellLocationChanged(CellLocation location) {
 			super.onCellLocationChanged(location);
@@ -310,10 +72,13 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 
 				GsmObservation data = new GsmObservation(System.currentTimeMillis());
 				
-				data.setTelephonyStandard(Standard.GSM);
+				data.setTelephonyStandard(TelephonyStandard.GSM);
 				data.setGsmCid(loc.getCid());
 				data.setGsmLac(loc.getLac());
-				data.setGsmPsc(loc.getPsc());
+				
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+					data.setGsmPsc(loc.getPsc());
+				}
 				
 				/* TODO: This will probably fail if there is no network */
 				String operator = telephonyManager.getNetworkOperator();
@@ -334,7 +99,7 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 									.getGsmSignalStrength() * 2) - 113;
 							data.setSignalStrength(signalStrengthDbm);
 						}
-						if (lastSignalStrength.getGsmBitErrorRate() != 99) {
+						if (lastSignalStrength.getGsmBitErrorRate() >= 0 && lastSignalStrength.getGsmBitErrorRate() != 99) {
 							double gsmBerPercent = gsmBerTable[lastSignalStrength.getGsmBitErrorRate()] / 100;
 							data.setSignalBer(gsmBerPercent);
 						}
@@ -385,7 +150,7 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 				// assign the values to ContentValues variable
 				CdmaObservation data = new CdmaObservation(System.currentTimeMillis());
 				
-				data.setTelephonyStandard(Standard.CDMA);
+				data.setTelephonyStandard(TelephonyStandard.CDMA);
 				data.setCdmaBaseStationId(loc.getBaseStationId());
 				data.setCdmaBaseLongitude(loc.getBaseStationLongitude());
 				data.setCdmaBaseLatitude(loc.getBaseStationLatitude());
@@ -431,23 +196,13 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 			
 			lastNetworkType = NetworkType.valueOf(networkType);
 			
-			// Report the new DataConnectionState
-			StateChange stateChange = new StateChange(TELEPHONY, System.currentTimeMillis());
-			stateChange.setType(StateType.DATA_CONNECTION_STATE.value());
-			stateChange.setState(DataConnectionState.valueOf(state).value());
-			
-			/* Notify the state */
-			notifyListeners(telephonyEvent, stateChange);
-			
-			if (DEBUG) Log.d(TAG, stateChange.toString());
-			
 			/**
 			 * Check the SIM state for changes
 			 */		
 			int simState = telephonyManager.getSimState(); 
 			if (simState != lastSimState.value()) {
 				StateChange simStateChange = new StateChange(TELEPHONY, System.currentTimeMillis());
-				simStateChange.setType(StateType.SIM_STATE.value());
+				simStateChange.setStateType(StateType.SIM);
 				simStateChange.setState(lastSimState.value());
 				
 				/* Notify the state */
@@ -474,7 +229,7 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 			
 			// Report the new ServiceState
 			StateChange stateChange = new StateChange(TELEPHONY, System.currentTimeMillis());
-			stateChange.setType(StateType.SERVICE_STATE.value());
+			stateChange.setStateType(StateType.SERVICE);
 			stateChange.setState(ServiceState.valueOf(serviceState).value());
 			
 			/* Notify the state */
@@ -489,7 +244,7 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 			int simState = telephonyManager.getSimState(); 
 			if (simState != lastSimState.value()) {
 				StateChange simStateChange = new StateChange(TELEPHONY, System.currentTimeMillis());
-				simStateChange.setType(StateType.SIM_STATE.value());
+				simStateChange.setStateType(StateType.SIM);
 				simStateChange.setState(lastSimState.value());
 				
 				/* Notify the state */
@@ -510,7 +265,7 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 		public void onReceive(Context context, Intent intent) {
 			if (intent.getAction().equals(Intent.ACTION_AIRPLANE_MODE_CHANGED)){
 				StateChange data = new StateChange(TELEPHONY, System.currentTimeMillis());
-				data.setType(StateType.AIRPLANE_MODE_STATE.value());
+				data.setStateType(StateType.AIRPLANE_MODE);
 				int mode;
 				
 				/* Check the version of the API, if is below to Jelly_Bean,
@@ -561,8 +316,7 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 			if (!isActive()) {
 				telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
 				telephonyManager.listen(telephonyStateListener,
-						PhoneStateListener.LISTEN_CELL_LOCATION	| PhoneStateListener.LISTEN_SIGNAL_STRENGTHS 
-						| PhoneStateListener.LISTEN_DATA_CONNECTION_STATE | PhoneStateListener.LISTEN_SERVICE_STATE);
+						PhoneStateListener.LISTEN_CELL_LOCATION	| PhoneStateListener.LISTEN_SIGNAL_STRENGTHS | PhoneStateListener.LISTEN_SERVICE_STATE);
 				
 				/* Get the initial network type */
 				ConnectivityManager connectivityManager = (ConnectivityManager) mContext
@@ -587,7 +341,7 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 				lastSimState = SimState.valueOf(simState);
 				
 				StateChange stateChange = new StateChange(TELEPHONY, System.currentTimeMillis());
-				stateChange.setType(StateType.SIM_STATE.value());
+				stateChange.setStateType(StateType.SIM);
 				stateChange.setState(lastSimState.value());
 				
 				/* Notify the initial state */
@@ -619,18 +373,15 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 			}
 			else if (result instanceof StateChange) {
 				StateChange stateChange = (StateChange)result;
-				StateType type = StateType.getInstance(stateChange.getType());
+				StateType type = stateChange.getStateType();
 				switch(type) {
-				case SERVICE_STATE:
+				case SERVICE:
 					listener.onServiceStateChange(stateChange);
 					break;
-				case DATA_CONNECTION_STATE:
-					listener.onDataConnectionStateChange(stateChange);
-					break;
-				case SIM_STATE:
+				case SIM:
 					listener.onSimStateChange(stateChange);
 					break;
-				case AIRPLANE_MODE_STATE:
+				case AIRPLANE_MODE:
 					listener.onAirplaneModeChange(stateChange);
 					break;
 				default:

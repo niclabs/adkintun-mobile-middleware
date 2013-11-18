@@ -1,7 +1,8 @@
 package cl.niclabs.adkmobile.monitor.data;
 
 import cl.niclabs.adkmobile.monitor.Monitor;
-import cl.niclabs.adkmobile.monitor.Telephony;
+import cl.niclabs.adkmobile.monitor.data.constants.NetworkType;
+import cl.niclabs.adkmobile.monitor.data.constants.TelephonyStandard;
 
 public abstract class TelephonyObservation<E extends TelephonyObservation<E>> extends AbstractObservation<E> {
 	protected int mcc;
@@ -35,7 +36,7 @@ public abstract class TelephonyObservation<E extends TelephonyObservation<E>> ex
 
 	/**
 	 * 
-	 * @return network type (GPRS, UMTS, EDGE). See {@link Telephony.NetworkType} for more info.
+	 * @return network type (GPRS, UMTS, EDGE). See {@link NetworkType} for more info.
 	 */
 	public int getNetworkType() {
 		return networkType;
@@ -64,7 +65,7 @@ public abstract class TelephonyObservation<E extends TelephonyObservation<E>> ex
 		this.mnc = mnc;
 	}
 
-	public void setNetworkType(Telephony.NetworkType networkType) {
+	public void setNetworkType(NetworkType networkType) {
 		this.networkType = networkType.value();
 	}
 
@@ -72,7 +73,7 @@ public abstract class TelephonyObservation<E extends TelephonyObservation<E>> ex
 		this.signalStrength = signalStrength;
 	}
 
-	public void setTelephonyStandard(Telephony.Standard telephonyStandard) {
+	public void setTelephonyStandard(TelephonyStandard telephonyStandard) {
 		this.telephonyStandard = telephonyStandard.value();
 	}
 }

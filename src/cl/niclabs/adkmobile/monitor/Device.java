@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.util.Log;
 import cl.niclabs.adkmobile.AdkintunMobileApp;
 import cl.niclabs.adkmobile.monitor.data.StateChange;
+import cl.niclabs.adkmobile.monitor.data.constants.DeviceBootState;
+import cl.niclabs.adkmobile.monitor.data.constants.StateType;
 
 /**
  * BroadcastReceiver for {@link Intent.ACTION_BOOT_COMPLETED} and
@@ -37,20 +39,6 @@ import cl.niclabs.adkmobile.monitor.data.StateChange;
 public class Device extends BroadcastReceiver {
 	protected String TAG = "AdkintunMobile::Device";
 	
-	public static enum State {
-		BOOT(1), SHUTDOWN(2);
-		
-		int value;
-		
-		private State(int value){
-			this.value = value;
-		}
-				
-		public int value() {
-			return value;
-		}
-	}
-	
 	/**
 	 * Called when the boot is completed. The default action is to
 	 * do nothing, it must be overriden by extending classes in order
@@ -73,7 +61,8 @@ public class Device extends BroadcastReceiver {
 	public final void onReceive(Context context, Intent intent) {
 		if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
 			StateChange stateChange = new StateChange(Monitor.DEVICE, System.currentTimeMillis());
-			stateChange.setState(State.BOOT.value());
+			stateChange.setStateType(StateType.DEVICE_BOOT);
+			stateChange.setState(DeviceBootState.BOOT.value());
 			
 			if (AdkintunMobileApp.DEBUG) Log.d(TAG, stateChange.toString());
 			try {
@@ -86,7 +75,8 @@ public class Device extends BroadcastReceiver {
 		}
 		else if (intent.getAction().equals(Intent.ACTION_SHUTDOWN)) {
 			StateChange stateChange = new StateChange(Monitor.DEVICE, System.currentTimeMillis());
-			stateChange.setState(State.SHUTDOWN.value());
+			stateChange.setStateType(StateType.DEVICE_BOOT);
+			stateChange.setState(DeviceBootState.SHUTDOWN.value());
 			
 			if (AdkintunMobileApp.DEBUG) Log.d(TAG, stateChange.toString());
 			try {

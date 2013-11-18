@@ -12,6 +12,8 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import cl.niclabs.adkmobile.monitor.data.ConnectivityObservation;
 import cl.niclabs.adkmobile.monitor.data.Observation;
+import cl.niclabs.adkmobile.monitor.data.constants.ConnectionType;
+import cl.niclabs.adkmobile.monitor.data.constants.NetworkState;
 import cl.niclabs.adkmobile.monitor.events.AbstractMonitorEvent;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
 import cl.niclabs.adkmobile.monitor.listeners.ConnectivityListener;
@@ -25,137 +27,6 @@ import cl.niclabs.adkmobile.monitor.listeners.ConnectivityListener;
  * @author Felipe Lalanne <flalanne@niclabs.cl>
  */
 public class Connectivity extends AbstractMonitor<ConnectivityListener> {	
-	/**
-	 * The network detailed state for recording on the database
-	 * 
-	 * @author Felipe Lalanne <flalanne@niclabs.cl>
-	 */
-	public static enum NetworkState {
-		AUTHENTICATING(1), BLOCKED(2), CAPTIVE_PORTAL_CHECK(3), CONNECTED(4), CONNECTING(
-				5), DISCONNECTED(6), DISCONNECTING(7), FAILED(8), IDLE(9), OBTAINING_IP_ADDRESS(
-				10), OTHER(0), SCANNING(11), SUSPENDED(12), VERIFYING_POOR_LINK(13);
-		
-		public static NetworkState valueOf(NetworkInfo.DetailedState value) {
-			switch(value) {
-			case AUTHENTICATING:
-				return AUTHENTICATING;
-			case BLOCKED:
-				return BLOCKED;
-			case CAPTIVE_PORTAL_CHECK:
-				return CAPTIVE_PORTAL_CHECK;
-			case CONNECTED:
-				return CONNECTED;
-			case CONNECTING:
-				return CONNECTING;
-			case DISCONNECTED:
-				return DISCONNECTED;
-			case DISCONNECTING:
-				return DISCONNECTING;
-			case FAILED:
-				return FAILED;
-			case IDLE:
-				return IDLE;
-			case OBTAINING_IPADDR:
-				return OBTAINING_IP_ADDRESS;
-			case SCANNING:
-				return SCANNING;
-			case SUSPENDED:
-				return SUSPENDED;
-			case VERIFYING_POOR_LINK:
-				return VERIFYING_POOR_LINK;
-			default:
-				return OTHER;
-			}
-		}
-		
-		private int value;
-		
-		private NetworkState(int value) {
-			this.value = value;
-		}
-		
-		public static NetworkState getInstance(int value) {
-			for (NetworkState n: NetworkState.values()) {
-				if (n.value() == value) {
-					return n;
-				}
-			}
-			return OTHER;
-		}
-		
-		public int value() {
-			return this.value;
-		}
-	}
-
-	/**
-	 * Network types as defined in android.net.ConnectivityManager
-	 *
-	 * 
-	 * @author Felipe Lalanne <flalanne@niclabs.cl>
-	 */
-	public static enum ConnectionType {
-		MOBILE(1), MOBILE_DUN(2), MOBILE_HIPRI(3), MOBILE_MMS(4), MOBILE_SUPL(5), OTHER(0), WIFI(
-						6), WIMAX(7);
-
-		/**
-		 * Get the network type from the ConnectivityManager constants
-		 * 
-		 * @param value connectivity identifier according to ConnectivityManager constants
-		 */
-		public static ConnectionType valueOf(int value) {
-			switch (value) {
-				case ConnectivityManager.TYPE_MOBILE:
-					return MOBILE;
-				case ConnectivityManager.TYPE_MOBILE_DUN:
-					return MOBILE_DUN;
-				case ConnectivityManager.TYPE_MOBILE_HIPRI:
-					return MOBILE_HIPRI;
-				case ConnectivityManager.TYPE_MOBILE_MMS:
-					return MOBILE_MMS;
-				case ConnectivityManager.TYPE_MOBILE_SUPL:
-					return MOBILE_SUPL;
-				case ConnectivityManager.TYPE_WIFI:
-					return WIFI;
-				case ConnectivityManager.TYPE_WIMAX:
-					return WIMAX;
-			}
-			return OTHER;
-		}
-		
-		public static ConnectionType getInstance(int value) {
-			for (ConnectionType n: ConnectionType.values()) {
-				if (n.value() == value) {
-					return n;
-				}
-			}
-			return OTHER;
-		}
-		
-		public boolean isMobile() {
-			switch(this) {
-				case MOBILE:
-				case MOBILE_DUN:
-				case MOBILE_HIPRI:
-				case MOBILE_MMS:
-				case MOBILE_SUPL:
-					return true;
-				default:
-					return false;
-			}
-		}
-
-		int value;
-
-		private ConnectionType(int value) {
-			this.value = value;
-		}
-
-		public int value() {
-			return this.value;
-		}
-	};
-
 	private MonitorEvent<ConnectivityListener> connectivityEvent = new AbstractMonitorEvent<ConnectivityListener>() {
 		@Override
 		public synchronized boolean activate() {
@@ -205,12 +76,17 @@ public class Connectivity extends AbstractMonitor<ConnectivityListener> {
 			 * the variable is null
 			 * TODO: should we record this? */
 			if (ni == null) {
-				Log.w(TAG, "No active network");
+				Log.w(TAG, "No active data connection");
 				
 				TelephonyManager telephony = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-			    if (telephony.isNetworkRoaming()) {
+				
+			    if (telephony.getDataState() == TelephonyManager.DATA_DISCONNECTED ||
+			    		telephony.getDataState() == TelephonyManager.DATA_SUSPENDED) {
+			    
 			    	data.setConnected(false);
-			    	data.setRoaming(true);
+			    	if (telephony.isNetworkRoaming()) {
+			    		data.setRoaming(true);
+			    	}
 			    	data.setAvailable(false);  
 			    	
 			    	// Log new state
@@ -219,6 +95,7 @@ public class Connectivity extends AbstractMonitor<ConnectivityListener> {
 					/* Notify listeners and update internal state */
 					notifyListeners(connectivityEvent, data);
 			    }
+			    
 				return; 
 			}
 

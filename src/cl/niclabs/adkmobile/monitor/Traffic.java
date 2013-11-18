@@ -6,6 +6,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
@@ -22,6 +23,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import cl.niclabs.adkmobile.monitor.data.Observation;
 import cl.niclabs.adkmobile.monitor.data.TrafficObservation;
+import cl.niclabs.adkmobile.monitor.data.constants.ConnectionType;
 import cl.niclabs.adkmobile.monitor.events.AbstractMonitorEvent;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
 import cl.niclabs.adkmobile.monitor.listeners.TrafficListener;
@@ -46,13 +48,13 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 	/**
 	 * Represents a mobile network for storage
 	 */
-	public static final int NETWORK_TYPE_MOBILE = Connectivity.ConnectionType.MOBILE
+	public static final int NETWORK_TYPE_MOBILE = ConnectionType.MOBILE
 			.value();
 
 	/**
 	 * Represents a wifi network for storage
 	 */
-	public static final int NETWORK_TYPE_WIFI = Connectivity.ConnectionType.WIFI
+	public static final int NETWORK_TYPE_WIFI = ConnectionType.WIFI
 			.value();
 
 	private Context mContext = this;
@@ -269,7 +271,8 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 
 	private ArrayList<Integer> uids;
 
-	@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
+	
+	@SuppressLint("NewApi")
 	private void notifyAppTraffic(int networkType, int uid) {
 
 		TrafficObservation appData = new TrafficObservation(TRAFFIC_APPLICATION, System.currentTimeMillis());
