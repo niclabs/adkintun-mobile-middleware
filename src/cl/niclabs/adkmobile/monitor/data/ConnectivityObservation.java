@@ -14,7 +14,7 @@ public class ConnectivityObservation extends AbstractObservation<ConnectivityObs
 	private boolean connected;
 	private boolean roaming;
 	private int connectionType;
-	private int connectionTypeOther;
+	private Integer connectionTypeOther;
 	
 	public ConnectivityObservation(long timestamp) {
 		super(Monitor.CONNECTIVITY, timestamp);
@@ -80,11 +80,11 @@ public class ConnectivityObservation extends AbstractObservation<ConnectivityObs
 	/**
 	 * @return the code for the network type if not listed in Connectivity.ConnectionType
 	 */
-	public int getConnectionTypeOther() {
+	public Integer getConnectionTypeOther() {
 		return connectionTypeOther;
 	}
 	
-	public void setConnectionTypeOther(int connectionTypeOther) {
+	public void setConnectionTypeOther(Integer connectionTypeOther) {
 		this.connectionTypeOther = connectionTypeOther;
 	}
 }

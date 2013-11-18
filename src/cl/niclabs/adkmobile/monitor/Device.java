@@ -3,6 +3,8 @@ package cl.niclabs.adkmobile.monitor;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
+import cl.niclabs.adkmobile.AdkintunMobileApp;
 import cl.niclabs.adkmobile.monitor.data.StateChange;
 
 /**
@@ -33,6 +35,7 @@ import cl.niclabs.adkmobile.monitor.data.StateChange;
  * @author Felipe Lalanne <flalanne@niclabs.cl>
  */
 public class Device extends BroadcastReceiver {
+	protected String TAG = "AdkintunMobile::Device";
 	
 	public static enum State {
 		BOOT(1), SHUTDOWN(2);
@@ -72,6 +75,7 @@ public class Device extends BroadcastReceiver {
 			StateChange stateChange = new StateChange(Monitor.DEVICE, System.currentTimeMillis());
 			stateChange.setState(State.BOOT.value());
 			
+			if (AdkintunMobileApp.DEBUG) Log.d(TAG, stateChange.toString());
 			try {
 				stateChange.save();
 			}
@@ -84,6 +88,7 @@ public class Device extends BroadcastReceiver {
 			StateChange stateChange = new StateChange(Monitor.DEVICE, System.currentTimeMillis());
 			stateChange.setState(State.SHUTDOWN.value());
 			
+			if (AdkintunMobileApp.DEBUG) Log.d(TAG, stateChange.toString());
 			try {
 				stateChange.save();
 			}
