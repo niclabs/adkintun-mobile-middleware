@@ -57,12 +57,20 @@ public class MonitorListenerConnection<M extends Monitor<L>, L extends MonitorLi
 			connected = true;
 		}
 	}
+	
+	/**
+	 * Called after calling disconnect()
+	 * @param service
+	 */
+	public void onServiceDisconnected(M service) {
+		
+	}
 
 	/**
 	 * Must be called when overriding the method
 	 */
 	@Override
-	public void onServiceDisconnected(M service) {
+	public void onServiceCrash(M service) {
 		synchronized(connected) {
 			monitor.listen(listener, false);
 			monitor = null;
@@ -89,6 +97,8 @@ public class MonitorListenerConnection<M extends Monitor<L>, L extends MonitorLi
 		if (connected) {
 			monitor.listen(listener, false);
 			c.unbindService(this);
+			
+			onServiceDisconnected(monitor);
 			monitor = null;
 			connected = false;
 		}

@@ -23,10 +23,10 @@ public abstract class MonitorConnection<E extends Monitor<?>> implements Service
 	public abstract void onServiceConnected(E service);
 	
 	/**
-	 * Called on service crash
+	 * Called on service crash 
 	 * @param monitor
 	 */
-	public abstract void onServiceDisconnected(E service);
+	public abstract void onServiceCrash(E service);
 	
 	@Override
 	public void onServiceConnected(ComponentName name, IBinder service) {
@@ -39,6 +39,6 @@ public abstract class MonitorConnection<E extends Monitor<?>> implements Service
 	/* Is only called on service crash */
 	@Override
 	public void onServiceDisconnected(ComponentName name) {
-		onServiceDisconnected(monitor);
+		onServiceCrash(monitor);
 	}
 };
