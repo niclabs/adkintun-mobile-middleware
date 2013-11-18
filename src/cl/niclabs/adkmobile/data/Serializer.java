@@ -7,21 +7,21 @@ import java.util.List;
 
 public interface Serializer {
 	/**
-	 * Write a serializable object to the specified output stream, closing the stream afterwards
+	 * Write a serializable object to the specified output stream
 	 * @param out
 	 * @param object
 	 */
 	public void serialize(OutputStream out, Serializable<?> object) throws IOException;
 
 	/**
-	 * Write a serializable list to the specified output stream, closing the stream afterwards
+	 * Write a serializable list to the specified output stream
 	 * @param out
 	 * @param list
 	 */
 	public void serialize(OutputStream out, List<Serializable<?>> list) throws IOException;
 	
 	/**
-	 * Write a serializable iterator to the specified output stream, closing the stream afterwards
+	 * Write a serializable iterator to the specified output stream
 	 * @param out
 	 * @param iterator
 	 * @throws IOException

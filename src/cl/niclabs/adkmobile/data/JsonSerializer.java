@@ -15,6 +15,27 @@ import android.util.Base64;
 import com.google.gson.stream.JsonWriter;
 import com.orm.StringUtil;
 
+
+/**
+ * Serializes an object or a list to JSON.
+ * 
+ * Note that this is a single usage serializer and two consecutive calls to an
+ * open stream will render invalid JSON
+ * 
+ * For example the code below will render
+ * <code>{<contentes of object1>}{<contents of object2>}</code> which will be
+ * parsed correctly as JSON <code>
+ * JsonSerializer serializer = new JsonSerializer();
+ * OutputStream out = new FileOutputStream(new File("file.json"));
+ * serializer.serialize(out, object1);
+ * serializer.serialize(out, object2);
+ * </code>
+ * 
+ * 
+ * 
+ * @author Felipe Lalanne <flalanne@niclabs.cl>
+ * 
+ */
 public class JsonSerializer implements Serializer {
 	/**
 	 * Open a JsonWriter and write the object provided as input. It is responsibility of the user to close 
@@ -27,7 +48,7 @@ public class JsonSerializer implements Serializer {
 	public void serialize(OutputStream out, Serializable<?> object) throws IOException {
 		JsonWriter writer = new JsonWriter(new OutputStreamWriter(out, "UTF-8"));
 		serialize(writer, object);
-		writer.close();
+		writer.flush();
 	}
 	
 	/**
@@ -42,7 +63,7 @@ public class JsonSerializer implements Serializer {
 	public void serialize(OutputStream out, List<Serializable<?>> list) throws IOException {
 		JsonWriter writer = new JsonWriter(new OutputStreamWriter(out, "UTF-8"));
 		serialize(writer, list.iterator());
-		writer.close();
+		writer.flush();
 	}
 	
 	/**
@@ -57,7 +78,7 @@ public class JsonSerializer implements Serializer {
 	public void serialize(OutputStream out, Iterator<Serializable<?>> iterator) throws IOException {
 		JsonWriter writer = new JsonWriter(new OutputStreamWriter(out, "UTF-8"));
 		serialize(writer, iterator);
-		writer.close();
+		writer.flush();
 	}
 	
 	/**
