@@ -20,10 +20,13 @@ import cl.niclabs.adkmobile.monitor.data.constants.StateType;
  * order to be able to save the state.
  * 
  * The class must be registered to the manifest as a broadcast receiver in order
- * to register the event.
+ * to register the event, and it requires the permission android.permission.RECEIVE_BOOT_COMPLETED
  * 
  * <code>
- * <receiver android:name="cl.niclabs.adkmobile.monitor.Device"
+ * <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+ * <application>
+ * ...
+ * 		<receiver android:name="cl.niclabs.adkmobile.monitor.Device"
  * 			android:enabled="true"
  *      	android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
  *          <intent-filter>
@@ -32,7 +35,10 @@ import cl.niclabs.adkmobile.monitor.data.constants.StateType;
  *              <category android:name="android.intent.category.DEFAULT" />
  *          </intent-filter>
  *      </receiver>
+ *      ...
+ * </application>
  * </code>
+ * 
  * 
  * @author Felipe Lalanne <flalanne@niclabs.cl>
  */
