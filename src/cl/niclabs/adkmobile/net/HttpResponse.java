@@ -1,14 +1,17 @@
 package cl.niclabs.adkmobile.net;
 
-import java.io.DataInputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 
 public class HttpResponse {
 	protected int code;
-	protected DataInputStream stream;
+	protected InputStream stream;
+	protected HttpURLConnection connection;
 	
-	public HttpResponse(int code, DataInputStream content) {
+	public HttpResponse(int code, InputStream stream, HttpURLConnection connection) {
 		this.code = code;
-		this.stream = content;
+		this.stream = stream;
+		this.connection = connection;
 	}
 	
 	public int getCode() {
@@ -19,7 +22,14 @@ public class HttpResponse {
 	 * 
 	 * @return the content of the response
 	 */
-	public DataInputStream getStream() {
+	public InputStream getStream() {
 		return stream;
+	}
+	
+	/**
+	 * Close the connection for this responses
+	 */
+	public void close() {
+		connection.disconnect();
 	}
 }

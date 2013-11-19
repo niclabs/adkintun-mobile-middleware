@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
-import android.util.Log;
 import cl.niclabs.adkmobile.monitor.data.Observation;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
 import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
@@ -127,9 +126,6 @@ public abstract class AbstractMonitor<E extends MonitorListener> extends Service
 		
 		/* Listen for activation messages */
 		registerReceiver(eventController, filter);
-		
-		/* TODO: Apply configuration from general preferences and listen to general broadcasts */
-		if(DEBUG) Log.d(TAG, TAG + " sensor started...");
 	}
 	
 	@Override
@@ -142,9 +138,6 @@ public abstract class AbstractMonitor<E extends MonitorListener> extends Service
 		 * Deactivate all the events for this monitor
 		 */
 		deactivate(ALL_EVENTS);
-		
-		/* TODO: Unregister broadcasts */
-		if(DEBUG) Log.d(TAG, TAG + " sensor terminated...");
 	}
 
 	@Override
@@ -153,8 +146,6 @@ public abstract class AbstractMonitor<E extends MonitorListener> extends Service
 		
 		/* Activate the events specified on the intent */
 		activate(intent.getIntExtra(EVENTS_EXTRA, 0), intent.getExtras());
-		
-		if(DEBUG) Log.d(TAG, TAG + " sensor active...");
 		
         return START_STICKY;
 	}

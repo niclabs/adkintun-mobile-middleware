@@ -327,7 +327,7 @@ public class Location extends AbstractMonitor<LocationListener> {
 				locationManager.removeUpdates(locationListener);
 				locationManager.removeGpsStatusListener(gpsStatusListener);
 
-				if (DEBUG) Log.d(TAG, "Locations GPS service terminated...");
+				if (DEBUG) Log.d(TAG, "Location GPS service terminated...");
 			}
 		}
 
@@ -426,7 +426,6 @@ public class Location extends AbstractMonitor<LocationListener> {
 
 	@Override
 	public IBinder onBind(Intent intent) {
-		if(DEBUG) Log.d(TAG, "Service has been bound");
 		return serviceBinder;
 	}
 

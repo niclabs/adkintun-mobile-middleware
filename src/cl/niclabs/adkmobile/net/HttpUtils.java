@@ -1,9 +1,7 @@
 package cl.niclabs.adkmobile.net;
 
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -34,7 +32,7 @@ public class HttpUtils {
 	public static final String CRLF = "\r\n";
 	public static final String GET = "GET";
 	public static final String POST = "POST";
-	public static final String BOUNDARY = "*****";
+	public static final String BOUNDARY = "a23bc126f";
 	private static final String TWO_HYPHENS = "--";
 	
 	private HttpURLConnection connection;
@@ -72,10 +70,10 @@ public class HttpUtils {
 	 * @param fileType content type of the file
 	 * @param fileField field name for the posted file
 	 * @param postParameters extra post parameters
-	 * @return
+	 * @return the result from HttpURLConnection.getOutputStream()
 	 * @throws IOException 
 	 */
-	protected OutputStream prepareFilePost(String fileName, String fileType, String fileField,  Map<String,String> postParameters) throws IOException {
+	protected DataOutputStream prepareFilePost(String fileName, String fileType, String fileField,  Map<String,String> postParameters) throws IOException {
 		// Enable POST method
 		connection.setRequestMethod(POST);
 		connection.setChunkedStreamingMode(0); //Use the default
@@ -89,21 +87,18 @@ public class HttpUtils {
 			for (String key: postParameters.keySet()) {
 				// Writer parameter
 				urlStream.writeBytes(TWO_HYPHENS + BOUNDARY + CRLF);
-				urlStream.writeBytes("Content-Disposition: form-data; name=\""+key+"\"");
-				urlStream.writeBytes(CRLF);
+				urlStream.writeBytes("Content-Disposition: form-data; name=\""+key+"\"" + CRLF);
 				urlStream.writeBytes(CRLF);
 				urlStream.writeBytes(postParameters.get(key));
+				urlStream.writeBytes(CRLF);
 			}
 		}
 		
 		// Write file
 		urlStream.writeBytes(TWO_HYPHENS + BOUNDARY + CRLF);
-		urlStream.writeBytes("Content-Disposition: form-data; name=\""+fileField+"\";filename=\""+ fileName + "\"");
-		urlStream.writeBytes(CRLF);
-		urlStream.writeBytes("Content-Type: "+fileType);
-		urlStream.writeBytes(CRLF);
-		urlStream.writeBytes("Content-Transfer-Encoding: binary");
-		urlStream.writeBytes(CRLF);
+		urlStream.writeBytes("Content-Disposition: form-data; name=\""+fileField+"\";filename=\""+ fileName + "\"" + CRLF);
+		urlStream.writeBytes("Content-Type: "+fileType + CRLF);
+		urlStream.writeBytes("Content-Transfer-Encoding: binary" + CRLF);
 		urlStream.writeBytes(CRLF);
 		
 		return urlStream;
@@ -116,9 +111,13 @@ public class HttpUtils {
 		urlStream.flush();
 		urlStream.close();
 		
-		HttpResponse response = new HttpResponse(connection.getResponseCode(), new DataInputStream(connection.getInputStream()));
-		
-		connection.disconnect();
+		HttpResponse response;
+		if (connection.getResponseCode() == 200) {
+			response = new HttpResponse(connection.getResponseCode(), connection.getInputStream(), connection);
+		}
+		else {
+			response = new HttpResponse(connection.getResponseCode(), connection.getErrorStream(), connection);
+		}
 		
 		return response;
 	}
@@ -139,6 +138,7 @@ public class HttpUtils {
 				GZIPOutputStream out = new GZIPOutputStream(http.prepareFilePost(POST_FILE_NAME, POST_FILE_TYPE, POST_FILE_FIELD, postParameters));
 				Serializer serializer = SerializerFactory.getInstance().getSerializer();
 				serializer.serialize(out, serializable);
+				out.finish();
 				
 				HttpResponse response = http.finishFilePost();
 				Log.d(TAG, "Server responded with code "+response.getCode());
@@ -148,7 +148,7 @@ public class HttpUtils {
 		catch (MalformedURLException e) {
 			Log.e(TAG, "Malformed url "+url);
 		} catch (IOException e) {
-			Log.e(TAG, "IOException: " + e.getMessage());
+			e.printStackTrace();
 		}
 		
 		return null;
@@ -169,6 +169,7 @@ public class HttpUtils {
 				GZIPOutputStream out = new GZIPOutputStream(http.prepareFilePost(POST_FILE_NAME, POST_FILE_TYPE, POST_FILE_FIELD, postParameters));
 				Serializer serializer = SerializerFactory.getInstance().getSerializer();
 				serializer.serialize(out, list);
+				out.finish();
 				
 				HttpResponse response = http.finishFilePost();
 				Log.d(TAG, "Server responded with code "+response.getCode());
@@ -178,7 +179,7 @@ public class HttpUtils {
 		catch (MalformedURLException e) {
 			Log.e(TAG, "Malformed url "+url);
 		} catch (IOException e) {
-			Log.e(TAG, "IOException: " + e.getMessage());
+			e.printStackTrace();
 		}
 		
 		return null;

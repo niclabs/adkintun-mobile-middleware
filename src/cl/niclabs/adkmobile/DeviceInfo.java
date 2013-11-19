@@ -7,6 +7,11 @@ import android.telephony.TelephonyManager;
 import cl.niclabs.adkmobile.data.AbstractSerializable;
 import cl.niclabs.adkmobile.data.DoNotSerialize;
 
+/**
+ * Provides information about the device (id, brand, manufacturer, etc).
+ * 
+ * @author Felipe Lalanne <flalanne@niclabs.cl>
+ */
 public class DeviceInfo extends AbstractSerializable<DeviceInfo> {
 	@DoNotSerialize
 	private static TelephonyManager telephonyManager;
