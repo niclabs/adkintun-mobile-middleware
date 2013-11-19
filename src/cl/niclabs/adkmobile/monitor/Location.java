@@ -273,8 +273,6 @@ public class Location extends AbstractMonitor<LocationListener> {
 
 		@Override
         public void onStatusChanged(String provider, int status, Bundle extras) {
-            if(DEBUG) Log.d(TAG, "onStatusChanged: "+provider+ " Status:"+status+" Extras:"+extras.toString());
-            
             if( status == LocationProvider.AVAILABLE ) {
             	//Save best location, could be GPS or network
 				//This covers the case when the GPS stopped and we did not get a location fix.
