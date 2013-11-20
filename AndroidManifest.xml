@@ -7,16 +7,31 @@
         android:minSdkVersion="8"
         android:targetSdkVersion="18" />
 
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- Required by Connectivity service -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    
+    <!-- Required by Location service -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    
+    <!-- Required by Location service and Telephony service -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_UPDATES" />
+    
+    <!-- Required by Telephony service -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    
+    <!-- Required by HttpUtils -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    
+    <!-- Required by Device monitor -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme"
+        android:name="cl.niclabs.adkmobile.AdkintunMobileApp"> <!-- android:name required in order to enable persistence -->
         
         <service android:name="cl.niclabs.adkmobile.monitor.Connectivity" >
         </service>
@@ -35,6 +50,7 @@
 		<meta-data android:name="QUERY_LOG" android:value="true" />
 		<meta-data android:name="DOMAIN_PACKAGE_NAME" android:value="cl.niclabs.adkmobile.monitor.data" />
 
+		<!-- Register receiver in order to monitor device boot state -->
         <receiver android:name="cl.niclabs.adkmobile.monitor.Device" 
             android:enabled="true"
         	android:permission="android.permission.RECEIVE_BOOT_COMPLETED" >
