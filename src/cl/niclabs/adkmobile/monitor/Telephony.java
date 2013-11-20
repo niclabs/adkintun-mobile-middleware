@@ -395,11 +395,10 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 	private TelephonyStateListener telephonyStateListener = new TelephonyStateListener();
 
 	@Override
-	public boolean activate(int events, Bundle configuration) {
+	public void activate(int events, Bundle configuration) {
 		if ((events & TELEPHONY) == TELEPHONY) {
-			return activate(telephonyEvent);
+			activate(telephonyEvent);
 		}
-		return false;
 	}
 
 	@Override

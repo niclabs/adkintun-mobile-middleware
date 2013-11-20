@@ -144,11 +144,10 @@ public class Connectivity extends AbstractMonitor<ConnectivityListener> {
 	private ConnectivityObservation lastObservation = null;
 
 	@Override
-	public boolean activate(int events, Bundle configuration) {
+	public void activate(int events, Bundle configuration) {
 		if ((events & CONNECTIVITY) == CONNECTIVITY) {
-			return activate(connectivityEvent);
+			activate(connectivityEvent);
 		}
-		return false;
 	}
 
 	@Override

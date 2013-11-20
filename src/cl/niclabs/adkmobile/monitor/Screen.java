@@ -109,11 +109,10 @@ public class Screen extends AbstractMonitor<ScreenListener> {
 	};
 	
 	@Override
-	public boolean activate(int events, Bundle configuration) {
+	public void activate(int events, Bundle configuration) {
 		if ((events & SCREEN) == SCREEN) {
-			return activate(screenEvent);
+			activate(screenEvent);
 		}
-		return false;
 	}
 
 	@Override

@@ -392,19 +392,17 @@ public class Location extends AbstractMonitor<LocationListener> {
 	};
 
 	@Override
-	public boolean activate(int events, Bundle configuration) {
+	public void activate(int events, Bundle configuration) {
 		EXPIRATION_TIME = configuration.getInt(
 				EXPIRATION_TIME_EXTRA, EXPIRATION_TIME);
 		
-		boolean gpsLocationActive = false;
-		boolean networkLocationActive = false;
 		if ((events & LOCATION_GPS) == LOCATION_GPS) {
 			UPDATE_TIME_GPS = configuration.getInt(
 					UPDATE_TIME_GPS_EXTRA, UPDATE_TIME_GPS);
 			UPDATE_DISTANCE_GPS = configuration.getInt(
 					UPDATE_DISTANCE_GPS_EXTRA, UPDATE_DISTANCE_GPS);
 			
-			gpsLocationActive = activate(gpsLocationEvent);
+			activate(gpsLocationEvent);
 		}
 		if ((events & LOCATION_NETWORK) == LOCATION_NETWORK) {
 			UPDATE_TIME_NETWORK = configuration.getInt(
@@ -412,10 +410,8 @@ public class Location extends AbstractMonitor<LocationListener> {
 			UPDATE_DISTANCE_NETWORK = configuration.getInt(
 					UPDATE_DISTANCE_NETWORK_EXTRA, UPDATE_DISTANCE_NETWORK);
 			
-			networkLocationActive = activate(networkLocationEvent);
+			activate(networkLocationEvent);
 		}
-		
-		return gpsLocationActive & networkLocationActive;
 	}
 
 	@Override

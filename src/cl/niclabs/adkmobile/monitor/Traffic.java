@@ -518,28 +518,22 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 	protected String TAG = "AdkintunMobile::Traffic";
 
 	@Override
-	public boolean activate(int events, Bundle configuration) {
+	public void activate(int events, Bundle configuration) {
 		/* Update the traffic update interval */
 		TRAFFIC_UPDATE_INTERVAL = configuration.getInt(
 				TRAFFIC_UPDATE_INTERVAL_EXTRA, TRAFFIC_UPDATE_INTERVAL);
 
-		boolean mobileTrafficActivated = false;
 		if ((events & TRAFFIC_MOBILE) == TRAFFIC_MOBILE) {
-			mobileTrafficActivated = activate(mobileTrafficEvent);
+			activate(mobileTrafficEvent);
 		}
 
-		boolean wifiTrafficActivated = false;
 		if ((events & TRAFFIC_WIFI) == TRAFFIC_WIFI) {
-			wifiTrafficActivated = activate(wifiTrafficEvent);
+			activate(wifiTrafficEvent);
 		}
 
-		boolean appTrafficActivated = false;
 		if ((events & TRAFFIC_APPLICATION) == TRAFFIC_APPLICATION) {
-			appTrafficActivated = activate(appTrafficEvent);
+			activate(appTrafficEvent);
 		}
-
-		return mobileTrafficActivated && wifiTrafficActivated
-				&& appTrafficActivated;
 	}
 
 	@Override
