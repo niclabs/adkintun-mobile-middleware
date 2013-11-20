@@ -156,7 +156,7 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 
 			/* Log the results */
 			if (DEBUG)
-				Log.d(TAG, mobileData.toString());
+				Log.v(TAG, mobileData.toString());
 		}
 	};
 
@@ -240,7 +240,7 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 
 			/* Log the results */
 			if (DEBUG)
-				Log.d(TAG, wifiData.toString());
+				Log.v(TAG, wifiData.toString());
 		}
 	};
 
@@ -326,7 +326,7 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 
 		/* Log the results */
 		if (DEBUG)
-			Log.d(TAG, appData.toString());
+			Log.v(TAG, appData.toString());
 	}
 
 	private MonitorEvent<TrafficListener> mobileTrafficEvent = new AbstractMonitorEvent<TrafficListener>() {
