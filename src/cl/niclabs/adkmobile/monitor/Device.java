@@ -71,11 +71,8 @@ public class Device extends BroadcastReceiver {
 			stateChange.setState(DeviceBootState.BOOT.value());
 			
 			if (AdkintunMobileApp.DEBUG) Log.v(TAG, stateChange.toString());
-			try {
+			if (AdkintunMobileApp.isPersistenceAvailable())
 				stateChange.save();
-			}
-			catch (NullPointerException e) { //Returned by sugar if the SugarApp is not defined in the manifest 
-			}
 			
 			onBootCompleted();
 		}
@@ -85,11 +82,8 @@ public class Device extends BroadcastReceiver {
 			stateChange.setState(DeviceBootState.SHUTDOWN.value());
 			
 			if (AdkintunMobileApp.DEBUG) Log.v(TAG, stateChange.toString());
-			try {
+			if (AdkintunMobileApp.isPersistenceAvailable())
 				stateChange.save();
-			}
-			catch (NullPointerException e) { //Returned by sugar if the SugarApp is not defined in the manifest 
-			}
 			
 			onShutdown();
 		}

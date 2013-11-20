@@ -1,5 +1,6 @@
 package cl.niclabs.adkmobile.data;
 
+import cl.niclabs.adkmobile.AdkintunMobileApp;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
@@ -21,10 +22,11 @@ public class PersistenceService extends Service {
 	}
 	
 	/**
-	 * Save the persistent object
+	 * Save the persistent object if persistence is enabled
 	 * @param persistent
 	 */
 	protected void save(Persistent<?> persistent) {
-		persistent.save();
+		if (AdkintunMobileApp.isPersistenceAvailable())
+			persistent.save();
 	}
 }

@@ -30,6 +30,16 @@ public class AdkintunMobileApp extends SugarApp {
 	 * Library version
 	 */
 	public static final String VERSION = "1.0b";
+	
+	/**
+	 * Define persistence state for the whole application
+	 */
+	public static boolean PERSISTENCE_ENABLED = true;
+	
+	/**
+	 * Application context, will be null if the application is not added to the manifest
+	 */
+	private static AdkintunMobileApp adkintunMobileContext;
 
 	@Override
 	public void onTerminate() {
@@ -37,5 +47,25 @@ public class AdkintunMobileApp extends SugarApp {
 		
 		// Shutdown the scheduler
 		Scheduler.getInstance().shutdown();
+	}
+	
+	
+	
+	@Override
+	public void onCreate() {
+		// TODO Auto-generated method stub
+		super.onCreate();
+		
+		/* Set context (it will be null if application is not added to manifest_ */
+		adkintunMobileContext = this;
+	}
+
+
+	/**
+	 * 
+	 * @return true if persistence is available for this application
+	 */
+	public static boolean isPersistenceAvailable() {
+		return adkintunMobileContext != null && PERSISTENCE_ENABLED;
 	}
 }
