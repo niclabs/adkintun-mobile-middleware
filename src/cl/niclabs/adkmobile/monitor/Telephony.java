@@ -142,7 +142,7 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 				notifyListeners(telephonyEvent, data);
 
 				/* Log the results */
-				if (DEBUG) Log.d(TAG, data.toString());
+				if (DEBUG) Log.v(TAG, data.toString());
 			} 
 			else {
 				CdmaCellLocation loc = (CdmaCellLocation) location;
@@ -186,7 +186,7 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 				notifyListeners(telephonyEvent, data);
 
 				/* Log the results */
-				if (DEBUG) Log.d(TAG, data.toString());
+				if (DEBUG) Log.v(TAG, data.toString());
 			}
 		}
 
@@ -208,7 +208,7 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 				/* Notify the state */
 				notifyListeners(telephonyEvent, simStateChange);
 				
-				if (DEBUG) Log.d(TAG, simStateChange.toString());
+				if (DEBUG) Log.v(TAG, simStateChange.toString());
 				
 				lastSimState = SimState.valueOf(simState);
 			}
@@ -235,7 +235,7 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 			/* Notify the state */
 			notifyListeners(telephonyEvent, stateChange);
 			
-			if (DEBUG) Log.d(TAG, stateChange.toString());
+			if (DEBUG) Log.v(TAG, stateChange.toString());
 			
 			
 			/**
@@ -250,12 +250,11 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 				/* Notify the state */
 				notifyListeners(telephonyEvent, simStateChange);
 				
-				if (DEBUG) Log.d(TAG, simStateChange.toString());
+				if (DEBUG) Log.v(TAG, simStateChange.toString());
 				
 				lastSimState = SimState.valueOf(simState);
 			}
 		}
-		
 	}
 	
 	private BroadcastReceiver airplaneModeMonitor = new BroadcastReceiver(){
@@ -289,7 +288,7 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 				
 				notifyListeners(telephonyEvent, data);
 				
-				if (DEBUG) Log.d(TAG, data.toString());
+				if (DEBUG) Log.v(TAG, data.toString());
 			}
 			
 		}		

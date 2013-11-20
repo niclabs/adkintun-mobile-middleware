@@ -38,7 +38,7 @@ public class Screen extends AbstractMonitor<ScreenListener> {
 
 				/* Notify listeners and update internal state */
 				notifyListeners(screenEvent, data);
-				Log.d(TAG, data.toString());
+				if (DEBUG) Log.v(TAG, data.toString());
 
 			}
 			if (intent.getAction().equalsIgnoreCase(Intent.ACTION_SCREEN_OFF)) {
@@ -55,7 +55,7 @@ public class Screen extends AbstractMonitor<ScreenListener> {
 				}
 				/* Notify listeners and update internal state */
 				notifyListeners(screenEvent, data);
-				Log.d(TAG, data.toString());
+				if (DEBUG) Log.v(TAG, data.toString());
 
 			}
 			if (intent.getAction().equals(Intent.ACTION_USER_PRESENT)) {
@@ -66,7 +66,7 @@ public class Screen extends AbstractMonitor<ScreenListener> {
 
 				/* Notify listeners and update internal state */
 				notifyListeners(screenEvent, data);
-				Log.d(TAG, data.toString());
+				if (DEBUG) Log.v(TAG, data.toString());
 			}
 		}		
 	};

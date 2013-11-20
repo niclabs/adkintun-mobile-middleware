@@ -70,7 +70,7 @@ public class Device extends BroadcastReceiver {
 			stateChange.setStateType(StateType.DEVICE_BOOT);
 			stateChange.setState(DeviceBootState.BOOT.value());
 			
-			if (AdkintunMobileApp.DEBUG) Log.d(TAG, stateChange.toString());
+			if (AdkintunMobileApp.DEBUG) Log.v(TAG, stateChange.toString());
 			try {
 				stateChange.save();
 			}
@@ -84,7 +84,7 @@ public class Device extends BroadcastReceiver {
 			stateChange.setStateType(StateType.DEVICE_BOOT);
 			stateChange.setState(DeviceBootState.SHUTDOWN.value());
 			
-			if (AdkintunMobileApp.DEBUG) Log.d(TAG, stateChange.toString());
+			if (AdkintunMobileApp.DEBUG) Log.v(TAG, stateChange.toString());
 			try {
 				stateChange.save();
 			}

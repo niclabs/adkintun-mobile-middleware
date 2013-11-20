@@ -85,7 +85,7 @@ public class Connectivity extends AbstractMonitor<ConnectivityListener> {
 						notifyListeners(connectivityEvent, data);
 						
 						// Log new state
-						if(DEBUG) Log.d(TAG, data.toString());
+						if(DEBUG) Log.v(TAG, data.toString());
 					}
 					lastObservation = (ConnectivityObservation) data;
 					return; 
@@ -124,7 +124,7 @@ public class Connectivity extends AbstractMonitor<ConnectivityListener> {
 					notifyListeners(connectivityEvent, data);
 					
 					// Log new state
-					if(DEBUG) Log.d(TAG, data.toString());
+					if(DEBUG) Log.v(TAG, data.toString());
 				}
 				lastObservation = (ConnectivityObservation) data;
 			}

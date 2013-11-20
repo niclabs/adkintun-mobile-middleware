@@ -67,7 +67,7 @@ public class Location extends AbstractMonitor<LocationListener> {
 				stateChange.setState(LocationState.ENABLED.value());
 				notifyListeners(gpsLocationEvent, stateChange);
 				
-				if (DEBUG) Log.d(TAG, stateChange.toString());
+				if (DEBUG) Log.v(TAG, stateChange.toString());
 				break;
 			case GpsStatus.GPS_EVENT_STOPPED:
 				if (bestLocation == null)
@@ -86,8 +86,8 @@ public class Location extends AbstractMonitor<LocationListener> {
 				
 				/* Log the results */
 				if (DEBUG) {
-					Log.d(TAG, locationData.toString());
-					Log.d(TAG, stateChange.toString());
+					Log.v(TAG, locationData.toString());
+					Log.v(TAG, stateChange.toString());
 				}
 				
 				break;
@@ -226,7 +226,7 @@ public class Location extends AbstractMonitor<LocationListener> {
 				notifyListeners(networkLocationEvent, observation);
 			}
 			
-			if (DEBUG) Log.d(TAG, observation.toString());
+			if (DEBUG) Log.v(TAG, observation.toString());
         }
 
 		@Override
@@ -238,7 +238,7 @@ public class Location extends AbstractMonitor<LocationListener> {
 				stateChange.setState(LocationState.DISABLED.value());
 				stateChange.setStateType(StateType.LOCATION);
 				notifyListeners(gpsLocationEvent, stateChange);
-				if (DEBUG) Log.d(TAG, stateChange.toString());
+				if (DEBUG) Log.v(TAG, stateChange.toString());
 			}
 			else if (provider.equals(LocationManager.NETWORK_PROVIDER)) {
 				/* Notify state change */
@@ -246,7 +246,7 @@ public class Location extends AbstractMonitor<LocationListener> {
 				stateChange.setState(LocationState.DISABLED.value());
 				stateChange.setStateType(StateType.LOCATION);
 				notifyListeners(networkLocationEvent, stateChange);
-				if (DEBUG) Log.d(TAG, stateChange.toString());
+				if (DEBUG) Log.v(TAG, stateChange.toString());
 			}
 		}
 
@@ -259,7 +259,7 @@ public class Location extends AbstractMonitor<LocationListener> {
 				stateChange.setState(LocationState.ENABLED.value());
 				stateChange.setStateType(StateType.LOCATION);
 				notifyListeners(gpsLocationEvent, stateChange);
-				if (DEBUG) Log.d(TAG, stateChange.toString());
+				if (DEBUG) Log.v(TAG, stateChange.toString());
 			}
 			else if (provider.equals(LocationManager.NETWORK_PROVIDER)) {
 				/* Notify state change */
@@ -267,7 +267,7 @@ public class Location extends AbstractMonitor<LocationListener> {
 				stateChange.setState(LocationState.ENABLED.value());
 				stateChange.setStateType(StateType.LOCATION);
 				notifyListeners(networkLocationEvent, stateChange);
-				if (DEBUG) Log.d(TAG, stateChange.toString());
+				if (DEBUG) Log.v(TAG, stateChange.toString());
 			}
 		}
 
@@ -395,13 +395,16 @@ public class Location extends AbstractMonitor<LocationListener> {
 	public boolean activate(int events, Bundle configuration) {
 		EXPIRATION_TIME = configuration.getInt(
 				EXPIRATION_TIME_EXTRA, EXPIRATION_TIME);
+		
+		boolean gpsLocationActive = false;
+		boolean networkLocationActive = false;
 		if ((events & LOCATION_GPS) == LOCATION_GPS) {
 			UPDATE_TIME_GPS = configuration.getInt(
 					UPDATE_TIME_GPS_EXTRA, UPDATE_TIME_GPS);
 			UPDATE_DISTANCE_GPS = configuration.getInt(
 					UPDATE_DISTANCE_GPS_EXTRA, UPDATE_DISTANCE_GPS);
 			
-			return activate(gpsLocationEvent);
+			gpsLocationActive = activate(gpsLocationEvent);
 		}
 		if ((events & LOCATION_NETWORK) == LOCATION_NETWORK) {
 			UPDATE_TIME_NETWORK = configuration.getInt(
@@ -409,9 +412,10 @@ public class Location extends AbstractMonitor<LocationListener> {
 			UPDATE_DISTANCE_NETWORK = configuration.getInt(
 					UPDATE_DISTANCE_NETWORK_EXTRA, UPDATE_DISTANCE_NETWORK);
 			
-			return activate(networkLocationEvent);
+			networkLocationActive = activate(networkLocationEvent);
 		}
-		return false;
+		
+		return gpsLocationActive & networkLocationActive;
 	}
 
 	@Override
