@@ -1,7 +1,5 @@
 package cl.niclabs.adkmobile.monitor;
 
-import java.util.List;
-
 import android.content.Intent;
 import android.location.GpsStatus;
 import android.location.LocationManager;
@@ -233,6 +231,8 @@ public class Location extends AbstractMonitor<LocationListener> {
 		public void onProviderDisabled(String provider) {
 			StateChange stateChange;
 			if (provider.equals(LocationManager.GPS_PROVIDER)) {
+				if (DEBUG) Log.d(TAG, "Gps location provider is disabled");
+				
 				/* Notify state change */
 				stateChange = new StateChange(LOCATION_GPS, System.currentTimeMillis());
 				stateChange.setState(LocationState.DISABLED.value());
@@ -241,6 +241,8 @@ public class Location extends AbstractMonitor<LocationListener> {
 				if (DEBUG) Log.v(TAG, stateChange.toString());
 			}
 			else if (provider.equals(LocationManager.NETWORK_PROVIDER)) {
+				if (DEBUG) Log.d(TAG, "Network location provider is disabled");
+				
 				/* Notify state change */
 				stateChange = new StateChange(LOCATION_NETWORK, System.currentTimeMillis());
 				stateChange.setState(LocationState.DISABLED.value());
@@ -254,6 +256,8 @@ public class Location extends AbstractMonitor<LocationListener> {
 		public void onProviderEnabled(String provider) {
 			StateChange stateChange;
 			if (provider.equals(LocationManager.GPS_PROVIDER)) {
+				if (DEBUG) Log.d(TAG, "Gps location provider is enabled");
+				
 				/* Notify state change */
 				stateChange = new StateChange(LOCATION_GPS, System.currentTimeMillis());
 				stateChange.setState(LocationState.ENABLED.value());
@@ -262,6 +266,8 @@ public class Location extends AbstractMonitor<LocationListener> {
 				if (DEBUG) Log.v(TAG, stateChange.toString());
 			}
 			else if (provider.equals(LocationManager.NETWORK_PROVIDER)) {
+				if (DEBUG) Log.d(TAG, "Network location provider is enabled");
+				
 				/* Notify state change */
 				stateChange = new StateChange(LOCATION_NETWORK, System.currentTimeMillis());
 				stateChange.setState(LocationState.ENABLED.value());
@@ -300,13 +306,6 @@ public class Location extends AbstractMonitor<LocationListener> {
 		@Override
 		public synchronized boolean activate() {
 			if (!isActive()) {
-				List<String> providers = locationManager.getProviders(true);
-
-				if (!providers.contains(LocationManager.GPS_PROVIDER)) {
-					if (DEBUG) Log.d(TAG, "Location tracking with GPS is unavailable");
-					return false;
-				}
-
 				locationManager.addGpsStatusListener(gpsStatusListener);
 				locationManager.requestLocationUpdates(
 						LocationManager.GPS_PROVIDER, UPDATE_TIME_GPS * 1000,
@@ -348,14 +347,6 @@ public class Location extends AbstractMonitor<LocationListener> {
 		@Override
 		public synchronized boolean activate() {
 			if (!isActive()) {
-				List<String> providers = locationManager.getProviders(true);
-
-				if (!providers.contains(LocationManager.NETWORK_PROVIDER)) {
-					if (DEBUG)
-						Log.d(TAG, "Location tracking with Network is unavailable");
-					return false;
-				}
-
 				super.activate();
 
 				locationManager.requestLocationUpdates(
@@ -363,7 +354,6 @@ public class Location extends AbstractMonitor<LocationListener> {
 						UPDATE_TIME_NETWORK * 1000, UPDATE_DISTANCE_NETWORK,
 						locationListener);
 				if (DEBUG) Log.d(TAG, "Location tracking with Network is active");
-
 			}
 			return true;
 		}
