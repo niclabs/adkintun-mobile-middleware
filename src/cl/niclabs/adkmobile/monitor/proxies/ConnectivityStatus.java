@@ -10,7 +10,7 @@ import cl.niclabs.adkmobile.utils.Notifier;
 public class ConnectivityStatus extends MonitorProxy<ConnectivityStatusListener> implements ConnectivityListener {
 	private ConnectivityObservation data;
 	
-	protected String TAG = "AdkintunMobile::ConectivityStatus";
+	protected String TAG = "AdkintunMobile::ConnectivityStatus";
 	
 	boolean switchedNetwork			= false;
 	boolean switchedRoamingStatus	= false;

@@ -46,7 +46,6 @@ public class Connectivity extends AbstractMonitor<ConnectivityListener> {
 		@Override
 		public synchronized void deactivate() {
 			if (isActive()) {
-				// TODO: what happens if the event is not active and we call unregisterReceiver?
 				unregisterReceiver(connectivityMonitor);
 				
 				if(DEBUG) Log.d(TAG, "Connectivity service has been deactivated");
@@ -64,57 +63,71 @@ public class Connectivity extends AbstractMonitor<ConnectivityListener> {
 	private BroadcastReceiver connectivityMonitor = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			// TODO: On API level 17, the intent contains the extra EXTRA_NETWORK_TYPE 
-			// that can be used with ConnectivityManager.getNetworkInfo(int) in order
-			// to obtain the new network info
-			// Get the NetworkInfo object
-			NetworkInfo ni = connectivityManager.getActiveNetworkInfo();
-					
-			ConnectivityObservation data = new ConnectivityObservation(System.currentTimeMillis());
-			
-			/* When no network is active
-			 * the variable is null
-			 * TODO: should we record this? */
-			if (ni == null) {
-				Log.w(TAG, "No active data connection");
+			if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {		
+				ConnectivityObservation data = new ConnectivityObservation(System.currentTimeMillis());
 				
-				TelephonyManager telephony = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-				
-			    if (telephony.getDataState() == TelephonyManager.DATA_DISCONNECTED ||
-			    		telephony.getDataState() == TelephonyManager.DATA_SUSPENDED) {
-			    
+				/* When no network is active
+				 * the variable is null
+				 * TODO: should we record this? */
+				if (intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false)) {					
+					TelephonyManager telephony = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
 			    	data.setConnected(false);
 			    	if (telephony.isNetworkRoaming()) {
 			    		data.setRoaming(true);
 			    	}
 			    	data.setAvailable(false);  
-			    	
-			    	// Log new state
-					if(DEBUG) Log.d(TAG, data.toString());
-
+			    	data.setConnectionType(ConnectionType.NONE);
+		
+			    	if (!data.equals(lastObservation)) {// Do not send the same observation twice in a row
+						if (DEBUG) Log.d(TAG, "No active data connection");
+			    		
+						/* Notify listeners and update internal state */
+						notifyListeners(connectivityEvent, data);
+						
+						// Log new state
+						if(DEBUG) Log.d(TAG, data.toString());
+					}
+					lastObservation = (ConnectivityObservation) data;
+					return; 
+				}
+				
+				// Get the NetworkInfo object
+				NetworkInfo ni = connectivityManager.getActiveNetworkInfo();
+				
+//				// This code was disabled to normalize the behavior across devices
+//				// otherwise multiple instances of a same event would be recorded 
+//				if (VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+//					// On API level 17, the intent contains the extra EXTRA_NETWORK_TYPE 
+//					// that can be used with ConnectivityManager.getNetworkInfo(int) in order
+//					// to obtain the new network info 
+//					ni = connectivityManager.getNetworkInfo(intent.getIntExtra(
+//							ConnectivityManager.EXTRA_NETWORK_TYPE, ni.getType()));
+//				}
+//				
+//				if (VERSION.SDK_INT <= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+//					ni = intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
+//				}
+				
+				data.setConnected(ni.isConnected());
+			
+				ConnectionType connectionType;
+				if ((connectionType = ConnectionType.valueOf(ni.getType())) == ConnectionType.OTHER) {
+					data.setConnectionTypeOther(ni.getType());
+				}
+				data.setConnectionType(connectionType);
+				data.setRoaming(ni.isRoaming());
+				data.setAvailable(ni.isAvailable());
+				data.setDetailedState(NetworkState.valueOf(ni.getDetailedState()));
+			
+				if (!data.equals(lastObservation)) {// Do not send the same observation twice in a row
 					/* Notify listeners and update internal state */
 					notifyListeners(connectivityEvent, data);
-			    }
-			    
-				return; 
+					
+					// Log new state
+					if(DEBUG) Log.d(TAG, data.toString());
+				}
+				lastObservation = (ConnectivityObservation) data;
 			}
-
-			data.setConnected(ni.isConnectedOrConnecting());
-
-			ConnectionType connectionType;
-			if ((connectionType = ConnectionType.valueOf(ni.getType())) == ConnectionType.OTHER) {
-				data.setConnectionTypeOther(ni.getType());
-			}
-			data.setConnectionType(connectionType);
-			data.setRoaming(ni.isRoaming());
-			data.setAvailable(ni.isAvailable());
-			data.setDetailedState(NetworkState.valueOf(ni.getDetailedState()));
-
-			// Log new state
-			if(DEBUG) Log.d(TAG, data.toString());
-
-			/* Notify listeners and update internal state */
-			notifyListeners(connectivityEvent, data);
 		}
 
 	};
@@ -127,6 +140,8 @@ public class Connectivity extends AbstractMonitor<ConnectivityListener> {
 	protected String TAG = "AdkintunMobile::Connectivity";
 	
 	private ConnectivityManager connectivityManager;
+	
+	private ConnectivityObservation lastObservation = null;
 
 	@Override
 	public boolean activate(int events, Bundle configuration) {
@@ -145,7 +160,6 @@ public class Connectivity extends AbstractMonitor<ConnectivityListener> {
 
 	@Override
 	public IBinder onBind(Intent intent) {
-		if(DEBUG) Log.d(TAG, "Service has been bound");
 		return serviceBinder;
 	}
 

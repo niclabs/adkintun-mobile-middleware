@@ -10,7 +10,7 @@ import android.net.NetworkInfo;
 public enum NetworkState {
 	AUTHENTICATING(1), BLOCKED(2), CAPTIVE_PORTAL_CHECK(3), CONNECTED(4), CONNECTING(
 			5), DISCONNECTED(6), DISCONNECTING(7), FAILED(8), IDLE(9), OBTAINING_IP_ADDRESS(
-			10), OTHER(0), SCANNING(11), SUSPENDED(12), VERIFYING_POOR_LINK(13);
+			10), UNKNOWN(0), SCANNING(11), SUSPENDED(12), VERIFYING_POOR_LINK(13);
 	
 	public static NetworkState valueOf(NetworkInfo.DetailedState value) {
 		switch(value) {
@@ -41,7 +41,7 @@ public enum NetworkState {
 		case VERIFYING_POOR_LINK:
 			return VERIFYING_POOR_LINK;
 		default:
-			return OTHER;
+			return UNKNOWN;
 		}
 	}
 	
@@ -57,7 +57,7 @@ public enum NetworkState {
 				return n;
 			}
 		}
-		return OTHER;
+		return UNKNOWN;
 	}
 	
 	public int value() {

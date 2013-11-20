@@ -96,4 +96,20 @@ public class ConnectivityObservation extends AbstractObservation<ConnectivityObs
 	public void setConnectionTypeOther(Integer connectionTypeOther) {
 		this.connectionTypeOther = connectionTypeOther;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null || !(obj instanceof ConnectivityObservation)) 
+			return false;
+		
+		ConnectivityObservation other = (ConnectivityObservation) obj;
+		
+		// If they are equal in everything except the timestamp return true
+		return getDetailedState() == other.getDetailedState() &&
+				isAvailable() == other.isAvailable() &&
+				isConnected() == other.isConnected() &&
+				isRoaming() == other.isRoaming() &&
+				getConnectionType() == other.getConnectionType() &&
+				getConnectionTypeOther() == other.getConnectionTypeOther();
+	}
 }

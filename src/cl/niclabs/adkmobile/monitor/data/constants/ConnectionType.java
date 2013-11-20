@@ -8,8 +8,8 @@ import android.net.ConnectivityManager;
  * @author Felipe Lalanne <flalanne@niclabs.cl>
  */
 public enum ConnectionType {
-	MOBILE(1), MOBILE_DUN(2), MOBILE_HIPRI(3), MOBILE_MMS(4), MOBILE_SUPL(5), OTHER(0), WIFI(
-					6), WIMAX(7);
+	NONE(0), MOBILE(1), MOBILE_DUN(2), MOBILE_HIPRI(3), MOBILE_MMS(4), MOBILE_SUPL(5), WIFI(
+					6), WIMAX(7), OTHER(8);
 
 	/**
 	 * Get the network type from the ConnectivityManager constants
