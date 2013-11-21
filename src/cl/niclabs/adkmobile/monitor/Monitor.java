@@ -162,4 +162,51 @@ public interface Monitor<E extends MonitorListener> {
 			return monitor;
 		}
 	}
+	
+	/**
+	 * Defines a generic controller for monitors
+	 * 
+	 * A controller allows to specify actions to be performed upon binding of the monitor.
+	 * 
+	 * @author Felipe Lalanne <flalanne@niclabs.cl>
+	 *
+	 * @param <L> listener for the monitor
+	 */
+	public static interface Controller<L extends MonitorListener> {
+		/**
+		 * Activate the monitor upon binding. Successive calls to this method must update the 
+		 * code of the event to activate and the internal configuration
+		 * @param events
+		 * @param configuration configuration for the event, can be null in which case is ignored
+		 */
+		public void activate(int events, Bundle configuration);
+		
+		/**
+		 * Activate the monitor upon binding. Successive calls to this method must update the 
+		 * code of the event to activate.
+		 * @param events
+		 */
+		public void activate(int events);
+		
+		/**
+		 * Deactivate the monitor if it is bound.
+		 * @param events
+		 */
+		public void deactivate(int events);
+		
+		/**
+		 * Remove listeners and unbind the service if bound. It does not
+		 * deactivate the service to avoid disrupting other binding services
+		 */
+		public void unbind();
+		
+		/**
+		 * Add a listener to the service. The listeners will be added upon
+		 * binding of the service and removed on unbinding.
+		 * 
+		 * @param listener
+		 * @param listen
+		 */
+		public void listen(L listener, boolean listen);
+	}
 }

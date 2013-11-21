@@ -1,13 +1,18 @@
 package cl.niclabs.adkmobile.monitor;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
+import android.os.Bundle;
 import android.os.IBinder;
 import cl.niclabs.adkmobile.monitor.data.Observation;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
@@ -157,5 +162,228 @@ public abstract class AbstractMonitor<E extends MonitorListener> extends Service
 	 */
 	private void setState(MonitorEvent<E> eventType, Observation state) {
 		currentStates.put(eventType, state);
+	}
+	
+	/**
+	 * Defines a controller to be bound with AbstractService.bind(). 
+	 * The monitor will re-bind automatically on service crash
+	 * @author Felipe Lalanne <flalanne@niclabs.cl>
+	 *
+	 * @param <M> type of monitor to bind
+	 * @param <L> type of listener the monitor takes
+	 */
+	private static class BindableController<M extends Monitor<L>, L extends MonitorListener> implements Controller<L> {
+		Boolean connected = false;
+		Context context;
+		int events;
+		Bundle extras;
+		List<L> listeners = new CopyOnWriteArrayList<L>();
+		M monitor;
+		Class<M> cls;
+		
+		/**
+		 * Service connection to the monitor
+		 */
+		ServiceConnection serviceConnection = new ServiceConnection() {
+			@Override
+			public void onServiceConnected(ComponentName name, IBinder service) {
+				@SuppressWarnings("unchecked") // Necessary to remove unchecked cast warning
+				ServiceBinder<M> binder = (ServiceBinder<M>) service;
+				onConnect(binder.getService());
+			}
+
+			/* Is only called on service crash */
+			@Override
+			public void onServiceDisconnected(ComponentName name) {
+				onCrash(monitor);
+			}
+		};
+		
+		/**
+		 * Broadcast an intent to the specified monitor
+		 * @param context
+		 * @param events
+		 * @param extras
+		 */
+		void activate(Context context, Integer events, Bundle extras) {
+			if (context != null) {
+				/* Can only activate when the service has been bound */
+				Intent intent = new Intent(Monitor.ACTIVATE);
+				intent.putExtra(Monitor.EVENTS_EXTRA, events);
+				
+				if (extras != null) {
+					intent.putExtras(extras);
+				}
+				
+				context.sendBroadcast(intent);
+			}
+		}
+		
+		/**
+		 * Update the activation configuration for the monitor
+		 * @param events
+		 * @param configuration
+		 */
+		public void activate(int events, Bundle extras) {
+			this.events |= events;
+			
+			if (extras != null) {
+				if (this.extras == null) 
+					this.extras = extras;
+				else 
+					this.extras.putAll(extras);
+			}
+		
+			synchronized(connected) {
+				if (connected) {
+					activate(this.context, this.events, this.extras);
+				}
+			}
+		}
+		
+		
+		/**
+		 * Update the activation configuration
+		 */
+		public void activate(int events) {
+			activate(events, null);
+		}
+		
+		/**
+		 * Bind the service to the provided context. If returns immediately if the
+		 * service is already connected
+		 * 
+		 * @param cls
+		 * @param c
+		 */
+		public void bind(Class<M> cls, Context c) {
+			c.bindService(new Intent(c, cls), serviceConnection, Context.BIND_AUTO_CREATE);
+			this.context = c;	
+			this.cls = cls;
+		}
+		
+		/**
+		 * Deactivate the specified events for the monitor of this controller
+		 * @param events
+		 */
+		public void deactivate(int events) {
+			/* Disable the event */
+			if (this.events != 0) 
+				this.events ^= events;
+			
+			synchronized(connected) {
+				if (connected) {
+					monitor.deactivate(events);
+				}
+			}
+		}
+		
+		/**
+		 * Adds a listener to listen when the service is bound
+		 * @param listener
+		 */
+		public void listen(L listener, boolean listen) {
+			if (listen) {
+				listeners.add(listener);
+			}
+			else {
+				listeners.remove(listener);
+			}
+			
+			/* Add the listener directly to the monitor */
+			synchronized(connected) {
+				if (connected) {
+					monitor.listen(listener, listen);
+				}
+			}
+		}
+		
+		/**
+		 * Add the listeners of this controller to the specified monitor 
+		 * @param monitor
+		 * @param listen
+		 */
+		void listen(M monitor, boolean listen) {
+			for (L listener: listeners) {
+				monitor.listen(listener, false);
+			}
+		}
+		
+		/**
+		 * Called when the monitor is bound. It performs the following
+		 * tasks.
+		 * 
+		 * - Adds listeners to monitor
+		 * - Activate the monitor if activate() was called previously
+		 * 
+		 * @param monitor
+		 */
+		void onConnect(M monitor) {
+			synchronized (connected) {
+				if (!connected) {
+					listen(monitor, true);
+					activate(context, events, extras);
+
+					this.monitor = monitor;
+					this.connected = true;
+				}
+			}
+		}
+		
+		/**
+		 * Called on service crash 
+		 * @param monitor
+		 */
+		void onCrash(M monitor) {
+			listen(monitor, false);
+			this.connected = false;
+			this.monitor = null;
+			
+			/* Re-bind and reactivate the service */
+			bind(cls, context);
+			if (events != 0)
+				activate(events, extras);
+		}
+		
+		/**
+		 * Called on service disconnection
+		 * @param monitor
+		 */
+		void onDisconnect(M monitor) {
+			synchronized (connected) {
+				if (!connected) {
+					listen(monitor, false);
+					this.connected = false;
+					this.monitor = null;
+				}
+			}
+		}
+		
+		/**
+		 * Unbind from the service
+		 */
+		public void unbind() {
+			if (connected) {
+				context.unbindService(serviceConnection);
+				onDisconnect(monitor);
+			}
+		}
+	}
+	
+	/**
+	 * Bind the service to a specific context and return a controller for the
+	 * service. Multiple calls to bind will return a different instance of the
+	 * controller, so precautions must be taken to unbind the services after
+	 * usage.
+	 * 
+	 * The returned controller will re-bind and reactivate the service if a
+	 * service crash occurs
+	 * 
+	 * @return a controller for the service
+	 */
+	public static <M extends Monitor<L>, L extends MonitorListener> Controller<L> bind(Class<M> cls, Context context) {
+		BindableController<M,L> controller = new BindableController<M,L>();
+		controller.bind(cls, context);
+		return controller;
 	}
 }
