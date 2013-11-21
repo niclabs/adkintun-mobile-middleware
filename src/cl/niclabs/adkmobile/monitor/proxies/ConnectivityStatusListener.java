@@ -26,4 +26,10 @@ public interface ConnectivityStatusListener extends MonitorProxyListener {
 	 * @param dataRoamingEnabled true if data roaming is enabled in the device
 	 */
 	public void onRoaming(boolean dataRoamingEnabled);
+	
+	
+	/**
+	 * Used to inform the listener that the device has disconnected from the network.
+	 */
+	public void onNetworkDisconnection();
 }

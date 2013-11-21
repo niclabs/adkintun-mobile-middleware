@@ -26,30 +26,23 @@ public class ConnectivityStatus extends MonitorProxy<ConnectivityStatusListener>
 		ConnectionType newNetworkType = newData.getConnectionType();
 		boolean isConnected = newData.isConnected();
 		boolean isAvailable = newData.isAvailable();
-		boolean isRoaming = newData.isRoaming();
+		boolean isRoaming = newData.isRoaming();		
+		boolean disconnectedFromNetwork = false;
 		
 		if (oldData != null) { // Connectivity status has changed
 			ConnectionType oldNetworkType = oldData.getConnectionType();
 			boolean wasRoaming = oldData.isRoaming();
 			
 			// Detect WiFi connection
-			if (oldNetworkType != ConnectionType.WIFI && newNetworkType == ConnectionType.WIFI) {
-				if (DEBUG) Log.d(TAG, "Switched to WiFi");
-				switchedNetwork = true;
-			}
-			// Detect mobile connection
-			else if (!oldNetworkType.isMobile() && newNetworkType.isMobile()) {
-				if (DEBUG) Log.d(TAG, "Switched to mobile");
-				switchedNetwork = true;
-			}			
-			
-			if (!wasRoaming && isRoaming) {
-				switchedRoamingStatus = true;
-			}
+			switchedNetwork = (oldNetworkType != ConnectionType.WIFI && newNetworkType == ConnectionType.WIFI)
+					|| !oldNetworkType.isMobile() && newNetworkType.isMobile();
+			disconnectedFromNetwork = oldNetworkType != ConnectionType.NONE && newNetworkType == ConnectionType.NONE;
+			switchedRoamingStatus = !wasRoaming && isRoaming;
 		}
 		else { // Service has just started
-			if (newNetworkType == ConnectionType.WIFI || newNetworkType.isMobile()) switchedNetwork = true;
-			if (isRoaming) switchedRoamingStatus = true;
+			switchedNetwork = newNetworkType == ConnectionType.WIFI || newNetworkType.isMobile();
+			disconnectedFromNetwork = newNetworkType == ConnectionType.NONE;
+			switchedRoamingStatus = isRoaming;
 		}
 
 		
@@ -92,6 +85,18 @@ public class ConnectivityStatus extends MonitorProxy<ConnectivityStatusListener>
 			
 			/* Reset status */
 			switchedRoamingStatus = false;
+		}
+		
+		if (disconnectedFromNetwork) {
+			notifyListeners(new Notifier<ConnectivityStatusListener>() {
+				@Override
+				public void notify(ConnectivityStatusListener listener) {
+					listener.onNetworkDisconnection();
+				}
+			});
+			
+			/* Reset status */
+			disconnectedFromNetwork = false;
 		}
 	}
 	
