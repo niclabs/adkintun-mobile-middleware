@@ -1,16 +1,10 @@
-package cl.niclabs.adkmobile.data;
+package cl.niclabs.adkmobile.services;
 
-import cl.niclabs.adkmobile.AdkintunMobileApp;
-import android.app.Service;
 import android.content.Intent;
-import android.os.IBinder;
+import cl.niclabs.adkmobile.AdkintunMobileApp;
+import cl.niclabs.adkmobile.data.Persistent;
 
-public class PersistenceService extends Service {
-	@Override
-	public IBinder onBind(Intent intent) {
-		return null;
-	}
-
+public class PersistenceService extends ApplicationService {
 	@Override
 	public void onCreate() {
 		super.onCreate();
