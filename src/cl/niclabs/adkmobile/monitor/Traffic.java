@@ -666,8 +666,5 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-
-		/* Shutdown the thread pool */
-		//taskThreadPool.shutdown();
 	}
 }

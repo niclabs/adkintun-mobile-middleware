@@ -175,8 +175,8 @@ public abstract class AbstractMonitor<E extends MonitorListener> extends Service
 	private static class BindableController<M extends Monitor<L>, L extends MonitorListener> implements Controller<L> {
 		Boolean connected = false;
 		Context context;
-		int events;
-		Bundle extras;
+		int events = 0;
+		Bundle extras = new Bundle();
 		List<L> listeners = new CopyOnWriteArrayList<L>(); //TODO: here it would probably suffice with an ArrayList
 		M monitor;
 		Class<M> cls;
@@ -200,26 +200,6 @@ public abstract class AbstractMonitor<E extends MonitorListener> extends Service
 		};
 		
 		/**
-		 * Broadcast an intent to the specified monitor
-		 * @param context
-		 * @param events
-		 * @param extras
-		 */
-		void activate(Context context, Integer events, Bundle extras) {
-			if (context != null) {
-				/* Can only activate when the service has been bound */
-				Intent intent = new Intent(Monitor.ACTIVATE);
-				intent.putExtra(Monitor.EVENTS_EXTRA, events);
-				
-				if (extras != null) {
-					intent.putExtras(extras);
-				}
-				
-				context.sendBroadcast(intent);
-			}
-		}
-		
-		/**
 		 * Update the activation configuration for the monitor
 		 * @param events
 		 * @param configuration
@@ -227,16 +207,12 @@ public abstract class AbstractMonitor<E extends MonitorListener> extends Service
 		public void activate(int events, Bundle extras) {
 			this.events |= events;
 			
-			if (extras != null) {
-				if (this.extras == null) 
-					this.extras = extras;
-				else 
-					this.extras.putAll(extras);
-			}
+			if (extras != null)  
+				this.extras.putAll(extras);
 		
 			synchronized(connected) {
 				if (connected) {
-					activate(this.context, this.events, this.extras);
+					monitor.activate(this.events, this.extras);
 				}
 			}
 		}
@@ -270,7 +246,7 @@ public abstract class AbstractMonitor<E extends MonitorListener> extends Service
 			/* Disable the event */
 			if (this.events != 0) 
 				this.events ^= events;
-			
+					
 			synchronized(connected) {
 				if (connected) {
 					monitor.deactivate(events);
@@ -322,7 +298,7 @@ public abstract class AbstractMonitor<E extends MonitorListener> extends Service
 			synchronized (connected) {
 				if (!connected) {
 					listen(monitor, true);
-					activate(context, events, extras);
+					monitor.activate(events, extras);
 
 					this.monitor = monitor;
 					this.connected = true;
