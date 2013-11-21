@@ -5,16 +5,6 @@ import cl.niclabs.adkmobile.AdkintunMobileApp;
 import cl.niclabs.adkmobile.data.Persistent;
 
 public class PersistenceService extends ApplicationService {
-	@Override
-	public void onCreate() {
-		super.onCreate();
-	}
-
-	@Override
-	public int onStartCommand(Intent intent, int flags, int startId) {
-		return super.onStartCommand(intent, flags, startId);
-	}
-	
 	/**
 	 * Save the persistent object if persistence is enabled
 	 * @param persistent
