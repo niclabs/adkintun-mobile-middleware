@@ -44,7 +44,7 @@ public abstract class AbstractMonitorEvent<E extends MonitorListener> implements
 	@Override
 	public void deactivate() {
 		synchronized(active) {
-			active = true;
+			active = false;
 		}
 	}
 
