@@ -1,6 +1,5 @@
 package cl.niclabs.adkmobile.services;
 
-import android.content.Intent;
 import cl.niclabs.adkmobile.AdkintunMobileApp;
 import cl.niclabs.adkmobile.data.Persistent;
 
