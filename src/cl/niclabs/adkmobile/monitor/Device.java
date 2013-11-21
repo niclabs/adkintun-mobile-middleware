@@ -50,7 +50,7 @@ public class Device extends BroadcastReceiver {
 	 * do nothing, it must be overriden by extending classes in order
 	 * to perform boot actions.
 	 */
-	public void onBootCompleted() {
+	public void onBootCompleted(Context context) {
 		
 	}
 	
@@ -59,7 +59,7 @@ public class Device extends BroadcastReceiver {
 	 * do nothing, it must be overriden by extending classes in order
 	 * to perform shutdown actions.
 	 */
-	public void onShutdown() {
+	public void onShutdown(Context context) {
 		
 	}
 
@@ -74,7 +74,7 @@ public class Device extends BroadcastReceiver {
 			if (AdkintunMobileApp.isPersistenceAvailable())
 				stateChange.save();
 			
-			onBootCompleted();
+			onBootCompleted(context);
 		}
 		else if (intent.getAction().equals(Intent.ACTION_SHUTDOWN)) {
 			StateChange stateChange = new StateChange(Monitor.DEVICE, System.currentTimeMillis());
@@ -85,7 +85,7 @@ public class Device extends BroadcastReceiver {
 			if (AdkintunMobileApp.isPersistenceAvailable())
 				stateChange.save();
 			
-			onShutdown();
+			onShutdown(context);
 		}
 	}
 
