@@ -55,6 +55,19 @@ public class Persistent<E extends Persistent<E>> extends SugarRecord<E> implemen
 	 */
 	public static <T extends Persistent<T>> Iterator<T> find(Class<T> type, String whereClause, String... whereArgs) {
 		return SugarRecord.findAsIterator(type, whereClause, whereArgs);
+	}
+	
+	/**
+	 * Find all the objects that match the specified criteria
+	 * @param type
+	 * @param whereClause
+	 * @param whereArgs
+	 * @return
+	 */
+	public static <T extends Persistent<T>> Iterator<T> find(Class<T> type,
+			String whereClause, String[] whereArgs, String orderBy) {
+		return SugarRecord.findAsIterator(type, whereClause, whereArgs,
+				null, orderBy, null);
 	} 
 	
 	/**
