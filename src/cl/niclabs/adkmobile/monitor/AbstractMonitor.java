@@ -177,7 +177,7 @@ public abstract class AbstractMonitor<E extends MonitorListener> extends Service
 		Context context;
 		int events;
 		Bundle extras;
-		List<L> listeners = new CopyOnWriteArrayList<L>();
+		List<L> listeners = new CopyOnWriteArrayList<L>(); //TODO: here it would probably suffice with an ArrayList
 		M monitor;
 		Class<M> cls;
 		
@@ -305,7 +305,7 @@ public abstract class AbstractMonitor<E extends MonitorListener> extends Service
 		 */
 		void listen(M monitor, boolean listen) {
 			for (L listener: listeners) {
-				monitor.listen(listener, false);
+				monitor.listen(listener, listen);
 			}
 		}
 		
