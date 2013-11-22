@@ -1,6 +1,7 @@
 package cl.niclabs.adkmobile.monitor.data;
 
 import cl.niclabs.adkmobile.monitor.Monitor;
+import cl.niclabs.adkmobile.utils.Time;
 
 public class TrafficObservation extends AbstractObservation<TrafficObservation> {
 	private int networkType;
@@ -23,7 +24,7 @@ public class TrafficObservation extends AbstractObservation<TrafficObservation> 
 	 * recommended.
 	 */
 	public TrafficObservation() {
-		super(Monitor.TRAFFIC, System.currentTimeMillis());
+		super(Monitor.TRAFFIC, Time.currentTimeMillis());
 	}
 	
 	public TrafficObservation(int eventType, long timestamp) {

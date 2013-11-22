@@ -3,6 +3,7 @@ package cl.niclabs.adkmobile.monitor.data;
 import cl.niclabs.adkmobile.monitor.Monitor;
 import cl.niclabs.adkmobile.monitor.data.constants.ConnectionType;
 import cl.niclabs.adkmobile.monitor.data.constants.NetworkState;
+import cl.niclabs.adkmobile.utils.Time;
 
 /**
  * Defines an observation for the connectivity monitor
@@ -22,7 +23,7 @@ public class ConnectivityObservation extends AbstractObservation<ConnectivityObs
 	 * time of creation as the event timestamp 
 	 */
 	public ConnectivityObservation() {
-		super(Monitor.CONNECTIVITY, System.currentTimeMillis());
+		super(Monitor.CONNECTIVITY, Time.currentTimeMillis());
 	}
 	
 	public ConnectivityObservation(long timestamp) {

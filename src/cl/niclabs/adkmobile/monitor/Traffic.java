@@ -27,6 +27,7 @@ import cl.niclabs.adkmobile.monitor.events.AbstractMonitorEvent;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
 import cl.niclabs.adkmobile.monitor.listeners.TrafficListener;
 import cl.niclabs.adkmobile.utils.Scheduler;
+import cl.niclabs.adkmobile.utils.Time;
 
 /**
  * Implements monitoring of Rx & Tx bytes. Traffic is notified by the system as
@@ -96,7 +97,7 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 			long dMobileTxPackets = newMobileTxPackets - mobileTxPackets;
 			long dMobileRxPackets = newMobileRxPackets - mobileRxPackets;
 
-			TrafficObservation mobileData = new TrafficObservation(TRAFFIC_MOBILE, System.currentTimeMillis());
+			TrafficObservation mobileData = new TrafficObservation(TRAFFIC_MOBILE, Time.currentTimeMillis());
 			mobileData.setNetworkType(NETWORK_TYPE_MOBILE);
 			mobileData.setRxBytes(dMobileRxBytes);
 			mobileData.setTxBytes(dMobileTxBytes);
@@ -180,7 +181,7 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 			long dWifiRxPackets = newWifiRxPackets - wifiRxPackets;
 			long dWifiTxPackets = newWifiTxPackets - wifiTxPackets;
 
-			TrafficObservation wifiData = new TrafficObservation(TRAFFIC_WIFI, System.currentTimeMillis());
+			TrafficObservation wifiData = new TrafficObservation(TRAFFIC_WIFI, Time.currentTimeMillis());
 			wifiData.setNetworkType(NETWORK_TYPE_WIFI);
 			wifiData.setRxBytes(dWifiRxBytes);
 			wifiData.setTxBytes(dWifiTxBytes);
@@ -275,7 +276,7 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 	@SuppressLint("NewApi")
 	private void notifyAppTraffic(int networkType, int uid) {
 
-		TrafficObservation appData = new TrafficObservation(TRAFFIC_APPLICATION, System.currentTimeMillis());
+		TrafficObservation appData = new TrafficObservation(TRAFFIC_APPLICATION, Time.currentTimeMillis());
 		appData.setUid(uid);
 
 		long newAppRxBytes = TrafficStats.getUidRxBytes(uid);

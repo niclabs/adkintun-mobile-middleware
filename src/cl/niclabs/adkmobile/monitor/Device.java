@@ -8,6 +8,7 @@ import cl.niclabs.adkmobile.AdkintunMobileApp;
 import cl.niclabs.adkmobile.monitor.data.StateChange;
 import cl.niclabs.adkmobile.monitor.data.constants.DeviceBootState;
 import cl.niclabs.adkmobile.monitor.data.constants.StateType;
+import cl.niclabs.adkmobile.utils.Time;
 
 /**
  * BroadcastReceiver for {@link Intent.ACTION_BOOT_COMPLETED} and
@@ -66,7 +67,7 @@ public class Device extends BroadcastReceiver {
 	@Override
 	public final void onReceive(Context context, Intent intent) {
 		if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
-			StateChange stateChange = new StateChange(Monitor.DEVICE, System.currentTimeMillis());
+			StateChange stateChange = new StateChange(Monitor.DEVICE, Time.currentTimeMillis());
 			stateChange.setStateType(StateType.DEVICE_BOOT);
 			stateChange.setState(DeviceBootState.BOOT.value());
 			
@@ -77,7 +78,7 @@ public class Device extends BroadcastReceiver {
 			onBootCompleted(context);
 		}
 		else if (intent.getAction().equals(Intent.ACTION_SHUTDOWN)) {
-			StateChange stateChange = new StateChange(Monitor.DEVICE, System.currentTimeMillis());
+			StateChange stateChange = new StateChange(Monitor.DEVICE, Time.currentTimeMillis());
 			stateChange.setStateType(StateType.DEVICE_BOOT);
 			stateChange.setState(DeviceBootState.SHUTDOWN.value());
 			

@@ -15,6 +15,7 @@ import cl.niclabs.adkmobile.monitor.data.constants.StateType;
 import cl.niclabs.adkmobile.monitor.events.AbstractMonitorEvent;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
 import cl.niclabs.adkmobile.monitor.listeners.ScreenListener;
+import cl.niclabs.adkmobile.utils.Time;
 
 /**
  * Implement monitoring of the Screen status change. Screen is
@@ -32,7 +33,7 @@ public class Screen extends AbstractMonitor<ScreenListener> {
 		public void onReceive(Context context, Intent intent) {
 			// TODO Auto-generated method stub.
 			if (intent.getAction().equalsIgnoreCase(Intent.ACTION_SCREEN_ON)) {
-				StateChange data = new StateChange(SCREEN, System.currentTimeMillis());
+				StateChange data = new StateChange(SCREEN, Time.currentTimeMillis());
 				data.setStateType(StateType.SCREEN);
 				data.setState(ScreenState.ON.value());
 
@@ -42,7 +43,7 @@ public class Screen extends AbstractMonitor<ScreenListener> {
 
 			}
 			if (intent.getAction().equalsIgnoreCase(Intent.ACTION_SCREEN_OFF)) {
-				StateChange data = new StateChange(SCREEN, System.currentTimeMillis());
+				StateChange data = new StateChange(SCREEN, Time.currentTimeMillis());
 				data.setStateType(StateType.SCREEN);
 				data.setState(ScreenState.OFF.value());
 
@@ -60,7 +61,7 @@ public class Screen extends AbstractMonitor<ScreenListener> {
 			}
 			if (intent.getAction().equals(Intent.ACTION_USER_PRESENT)) {
 				// assign the values to ContentValues variables
-				StateChange data = new StateChange(SCREEN, System.currentTimeMillis());
+				StateChange data = new StateChange(SCREEN, Time.currentTimeMillis());
 				data.setStateType(StateType.SCREEN);
 				data.setState(ScreenState.UNLOCKED.value());
 

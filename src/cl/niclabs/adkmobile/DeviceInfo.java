@@ -6,6 +6,7 @@ import android.os.Build;
 import android.telephony.TelephonyManager;
 import cl.niclabs.adkmobile.data.AbstractSerializable;
 import cl.niclabs.adkmobile.data.DoNotSerialize;
+import cl.niclabs.adkmobile.utils.Time;
 
 /**
  * Provides information about the device (id, brand, manufacturer, etc).
@@ -37,7 +38,7 @@ public class DeviceInfo extends AbstractSerializable<DeviceInfo> {
 		telephonyManager = (TelephonyManager) context
 				.getSystemService(Context.TELEPHONY_SERVICE);
 		
-		timestamp = System.currentTimeMillis();
+		timestamp = Time.currentTimeMillis();
 		deviceId = telephonyManager.getDeviceId();
 		board = Build.BOARD;
 		brand = Build.BRAND;

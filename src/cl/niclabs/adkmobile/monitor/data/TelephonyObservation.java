@@ -3,6 +3,7 @@ package cl.niclabs.adkmobile.monitor.data;
 import cl.niclabs.adkmobile.monitor.Monitor;
 import cl.niclabs.adkmobile.monitor.data.constants.NetworkType;
 import cl.niclabs.adkmobile.monitor.data.constants.TelephonyStandard;
+import cl.niclabs.adkmobile.utils.Time;
 
 public abstract class TelephonyObservation<E extends TelephonyObservation<E>> extends AbstractObservation<E> {
 	protected int mcc;
@@ -12,7 +13,7 @@ public abstract class TelephonyObservation<E extends TelephonyObservation<E>> ex
 	protected int telephonyStandard;
 	
 	public TelephonyObservation() {
-		super(Monitor.TELEPHONY, System.currentTimeMillis());
+		super(Monitor.TELEPHONY, Time.currentTimeMillis());
 	}
 
 	public TelephonyObservation(long timestamp) {

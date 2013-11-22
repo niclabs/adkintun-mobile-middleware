@@ -15,6 +15,7 @@ import cl.niclabs.adkmobile.monitor.data.constants.StateType;
 import cl.niclabs.adkmobile.monitor.events.AbstractMonitorEvent;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
 import cl.niclabs.adkmobile.monitor.listeners.LocationListener;
+import cl.niclabs.adkmobile.utils.Time;
 
 /**
  * Implements monitoring of GPS and Network Location. Location is notified by
@@ -34,7 +35,7 @@ public class Location extends AbstractMonitor<LocationListener> {
 	private android.location.Location lastNetwork = null;
 
 	private LocationObservation getObservationFromLocation(android.location.Location loc) {
-		LocationObservation locData = new LocationObservation(System.currentTimeMillis());
+		LocationObservation locData = new LocationObservation(Time.currentTimeMillis());
 		
 		locData.setLatitude(loc.getLatitude());
 		locData.setLongitude(loc.getLongitude());
@@ -60,7 +61,7 @@ public class Location extends AbstractMonitor<LocationListener> {
 			case GpsStatus.GPS_EVENT_SATELLITE_STATUS:
 				break;
 			case GpsStatus.GPS_EVENT_STARTED:
-				stateChange = new StateChange(LOCATION_GPS, System.currentTimeMillis());
+				stateChange = new StateChange(LOCATION_GPS, Time.currentTimeMillis());
 				stateChange.setStateType(StateType.LOCATION);
 				stateChange.setState(LocationState.ENABLED.value());
 				notifyListeners(gpsLocationEvent, stateChange);
@@ -77,7 +78,7 @@ public class Location extends AbstractMonitor<LocationListener> {
 				notifyListeners(gpsLocationEvent, locationData);
 
 				/* Notify state change */
-				stateChange = new StateChange(LOCATION_GPS, System.currentTimeMillis());
+				stateChange = new StateChange(LOCATION_GPS, Time.currentTimeMillis());
 				stateChange.setStateType(StateType.LOCATION);
 				stateChange.setState(LocationState.DISABLED.value());
 				notifyListeners(gpsLocationEvent, stateChange);
@@ -234,7 +235,7 @@ public class Location extends AbstractMonitor<LocationListener> {
 				if (DEBUG) Log.d(TAG, "Gps location provider is disabled");
 				
 				/* Notify state change */
-				stateChange = new StateChange(LOCATION_GPS, System.currentTimeMillis());
+				stateChange = new StateChange(LOCATION_GPS, Time.currentTimeMillis());
 				stateChange.setState(LocationState.DISABLED.value());
 				stateChange.setStateType(StateType.LOCATION);
 				notifyListeners(gpsLocationEvent, stateChange);
@@ -244,7 +245,7 @@ public class Location extends AbstractMonitor<LocationListener> {
 				if (DEBUG) Log.d(TAG, "Network location provider is disabled");
 				
 				/* Notify state change */
-				stateChange = new StateChange(LOCATION_NETWORK, System.currentTimeMillis());
+				stateChange = new StateChange(LOCATION_NETWORK, Time.currentTimeMillis());
 				stateChange.setState(LocationState.DISABLED.value());
 				stateChange.setStateType(StateType.LOCATION);
 				notifyListeners(networkLocationEvent, stateChange);
@@ -259,7 +260,7 @@ public class Location extends AbstractMonitor<LocationListener> {
 				if (DEBUG) Log.d(TAG, "Gps location provider is enabled");
 				
 				/* Notify state change */
-				stateChange = new StateChange(LOCATION_GPS, System.currentTimeMillis());
+				stateChange = new StateChange(LOCATION_GPS, Time.currentTimeMillis());
 				stateChange.setState(LocationState.ENABLED.value());
 				stateChange.setStateType(StateType.LOCATION);
 				notifyListeners(gpsLocationEvent, stateChange);
@@ -269,7 +270,7 @@ public class Location extends AbstractMonitor<LocationListener> {
 				if (DEBUG) Log.d(TAG, "Network location provider is enabled");
 				
 				/* Notify state change */
-				stateChange = new StateChange(LOCATION_NETWORK, System.currentTimeMillis());
+				stateChange = new StateChange(LOCATION_NETWORK, Time.currentTimeMillis());
 				stateChange.setState(LocationState.ENABLED.value());
 				stateChange.setStateType(StateType.LOCATION);
 				notifyListeners(networkLocationEvent, stateChange);

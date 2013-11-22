@@ -1,6 +1,7 @@
 package cl.niclabs.adkmobile.monitor.data;
 
 import cl.niclabs.adkmobile.monitor.Monitor;
+import cl.niclabs.adkmobile.utils.Time;
 
 public class LocationObservation extends AbstractObservation<LocationObservation> {	
 	private float accuracy;
@@ -21,7 +22,7 @@ public class LocationObservation extends AbstractObservation<LocationObservation
 	 * Required by Sugar ORM. Create instance with creation time as timestamp
 	 */
 	public LocationObservation() {
-		super(Monitor.LOCATION, System.currentTimeMillis());
+		super(Monitor.LOCATION, Time.currentTimeMillis());
 	}
 	
 	public LocationObservation(long timestamp) {

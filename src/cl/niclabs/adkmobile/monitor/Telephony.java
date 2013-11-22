@@ -37,6 +37,7 @@ import cl.niclabs.adkmobile.monitor.data.constants.TelephonyStandard;
 import cl.niclabs.adkmobile.monitor.events.AbstractMonitorEvent;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
 import cl.niclabs.adkmobile.monitor.listeners.TelephonyListener;
+import cl.niclabs.adkmobile.utils.Time;
 
 /**
  * Implements monitoring of Telephony services of the mobile.
@@ -70,7 +71,7 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 			if (location instanceof GsmCellLocation) {
 				GsmCellLocation loc = (GsmCellLocation) location;
 
-				GsmObservation data = new GsmObservation(System.currentTimeMillis());
+				GsmObservation data = new GsmObservation(Time.currentTimeMillis());
 				
 				data.setTelephonyStandard(TelephonyStandard.GSM);
 				data.setGsmCid(loc.getCid());
@@ -148,7 +149,7 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 				CdmaCellLocation loc = (CdmaCellLocation) location;
 				
 				// assign the values to ContentValues variable
-				CdmaObservation data = new CdmaObservation(System.currentTimeMillis());
+				CdmaObservation data = new CdmaObservation(Time.currentTimeMillis());
 				
 				data.setTelephonyStandard(TelephonyStandard.CDMA);
 				data.setCdmaBaseStationId(loc.getBaseStationId());
@@ -201,7 +202,7 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 			 */		
 			int simState = telephonyManager.getSimState(); 
 			if (simState != lastSimState.value()) {
-				StateChange simStateChange = new StateChange(TELEPHONY, System.currentTimeMillis());
+				StateChange simStateChange = new StateChange(TELEPHONY, Time.currentTimeMillis());
 				simStateChange.setStateType(StateType.SIM);
 				simStateChange.setState(lastSimState.value());
 				
@@ -228,7 +229,7 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 			super.onServiceStateChanged(serviceState);
 			
 			// Report the new ServiceState
-			StateChange stateChange = new StateChange(TELEPHONY, System.currentTimeMillis());
+			StateChange stateChange = new StateChange(TELEPHONY, Time.currentTimeMillis());
 			stateChange.setStateType(StateType.SERVICE);
 			stateChange.setState(ServiceState.valueOf(serviceState).value());
 			
@@ -243,7 +244,7 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 			 */		
 			int simState = telephonyManager.getSimState(); 
 			if (simState != lastSimState.value()) {
-				StateChange simStateChange = new StateChange(TELEPHONY, System.currentTimeMillis());
+				StateChange simStateChange = new StateChange(TELEPHONY, Time.currentTimeMillis());
 				simStateChange.setStateType(StateType.SIM);
 				simStateChange.setState(lastSimState.value());
 				
@@ -263,7 +264,7 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (intent.getAction().equals(Intent.ACTION_AIRPLANE_MODE_CHANGED)){
-				StateChange data = new StateChange(TELEPHONY, System.currentTimeMillis());
+				StateChange data = new StateChange(TELEPHONY, Time.currentTimeMillis());
 				data.setStateType(StateType.AIRPLANE_MODE);
 				int mode;
 				
@@ -339,7 +340,7 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 				
 				lastSimState = SimState.valueOf(simState);
 				
-				StateChange stateChange = new StateChange(TELEPHONY, System.currentTimeMillis());
+				StateChange stateChange = new StateChange(TELEPHONY, Time.currentTimeMillis());
 				stateChange.setStateType(StateType.SIM);
 				stateChange.setState(lastSimState.value());
 				

@@ -17,6 +17,7 @@ import cl.niclabs.adkmobile.monitor.data.constants.NetworkState;
 import cl.niclabs.adkmobile.monitor.events.AbstractMonitorEvent;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
 import cl.niclabs.adkmobile.monitor.listeners.ConnectivityListener;
+import cl.niclabs.adkmobile.utils.Time;
 
 /**
  * Implements monitoring of Internet connectivity change. Connectivity is
@@ -64,7 +65,7 @@ public class Connectivity extends AbstractMonitor<ConnectivityListener> {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {		
-				ConnectivityObservation data = new ConnectivityObservation(System.currentTimeMillis());
+				ConnectivityObservation data = new ConnectivityObservation(Time.currentTimeMillis());
 				
 				/* When no network is active
 				 * the variable is null

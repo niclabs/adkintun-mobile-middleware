@@ -1,6 +1,7 @@
 package cl.niclabs.adkmobile.monitor.data;
 
 import cl.niclabs.adkmobile.monitor.data.constants.StateType;
+import cl.niclabs.adkmobile.utils.Time;
 
 public class StateChange extends AbstractObservation<StateChange> {
 	private int state;
@@ -11,7 +12,7 @@ public class StateChange extends AbstractObservation<StateChange> {
 	 * and eventType as 0. Usage of this constructor is not recommended.
 	 */
 	public StateChange() {
-		super(0, System.currentTimeMillis());
+		super(0, Time.currentTimeMillis());
 	}
 	
 	public StateChange(int eventType, long timestamp) {
