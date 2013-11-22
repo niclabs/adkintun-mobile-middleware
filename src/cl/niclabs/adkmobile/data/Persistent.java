@@ -16,7 +16,7 @@ import com.orm.dsl.Ignore;
 
 /**
  * Abstraction for all persistent objects. Keep in mind that the underlying implementation may
- * change, therefore it is not advisable to use any of the superclass methods.
+ * change, therefore it is highly discouraged to use any of the superclass methods.
  * 
  * @author Felipe Lalanne <flalanne@niclabs.cl>
  *

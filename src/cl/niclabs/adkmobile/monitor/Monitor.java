@@ -102,6 +102,14 @@ public interface Monitor<E extends MonitorListener> {
 	 */
 	public void activate(int events, Bundle configuration);
 	
+	
+	/**
+	 * Activate the specified events.
+	 * @param events
+	 * @return true if the event was activated correctly, false otherwise or if the event is not recongnized by the monitor
+	 */
+	public void activate(int events);
+	
 	/**
 	 * Activates the monitor for a given event
 	 * @param event

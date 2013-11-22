@@ -6,11 +6,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -31,25 +29,10 @@ import cl.niclabs.adkmobile.utils.Notifier;
  * @param <E> listeners that the monitor handles
  */
 public abstract class AbstractMonitor<E extends MonitorListener> extends Service implements Monitor<E> {	
-	protected class MonitorEventController extends BroadcastReceiver {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			if (intent.getAction().equals(ACTIVATE)) {
-				activate(intent.getIntExtra(EVENTS_EXTRA, 0), intent.getExtras());
-			}
-			else if (intent.getAction().equals(DEACTIVATE)) {
-				deactivate(intent.getIntExtra(EVENTS_EXTRA, 0));
-			}
-		}	
-	}
-	
 	/**
 	 * Current state by eventType
 	 */
 	private Map<MonitorEvent<E>, Observation> currentStates = new ConcurrentHashMap<MonitorEvent<E>,Observation>(4);
-	
-	
-	private MonitorEventController eventController = new MonitorEventController();
 	
 	/**
 	 * Dispatcher for monitor events
@@ -63,6 +46,12 @@ public abstract class AbstractMonitor<E extends MonitorListener> extends Service
 		return eventType.activate();
 	}
 	
+	/**
+	 * Activate the events passing an empty bundle
+	 */
+	public void activate(int events) {
+		activate(events, new Bundle());
+	}
 	
 	@Override
 	public void deactivate(MonitorEvent<E> eventType) {
@@ -109,7 +98,6 @@ public abstract class AbstractMonitor<E extends MonitorListener> extends Service
 		dispatcher.notifyListeners(new Notifier<E>() {
 			@Override
 			public void notify(E listener) {
-				// TODO: Execute the method on a runnable and schedule on a ScheduledThreadPoolExecutor?
 				eventType.onDataReceived(listener, result);
 			}
 			
@@ -122,22 +110,8 @@ public abstract class AbstractMonitor<E extends MonitorListener> extends Service
 	}
 	
 	@Override
-	public void onCreate() {
-		super.onCreate();
-		
-		IntentFilter filter = new IntentFilter();
-		filter.addAction(ACTIVATE);
-		filter.addAction(DEACTIVATE);
-		
-		/* Listen for activation messages */
-		registerReceiver(eventController, filter);
-	}
-	
-	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		
-		unregisterReceiver(eventController);
 		
 		/**
 		 * Deactivate all the events for this monitor
@@ -146,6 +120,11 @@ public abstract class AbstractMonitor<E extends MonitorListener> extends Service
 	}
 
 	@Override
+	/**
+	 * Start the service. 
+	 * 
+	 * The events to activate can be put on the intent using the EVENTS_EXTRA key
+	 */
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		super.onStartCommand(intent, flags, startId);
 		
