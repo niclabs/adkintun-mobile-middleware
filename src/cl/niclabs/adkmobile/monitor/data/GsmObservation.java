@@ -6,13 +6,17 @@ import java.util.List;
 
 import cl.niclabs.adkmobile.monitor.data.constants.TelephonyStandard;
 
+import com.orm.dsl.Ignore;
+
 public class GsmObservation extends TelephonyObservation<GsmObservation> {
 	private int gsmCid;
 	private int gsmLac;
 	private Integer gsmPsc;
-	private List<NeighborAntenna> neighborList;
 	
 	private Double signalBer;
+	
+	@Ignore
+	private List<NeighborAntenna> neighborList;
 
 	/**
 	 * Required by Sugar ORM. Create instance with creation time as timestamp
