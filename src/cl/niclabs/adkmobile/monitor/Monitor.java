@@ -95,6 +95,11 @@ public interface Monitor<E extends MonitorListener> {
 	public static final int DEVICE = 256;
 	
 	/**
+	 * Defines the clock synchronization event
+	 */
+	public static final int CLOCK = 512;
+	
+	/**
 	 * Activate the specified events.
 	 * @param events
 	 * @param configuration additional configurations for the events

@@ -1,5 +1,7 @@
 package cl.niclabs.adkmobile;
 
+import android.content.Intent;
+import cl.niclabs.adkmobile.services.ClockService;
 import cl.niclabs.adkmobile.utils.Scheduler;
 
 import com.orm.SugarApp;
@@ -37,6 +39,11 @@ public class AdkintunMobileApp extends SugarApp {
 	public static boolean PERSISTENCE_ENABLED = true;
 	
 	/**
+	 * Library settings file
+	 */
+	public static final String LIBRARY_SETTINGS = "cl.niclabs.adkmobile.settings"; 
+	
+	/**
 	 * Application context, will be null if the application is not added to the manifest
 	 */
 	private static AdkintunMobileApp adkintunMobileContext;
@@ -49,12 +56,12 @@ public class AdkintunMobileApp extends SugarApp {
 		Scheduler.getInstance().shutdown();
 	}
 	
-	
-	
 	@Override
 	public void onCreate() {
-		// TODO Auto-generated method stub
 		super.onCreate();
+		
+		if (!ClockService.isRunning())
+			startService(new Intent(this, ClockService.class));
 		
 		/* Set context (it will be null if application is not added to manifest_ */
 		adkintunMobileContext = this;

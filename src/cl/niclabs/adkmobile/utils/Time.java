@@ -1,7 +1,9 @@
 package cl.niclabs.adkmobile.utils;
 
+import cl.niclabs.adkmobile.services.ClockService;
+
 public class Time {
 	public static long currentTimeMillis() {
-		return System.currentTimeMillis();
+		return ClockService.currentTimeMillis();
 	}
 }
