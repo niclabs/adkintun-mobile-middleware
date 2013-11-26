@@ -15,7 +15,7 @@ public class Scheduler {
 	private ScheduledThreadPoolExecutor taskPool;
 	
 	private Scheduler() {
-		taskPool = new ScheduledThreadPoolExecutor(0);
+		taskPool = new ScheduledThreadPoolExecutor(4);
 	}
 	
 	public static Scheduler getInstance() {
