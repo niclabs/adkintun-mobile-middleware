@@ -14,8 +14,10 @@ public interface ConnectivityStatusListener extends MonitorProxyListener {
 	 * 
 	 * Should be called on starting the connectivity service if the Mobile connection
 	 * is active
+	 * 
+	 * @param roaming true if the device is roaming
 	 */
-	public void onMobileConnection();
+	public void onMobileConnection(boolean roaming);
 	
 	/**
 	 * Inform the listener when the service has started roaming or when the data roaming 
@@ -32,4 +34,12 @@ public interface ConnectivityStatusListener extends MonitorProxyListener {
 	 * Used to inform the listener that the device has disconnected from the network.
 	 */
 	public void onNetworkDisconnection();
+	
+	/**
+	 * Used to inform the listener that the device has connected to a network
+	 * after being disconnected and the connection is available
+	 * 
+	 * @param boolean isMobileRoaming, true if the connection is mobile and on roaming
+	 */
+	public void onNetworkConnection(boolean isMobileRoaming);
 }

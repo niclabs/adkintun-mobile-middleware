@@ -14,6 +14,7 @@ public class ConnectivityStatus extends MonitorProxy<ConnectivityStatusListener>
 	
 	boolean switchedNetwork			= false;
 	boolean switchedRoamingStatus	= false;
+	boolean connectedToNetwork		= false;
 	
 	/**
 	 * Detect a change in network status and notify the listener
@@ -23,10 +24,10 @@ public class ConnectivityStatus extends MonitorProxy<ConnectivityStatusListener>
 	 * @param newData
 	 */
 	private void detectNetworkStatusChange(ConnectivityObservation oldData, ConnectivityObservation newData) {
-		ConnectionType newNetworkType = newData.getConnectionType();
-		boolean isConnected = newData.isConnected();
-		boolean isAvailable = newData.isAvailable();
-		boolean isRoaming = newData.isRoaming();		
+		final ConnectionType newNetworkType = newData.getConnectionType();
+		final boolean isConnected = newData.isConnected();
+		final boolean isAvailable = newData.isAvailable();
+		final boolean isRoaming = newData.isRoaming();		
 		boolean disconnectedFromNetwork = false;
 		
 		if (oldData != null) { // Connectivity status has changed
@@ -37,11 +38,13 @@ public class ConnectivityStatus extends MonitorProxy<ConnectivityStatusListener>
 			switchedNetwork = (oldNetworkType != ConnectionType.WIFI && newNetworkType == ConnectionType.WIFI)
 					|| !oldNetworkType.isMobile() && newNetworkType.isMobile();
 			disconnectedFromNetwork = oldNetworkType != ConnectionType.NONE && newNetworkType == ConnectionType.NONE;
+			connectedToNetwork = oldNetworkType == ConnectionType.NONE && newNetworkType != ConnectionType.NONE;
 			switchedRoamingStatus = !wasRoaming && isRoaming;
 		}
 		else { // Service has just started
 			switchedNetwork = newNetworkType == ConnectionType.WIFI || newNetworkType.isMobile();
 			disconnectedFromNetwork = newNetworkType == ConnectionType.NONE;
+			connectedToNetwork = newNetworkType != ConnectionType.NONE;
 			switchedRoamingStatus = isRoaming;
 		}
 
@@ -50,11 +53,10 @@ public class ConnectivityStatus extends MonitorProxy<ConnectivityStatusListener>
 		if (switchedNetwork && isConnected && isAvailable) {
 			if (newNetworkType.isMobile()) {
 				if (DEBUG) Log.d(TAG, "Connected to mobile");
-				
 				notifyListeners(new Notifier<ConnectivityStatusListener>() {
 					@Override
 					public void notify(ConnectivityStatusListener listener) {
-						listener.onMobileConnection();
+						listener.onMobileConnection(isRoaming);
 					}
 				});
 			}
@@ -74,12 +76,10 @@ public class ConnectivityStatus extends MonitorProxy<ConnectivityStatusListener>
 		
 		// Detect change in roaming status
 		if (switchedRoamingStatus && newNetworkType != ConnectionType.WIFI) {
-			final boolean isDataRoamingEnabled = isConnected && isAvailable;
-			
 			notifyListeners(new Notifier<ConnectivityStatusListener>() {
 				@Override
 				public void notify(ConnectivityStatusListener listener) {
-					listener.onRoaming(isDataRoamingEnabled);
+					listener.onRoaming(isConnected && isAvailable);
 				}
 			});
 			
@@ -97,6 +97,17 @@ public class ConnectivityStatus extends MonitorProxy<ConnectivityStatusListener>
 			
 			/* Reset status */
 			disconnectedFromNetwork = false;
+		}
+		else if (connectedToNetwork && isConnected && isAvailable) {
+			notifyListeners(new Notifier<ConnectivityStatusListener>() {
+				@Override
+				public void notify(ConnectivityStatusListener listener) {
+					listener.onNetworkConnection(newNetworkType.isMobile() && isRoaming);
+				}
+			});
+			
+			/* Reset status */
+			connectedToNetwork = false;
 		}
 	}
 	
