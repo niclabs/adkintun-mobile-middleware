@@ -50,7 +50,8 @@ public final class ClockService extends ApplicationService implements Connectivi
 	 * Timeout for NTP server (in milliseconds)
 	 */
 	public static final int NTP_TIMEOUT = 5000;
-	public static final int NTP_MAX_FREQUENCY = 5000;
+	public static final int NTP_MAX_RETRY_FREQUENCY = 5000;
+	public static final int NTP_MAX_FREQUENCY = 3600000; // 1 hour
 	public static final String NTP_HOST = "ntp.shoa.cl";
 	
 	private static final String REAL_TIMESTAMP_PROPERTY = "cl.niclabs.adkmobile.time.real_timestamp";
@@ -66,6 +67,7 @@ public final class ClockService extends ApplicationService implements Connectivi
 	private static Long bootTimeMillis = null;
 	private static boolean realTime = false;
 	private static long lastSynchronizationTime = 0L;
+	private static long lastSynchronizationAttempt = 0L;
 	
 	/**
 	 * Return the time in milliseconds, if the service was able to synchronize
@@ -205,7 +207,8 @@ public final class ClockService extends ApplicationService implements Connectivi
 	 */
 	private boolean synchronizeClock() {
 		SntpClient client = new SntpClient();
-		if (SystemClock.elapsedRealtime() - lastSynchronizationTime >= NTP_MAX_FREQUENCY
+		if (SystemClock.elapsedRealtime() - lastSynchronizationTime >= NTP_MAX_FREQUENCY &&
+				SystemClock.elapsedRealtime() - lastSynchronizationAttempt >= NTP_MAX_RETRY_FREQUENCY
 				&& client.requestTime(NTP_HOST, NTP_TIMEOUT)) {
 			bootTimeMillis = client.getNtpTime() - client.getNtpTimeReference();
 			lastSynchronizationTime = SystemClock.elapsedRealtime();
@@ -215,6 +218,7 @@ public final class ClockService extends ApplicationService implements Connectivi
 			
 			return true;
 		}
+		lastSynchronizationAttempt = SystemClock.elapsedRealtime();
 		return false;
 	}
 
