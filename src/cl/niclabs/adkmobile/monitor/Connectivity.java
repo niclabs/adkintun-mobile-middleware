@@ -67,10 +67,13 @@ public class Connectivity extends AbstractMonitor<ConnectivityListener> {
 			if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {		
 				ConnectivityObservation data = new ConnectivityObservation(Time.currentTimeMillis());
 				
+				// Get the NetworkInfo object
+				NetworkInfo ni = connectivityManager.getActiveNetworkInfo();
+				
 				/* When no network is active
 				 * the variable is null
 				 * TODO: should we record this? */
-				if (intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false)) {					
+				if (intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false) || ni == null) {					
 					TelephonyManager telephony = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
 			    	data.setConnected(false);
 			    	if (telephony.isNetworkRoaming()) {
@@ -91,9 +94,6 @@ public class Connectivity extends AbstractMonitor<ConnectivityListener> {
 					lastObservation = (ConnectivityObservation) data;
 					return; 
 				}
-				
-				// Get the NetworkInfo object
-				NetworkInfo ni = connectivityManager.getActiveNetworkInfo();
 				
 //				// This code was disabled to normalize the behavior across devices
 //				// otherwise multiple instances of a same event would be recorded 
