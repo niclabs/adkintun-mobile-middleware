@@ -10,6 +10,7 @@ public abstract class TelephonyObservation<E extends TelephonyObservation<E>> ex
 	protected int mnc;
 	protected int networkType;
 	protected Integer signalStrength;
+	
 	protected int telephonyStandard;
 	
 	public TelephonyObservation() {
@@ -19,6 +20,7 @@ public abstract class TelephonyObservation<E extends TelephonyObservation<E>> ex
 	public TelephonyObservation(long timestamp) {
 		super(Monitor.TELEPHONY, timestamp);
 	}
+
 	/**
 	 * 
 	 * @return Mobile Country Code
@@ -26,7 +28,7 @@ public abstract class TelephonyObservation<E extends TelephonyObservation<E>> ex
 	public int getMcc() {
 		return mcc;
 	}
-	
+
 	/**
 	 * 
 	 * @return Mobile Network Code
@@ -34,15 +36,14 @@ public abstract class TelephonyObservation<E extends TelephonyObservation<E>> ex
 	public int getMnc() {
 		return mnc;
 	}
-
 	/**
 	 * 
 	 * @return network type (GPRS, UMTS, EDGE). See {@link NetworkType} for more info.
 	 */
-	public int getNetworkType() {
-		return networkType;
+	public NetworkType getNetworkType() {
+		return NetworkType.getInstance(networkType);
 	}
-
+	
 	/**
 	 * 
 	 * @return signal strength in dBm or null if not available
@@ -54,8 +55,8 @@ public abstract class TelephonyObservation<E extends TelephonyObservation<E>> ex
 	/**
 	 * @return telephony standard (GPRS, CDMA).
 	 */
-	public int getTelephonyStandard() {
-		return telephonyStandard;
+	public TelephonyStandard getTelephonyStandard() {
+		return TelephonyStandard.getInstance(telephonyStandard);
 	}
 
 	public void setMcc(int mcc) {

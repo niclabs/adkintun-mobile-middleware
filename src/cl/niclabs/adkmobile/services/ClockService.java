@@ -203,7 +203,7 @@ public final class ClockService extends ApplicationService implements Connectivi
 	
 	/**
 	 * Synchronize time with the NTP server
-	 * @return true if synchronization was performed succesffully
+	 * @return true if synchronization was performed successfully
 	 */
 	private boolean synchronizeClock() {
 		SntpClient client = new SntpClient();

@@ -16,4 +16,13 @@ public enum TelephonyStandard {
 	public int value() {
 		return value;
 	}
+	
+	public static TelephonyStandard getInstance(int value) {
+		for (TelephonyStandard n: TelephonyStandard.values()) {
+			if (n.value() == value) {
+				return n;
+			}
+		}
+		return GSM;
+	}
 }
