@@ -1,5 +1,7 @@
 package cl.niclabs.adkmobile.data;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,5 +26,16 @@ public abstract class AbstractSerializable<E extends AbstractSerializable<E>> im
             }
         }
         return toStore;
+	}
+	
+	public String toString() {
+		Serializer serializer = SerializerFactory.getInstance().getSerializer();
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		try {
+			serializer.serialize(out, this);
+			out.close();
+		} catch (IOException e) {
+		}
+		return out.toString();
 	}
 }
