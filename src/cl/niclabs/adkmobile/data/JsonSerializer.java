@@ -45,6 +45,7 @@ public class JsonSerializer implements Serializer {
 	 * @param object
 	 * @throws IOException
 	 */
+	@Override
 	public void serialize(OutputStream out, Serializable<?> object) throws IOException {
 		JsonWriter writer = new JsonWriter(new OutputStreamWriter(out, "UTF-8"));
 		serialize(writer, object);
@@ -60,6 +61,7 @@ public class JsonSerializer implements Serializer {
 	 * @return
 	 * @throws IOException
 	 */
+	@Override
 	public void serialize(OutputStream out, List<Serializable<?>> list) throws IOException {
 		JsonWriter writer = new JsonWriter(new OutputStreamWriter(out, "UTF-8"));
 		serialize(writer, list.iterator());
@@ -75,6 +77,7 @@ public class JsonSerializer implements Serializer {
 	 * @return
 	 * @throws IOException
 	 */
+	@Override
 	public void serialize(OutputStream out, Iterator<Serializable<?>> iterator) throws IOException {
 		JsonWriter writer = new JsonWriter(new OutputStreamWriter(out, "UTF-8"));
 		serialize(writer, iterator);
@@ -104,7 +107,7 @@ public class JsonSerializer implements Serializer {
 					continue;
 				}
 				
-				if (Serializable.class.isAssignableFrom(field.getClass())) {
+				if (Serializable.class.isAssignableFrom(fieldType)) {
 					writer.name(fieldName);
 					serialize(writer, (Serializable)fieldValue);
 				}
@@ -115,7 +118,7 @@ public class JsonSerializer implements Serializer {
 	             		if (Serializable.class.isAssignableFrom((Class<?>)listType)) {
 	             			// If it is a list of Serializable objects write the list
 	             			writer.name(fieldName);
-	             			serialize(writer, ((List) fieldValue).iterator());
+	             			serialize(writer, ((List) fieldValue).iterator());	             			
 	             		}
 	             	}
 				}
