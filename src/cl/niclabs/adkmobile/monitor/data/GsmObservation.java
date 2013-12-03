@@ -1,22 +1,20 @@
 package cl.niclabs.adkmobile.monitor.data;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import cl.niclabs.adkmobile.monitor.data.constants.TelephonyStandard;
 
-import com.orm.dsl.Ignore;
-
 public class GsmObservation extends TelephonyObservation<GsmObservation> {
 	private int gsmCid;
 	private int gsmLac;
 	private Integer gsmPsc;
 	
-	private Double signalBer;
-	
-	@Ignore
 	private List<NeighborAntenna> neighborList;
+	
+	private Sample signalBer;
 
 	/**
 	 * Required by Sugar ORM. Create instance with creation time as timestamp
@@ -66,25 +64,39 @@ public class GsmObservation extends TelephonyObservation<GsmObservation> {
 		return neighborList;
 	}
 	
-	/**
-	 * @return signal Bit-error rate
-	 */
-	public Double getSignalBer() {
-		return signalBer;
-	}
-	
 	@Override
 	public void save() {
+		if (signalBer != null)
+			signalBer.save();
+		
 		super.save();
 		
-		if (this.getId() != null && neighborList != null) {
-			for (NeighborAntenna neighbor: neighborList) {
-				neighbor.setGsmObservation(this);
-				neighbor.save();
+		if (this.getId() != null) {
+			if (neighborList != null) {
+				for (NeighborAntenna neighbor: neighborList) {
+					neighbor.setGsmObservation(this);
+					neighbor.save();
+				}
 			}
 		}
 	}
  
+	@Override
+	public List<Field> getSerializableFields() {
+		if (neighborList == null || neighborList.size() == 0)
+			neighborList = getNeighborList();
+		
+		return super.getSerializableFields();
+	}
+	
+	/**
+	 * Get mean bit-error rate
+	 * @return
+	 */
+	public Sample getSignalBer() {
+		return signalBer;
+	}
+
 	public void setGsmCid(int gsmCid) {
 		this.gsmCid = gsmCid;
 	}
@@ -100,8 +112,13 @@ public class GsmObservation extends TelephonyObservation<GsmObservation> {
 	public void setNeighborList(List<NeighborAntenna> neighborList) {
 		this.neighborList = neighborList;
 	}
-
-	public void setSignalBer(Double signalBer) {
-		this.signalBer = signalBer;
+	
+	/**
+	 * Update the signalBer with a new sample value
+	 * @param signalBer
+	 */
+	public void updateSignalBer(double signalBer) {
+		if (this.signalBer == null) this.signalBer = new Sample();
+		this.signalBer.update(signalBer);
 	}
 }

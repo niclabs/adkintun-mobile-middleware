@@ -9,9 +9,10 @@ public abstract class TelephonyObservation<E extends TelephonyObservation<E>> ex
 	protected int mcc;
 	protected int mnc;
 	protected int networkType;
-	protected Integer signalStrength;
 	
 	protected int telephonyStandard;
+
+	private Sample signalStrength;
 	
 	public TelephonyObservation() {
 		super(Monitor.TELEPHONY, Time.currentTimeMillis());
@@ -45,11 +46,19 @@ public abstract class TelephonyObservation<E extends TelephonyObservation<E>> ex
 	}
 	
 	/**
-	 * 
-	 * @return signal strength in dBm or null if not available
+	 * Get the signal strength sample
+	 * @return
 	 */
-	public Integer getSignalStrength() {
+	public Sample getSignalStrength() {
 		return signalStrength;
+	}
+
+	@Override
+	public void save() {
+		if (signalStrength != null)
+			signalStrength.save();
+		
+		super.save();
 	}
 
 	/**
@@ -71,11 +80,17 @@ public abstract class TelephonyObservation<E extends TelephonyObservation<E>> ex
 		this.networkType = networkType.value();
 	}
 
-	public void setSignalStrength(int signalStrength) {
-		this.signalStrength = signalStrength;
-	}
-
 	public void setTelephonyStandard(TelephonyStandard telephonyStandard) {
 		this.telephonyStandard = telephonyStandard.value();
+	}
+	
+	/**
+	 * Update signal strength with a new value
+	 * @param signalStrength
+	 */
+	public void updateSignalStrength(int signalStrength) {
+		if (this.signalStrength == null) this.signalStrength = new Sample();
+		
+		this.signalStrength.update(signalStrength);
 	}
 }

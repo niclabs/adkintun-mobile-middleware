@@ -11,7 +11,7 @@ import cl.niclabs.adkmobile.monitor.data.TelephonyObservation;
  */
 public interface TelephonyListener extends MonitorListener{
 	/**
-	 * Inform the listener of a telephony change
+	 * Inform the listener of a telephony change. 
 	 * @param trafficState the new telephony data
 	 */
 	public void onMobileTelephonyChange(TelephonyObservation<?> telephonyState);

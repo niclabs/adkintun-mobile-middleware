@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -11,13 +12,14 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
+import android.os.Build.VERSION;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
+import android.telephony.CellInfo;
 import android.telephony.CellLocation;
 import android.telephony.NeighboringCellInfo;
 import android.telephony.PhoneStateListener;
-import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.telephony.cdma.CdmaCellLocation;
 import android.telephony.gsm.GsmCellLocation;
@@ -92,21 +94,6 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 				}
 				catch (IndexOutOfBoundsException e) {}
 				
-				if (lastSignalStrength != null) {
-					synchronized(syncSignalStrength) {
-						/* convert the Signal Strength from GSM to Dbm */
-						if (lastSignalStrength.getGsmSignalStrength() != 99) {
-							int signalStrengthDbm = (lastSignalStrength
-									.getGsmSignalStrength() * 2) - 113;
-							data.setSignalStrength(signalStrengthDbm);
-						}
-						if (lastSignalStrength.getGsmBitErrorRate() >= 0 && lastSignalStrength.getGsmBitErrorRate() != 99) {
-							double gsmBerPercent = gsmBerTable[lastSignalStrength.getGsmBitErrorRate()] / 100;
-							data.setSignalBer(gsmBerPercent);
-						}
-					}
-				}
-				
 				if (lastNetworkType != null){
 					data.setNetworkType(lastNetworkType);
 					
@@ -144,6 +131,9 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 
 				/* Log the results */
 				if (DEBUG) Log.v(TAG, data.toString());
+				
+				/* Update last observation */
+				lastObservation = data;
 			} 
 			else {
 				CdmaCellLocation loc = (CdmaCellLocation) location;
@@ -169,16 +159,6 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 				}
 				catch (IndexOutOfBoundsException e) {}
 				
-				if (lastSignalStrength != null) {
-					synchronized(syncSignalStrength) {
-						data.setSignalStrength(lastSignalStrength.getCdmaDbm());
-						data.setCdmaEcio(lastSignalStrength.getCdmaEcio());
-						data.setEvdoDbm(lastSignalStrength.getEvdoDbm());
-						data.setEvdoEcio(lastSignalStrength.getEvdoEcio());
-						data.setEvdoSnr(lastSignalStrength.getEvdoSnr());
-					}
-				}
-				
 				if (lastNetworkType != null){
 					data.setNetworkType(lastNetworkType);
 				}
@@ -188,7 +168,17 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 
 				/* Log the results */
 				if (DEBUG) Log.v(TAG, data.toString());
+				
+				/* Update last observation */
+				lastObservation = data;
 			}
+		}
+		
+		@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+		@Override
+		public void onCellInfoChanged(List<CellInfo> cellInfo) {
+			super.onCellInfoChanged(cellInfo);
+			// TODO Add cell info detection
 		}
 
 		@Override
@@ -196,6 +186,52 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 			super.onDataConnectionStateChanged(state, networkType);
 			
 			lastNetworkType = NetworkType.valueOf(networkType);
+			
+			if (lastObservation != null) {
+				if (lastObservation instanceof GsmObservation) {
+					GsmObservation data = new GsmObservation(System.currentTimeMillis());
+					GsmObservation  old = (GsmObservation) lastObservation;
+					
+					data.setNetworkType(old.getNetworkType());
+					data.setTelephonyStandard(old.getTelephonyStandard());
+					data.setGsmCid(old.getGsmCid());
+					data.setGsmLac(old.getGsmLac());
+					data.setGsmPsc(old.getGsmPsc());
+					data.setMcc(old.getMcc());
+					data.setMnc(old.getMnc());
+					data.setNeighborList(old.getNeighborList());
+					
+					/* Notify listeners and update internal state */
+					notifyListeners(telephonyEvent, data);
+
+					/* Log the results */
+					if (DEBUG) Log.v(TAG, data.toString());
+					
+					lastObservation = data;
+				}
+				else if (lastObservation instanceof CdmaObservation) {
+					CdmaObservation data = new CdmaObservation(System.currentTimeMillis());
+					CdmaObservation  old = (CdmaObservation) lastObservation;
+					
+					data.setNetworkType(old.getNetworkType());
+					data.setTelephonyStandard(old.getTelephonyStandard());
+					data.setMcc(old.getMcc());
+					data.setMnc(old.getMnc());
+					data.setCdmaBaseLatitude(old.getCdmaBaseLatitude());
+					data.setCdmaBaseLongitude(old.getCdmaBaseLongitude());
+					data.setCdmaBaseStationId(old.getCdmaBaseStationId());
+					data.setNetworkId(old.getNetworkId());
+					data.setSystemId(old.getSystemId());
+				
+					/* Notify listeners and update internal state */
+					notifyListeners(telephonyEvent, data);
+
+					/* Log the results */
+					if (DEBUG) Log.v(TAG, data.toString());
+					
+					lastObservation = data;
+				}
+			}
 			
 			/**
 			 * Check the SIM state for changes
@@ -216,10 +252,52 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
     	}
 		
 		@Override
-		public void onSignalStrengthsChanged(SignalStrength signalStrength) {
+		public void onSignalStrengthsChanged(android.telephony.SignalStrength signalStrength) {
 			super.onSignalStrengthsChanged(signalStrength);
-			synchronized(syncSignalStrength) {
-				lastSignalStrength = signalStrength;
+
+			
+			if (lastObservation != null) {
+				boolean changed = false;
+							
+				if (signalStrength.isGsm()) {
+					GsmObservation updatedObservation = (GsmObservation) lastObservation;
+					
+					/* convert the Signal Strength from GSM to Dbm */
+					if (signalStrength.getGsmSignalStrength() != 99) {
+						int signalStrengthDbm = (signalStrength
+								.getGsmSignalStrength() * 2) - 113;
+						updatedObservation.updateSignalStrength(signalStrengthDbm);
+						
+						changed = true;
+					}
+	
+					if (signalStrength.getGsmBitErrorRate() >= 0
+							&& signalStrength.getGsmBitErrorRate() != 99) {
+						double gsmBerPercent = gsmBerTable[signalStrength
+								.getGsmBitErrorRate()] / 100;
+						updatedObservation.updateSignalBer(gsmBerPercent);
+						
+						changed = true;
+					}
+				} else {
+					CdmaObservation updatedObservation = (CdmaObservation) lastObservation;
+					
+					updatedObservation.updateSignalStrength(signalStrength.getCdmaDbm());
+					updatedObservation.updateCdmaEcio(signalStrength.getCdmaEcio());
+					updatedObservation.updateEvdoDbm(signalStrength.getEvdoDbm());
+					updatedObservation.updateEvdoEcio(signalStrength.getEvdoEcio());
+					updatedObservation.updateEvdoSnr(signalStrength.getEvdoSnr());
+					
+					changed = true;
+				}
+				
+				if (changed) {
+					/* Notify listeners and update internal state */
+					notifyListeners(telephonyEvent, lastObservation);
+
+					/* Log the results */
+					if (DEBUG) Log.v(TAG, lastObservation.toString());
+				}
 			}
 		}
 
@@ -295,9 +373,8 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 		}		
 	};
 	
-	private SignalStrength lastSignalStrength = null;
-	private Object syncSignalStrength = new Object();
 	private NetworkType lastNetworkType = null;
+	private TelephonyObservation<?> lastObservation = null;
 
 	/**
 	 * Activity-Service binder
@@ -311,12 +388,21 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 	private SimState lastSimState = null;
 
 	private MonitorEvent<TelephonyListener> telephonyEvent = new AbstractMonitorEvent<TelephonyListener>() {
+		@SuppressLint("InlinedApi")
 		@Override
 		public synchronized boolean activate() {
 			if (!isActive()) {
 				telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
-				telephonyManager.listen(telephonyStateListener,
-						PhoneStateListener.LISTEN_CELL_LOCATION	| PhoneStateListener.LISTEN_SIGNAL_STRENGTHS | PhoneStateListener.LISTEN_SERVICE_STATE);
+				
+				int events = PhoneStateListener.LISTEN_CELL_LOCATION
+						| PhoneStateListener.LISTEN_SIGNAL_STRENGTHS
+						| PhoneStateListener.LISTEN_SERVICE_STATE;
+				
+				if (VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+					events |= PhoneStateListener.LISTEN_CELL_INFO;
+				}
+				
+				telephonyManager.listen(telephonyStateListener, events);
 				
 				/* Get the initial network type */
 				ConnectivityManager connectivityManager = (ConnectivityManager) mContext
