@@ -31,10 +31,7 @@ import com.orm.StringUtil;
  * serializer.serialize(out, object2);
  * </code>
  * 
- * 
- * 
  * @author Felipe Lalanne <flalanne@niclabs.cl>
- * 
  */
 public class JsonSerializer implements Serializer {
 	/**

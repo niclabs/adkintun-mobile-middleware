@@ -49,7 +49,7 @@ public class Location extends AbstractMonitor<LocationListener> {
 	}
 
 	/**
-	 * This listener will keep track for failed GPS location requests
+	 * Listens to GPS status change events and notifies StateChange if necessary
 	 */
 	private final GpsStatus.Listener gpsStatusListener = new GpsStatus.Listener() {
 		@Override
@@ -147,6 +147,15 @@ public class Location extends AbstractMonitor<LocationListener> {
 	 */
 	public static String EXPIRATION_TIME_EXTRA = "expiration_time";
 
+	
+	/**
+	 * Compares two android.location.Location events according to accuracy and expiration time parameters
+	 * and returns true if the new location is better than the previous one.
+	 *
+	 * @param newLocation
+	 * @param lastLocation
+	 * @return
+	 */
 	private boolean isBetterLocation(android.location.Location newLocation, android.location.Location lastLocation) {
 		if (newLocation != null && lastLocation == null) {
 			return true;
@@ -186,8 +195,14 @@ public class Location extends AbstractMonitor<LocationListener> {
 		return false;
 	}
 
+	/**
+	 * Listen to location and provider change events
+	 */
 	private android.location.LocationListener locationListener = new android.location.LocationListener() {
 
+		/**
+		 * Get notified on new location
+		 */
 		@Override
         public void onLocationChanged(android.location.Location newLocation) {
             
@@ -228,6 +243,9 @@ public class Location extends AbstractMonitor<LocationListener> {
 			if (DEBUG) Log.v(TAG, observation.toString());
         }
 
+		/**
+		 * Get notified on user de-activation of a location provider
+		 */
 		@Override
 		public void onProviderDisabled(String provider) {
 			StateChange stateChange;
@@ -253,6 +271,9 @@ public class Location extends AbstractMonitor<LocationListener> {
 			}
 		}
 
+		/**
+		 * Get notified on user activation of a location provider
+		 */
 		@Override
 		public void onProviderEnabled(String provider) {
 			StateChange stateChange;
@@ -278,6 +299,9 @@ public class Location extends AbstractMonitor<LocationListener> {
 			}
 		}
 
+		/**
+		 * Get notified on a provided information status change
+		 */
 		@Override
         public void onStatusChanged(String provider, int status, Bundle extras) {
             if( status == LocationProvider.AVAILABLE ) {
@@ -302,6 +326,9 @@ public class Location extends AbstractMonitor<LocationListener> {
 
 	protected String TAG = "AdkintunMobile::Location";
 
+	/**
+	 * Control gps location events
+	 */
 	private MonitorEvent<LocationListener> gpsLocationEvent = new AbstractMonitorEvent<LocationListener>() {
 
 		@Override
@@ -343,6 +370,9 @@ public class Location extends AbstractMonitor<LocationListener> {
 
 	};
 
+	/**
+	 * Control network location events
+	 */
 	private MonitorEvent<LocationListener> networkLocationEvent = new AbstractMonitorEvent<LocationListener>() {
 
 		@Override

@@ -61,6 +61,12 @@ public class Connectivity extends AbstractMonitor<ConnectivityListener> {
 		}
 	};
 
+	/**
+	 * Broadcast receiver for CONNECTIVITY_ACTION intents.
+	 * 
+	 * Generates the connectivity change observation and notifies the listeners
+	 * of the service
+	 */
 	private BroadcastReceiver connectivityMonitor = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {

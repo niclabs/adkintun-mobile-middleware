@@ -9,7 +9,9 @@ import cl.niclabs.adkmobile.data.DoNotSerialize;
 import cl.niclabs.adkmobile.utils.Time;
 
 /**
- * Provides information about the device (id, brand, manufacturer, etc).
+ * Singleton class to obtain information about the device (brand, manufacturer, etc)
+ * 
+ * An instance can be obtained with getInstance(context)
  * 
  * @author Felipe Lalanne <flalanne@niclabs.cl>
  */

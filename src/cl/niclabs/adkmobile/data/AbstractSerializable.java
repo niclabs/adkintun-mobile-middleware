@@ -7,14 +7,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Generic implementation for serialzable objects
+ * Generic implementation for serializable objects. 
+ * 
  * @author Felipe Lalanne <flalanne@niclabs.cl>
  *
- * @param <E>
+ * @param <E> sub-class to serialize
  */
 public abstract class AbstractSerializable<E extends AbstractSerializable<E>> implements Serializable<E> {
 	/**
-	 * Return the list of fields of the object
+	 * Return the list of fields of the object except for those with the @DoNotSerizalize
+	 * annotation.
 	 * @return
 	 */
 	@Override

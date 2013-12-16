@@ -1,8 +1,8 @@
 package cl.niclabs.adkmobile.data;
 
 /**
- * Construct elements of type DataObjectWriter, it is preferrable to 
- * use this class instead of creating individual instances of DataObjectWriter
+ * Construct elements of type Serializer, it is preferable to 
+ * use this class instead of creating individual instances of Serializer
  * to encapsulate the implementation of the writer
  * 
  * @author Felipe Lalanne <flalanne@niclabs.cl>

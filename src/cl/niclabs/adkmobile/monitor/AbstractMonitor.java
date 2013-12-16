@@ -23,8 +23,6 @@ import cl.niclabs.adkmobile.utils.Notifier;
  * handle multiple types of events and data types, as well as listeners of the
  * monitoring events to be notified of status changes.
  * 
- * TODO: Verify thread safety of the methods in this class
- * 
  * @author Felipe Lalanne <flalanne@niclabs.cl>
  * @param <E> listeners that the monitor handles
  */

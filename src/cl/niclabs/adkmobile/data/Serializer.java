@@ -5,6 +5,11 @@ import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * Define the methods and behavior that must be implemented by all serializers 
+ * 
+ * @author Felipe Lalanne <flalanne@niclabs.cl>
+ */
 public interface Serializer {
 	/**
 	 * Write a serializable object to the specified output stream

@@ -15,12 +15,54 @@ import com.orm.SugarRecord;
 import com.orm.dsl.Ignore;
 
 /**
- * Abstraction for all persistent objects. Keep in mind that the underlying implementation may
- * change, therefore it is highly discouraged to use any of the superclass methods.
+ * Abstraction for all persistent objects.
+ * 
+ * This class currently depends of the Sugar library
+ * https://github.com/niclabs/sugar However, keep in mind that the underlying
+ * implementation may change, therefore it is highly discouraged to use any of
+ * the superclass methods.
+ * 
+ * In order to enable persistance in the application using the library, it is necessary
+ * to add the class {@link cl.niclabs.adkmobile.AdkintunMobileApp} to the <code>android:name</code>
+ * argument in the manifest of the implementing class.
+ * 
+ * In order to create persistent objects, it suffices with extending this class.
+ * For instance, the following code creates a Note entity that is
+ * persistable in a database
+ * 
+ * <code>
+ * class Note {
+ * 		public String title;
+ * 		public String body;
+ * 
+ * 		// The default constructor is mandatory
+ * 		public Note() {}
+ * }
+ * </code>
+ * 
+ * In order to save the note 
+ * <code>
+ * Note note = new Note();
+ * note.title = "Hello";
+ * note.body =  "Hello world!!";
+ * 
+ * // Saves the note to storage
+ * note.save();
+ * </code>
+ * 
+ * To find all the notes in storage
+ * 
+ * <code>
+ * Iterator<Note> notes = Note.findAll(Note.class);
+ * while (notes.hasNext()) {
+ * 		Note n = notes.next();
+ * 		Log.d("Example", n.title);
+ * }
+ * </code>
  * 
  * @author Felipe Lalanne <flalanne@niclabs.cl>
- *
- * @param <E> persistent object 
+ * 
+ * @param <E> object that is desired to make persistable
  */
 public class Persistent<E extends Persistent<E>> extends SugarRecord<E> implements Serializable<E> {
 	/**
