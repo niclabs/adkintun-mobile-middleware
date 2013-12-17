@@ -271,8 +271,9 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 						changed = true;
 					}
 	
+					// Check that bit error rate is in correct range, since not all devices return the correct value
 					if (signalStrength.getGsmBitErrorRate() >= 0
-							&& signalStrength.getGsmBitErrorRate() != 99) {
+							&& signalStrength.getGsmBitErrorRate() <= 7) {
 						double gsmBerPercent = gsmBerTable[signalStrength
 								.getGsmBitErrorRate()] / 100;
 						updatedObservation.updateSignalBer(gsmBerPercent);
