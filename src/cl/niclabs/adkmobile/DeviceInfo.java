@@ -35,6 +35,8 @@ public class DeviceInfo extends AbstractSerializable<DeviceInfo> {
 	private String release;
 	private String releaseType;
 	private Integer sdk;
+	private Integer simMnc;
+	private Integer simMcc;
 	
 	private DeviceInfo(Context context) {
 		telephonyManager = (TelephonyManager) context
@@ -53,6 +55,13 @@ public class DeviceInfo extends AbstractSerializable<DeviceInfo> {
 		release = Build.VERSION.RELEASE;
 		releaseType = Build.TYPE;
 		sdk = Build.VERSION.SDK_INT;
+		
+		try {
+			String operator = telephonyManager.getSimOperator();
+			simMcc = Integer.valueOf(operator.substring(0,3));			
+			simMnc = Integer.valueOf(operator.substring(3));
+		}
+		catch (IndexOutOfBoundsException e) {}
 		
 	}
 
@@ -159,6 +168,22 @@ public class DeviceInfo extends AbstractSerializable<DeviceInfo> {
 	 */
 	public Integer getSdk() {
 		return sdk;
+	}
+
+	/**
+	 * Get the SIM card mobile network code (null if unavailable)
+	 * @return
+	 */
+	public Integer getSimMnc() {
+		return simMnc;
+	}
+
+	/**
+	 * Get the SIM card mobile country code (null if unavailable)
+	 * @return
+	 */
+	public Integer getSimMcc() {
+		return simMcc;
 	}
 
 	/**
