@@ -72,7 +72,30 @@ public class Persistent<E extends Persistent<E>> extends SugarRecord<E> implemen
 	public Persistent() {
 		super();
 	}
-		
+	
+	@Override
+	public void delete() {
+		super.delete();
+	}
+	
+	/**
+	 * Delete all records for the persistent type
+	 * @param type
+	 */
+	public static <T extends Persistent<?>> void deleteAll(Class<T> type) {
+        SugarRecord.deleteAll(type);
+    }
+	
+	/**
+	 * Delete all records that fulfill the where clause
+	 * @param type
+	 * @param whereClause
+	 * @param whereArgs
+	 */
+	public static <T extends Persistent<?>> void deleteAll(Class<T> type, String whereClause, String... whereArgs ) {
+        SugarRecord.deleteAll(type, whereClause, whereArgs);
+    }
+ 		
 	@Override
 	public Long getId() {
 		return super.getId();
