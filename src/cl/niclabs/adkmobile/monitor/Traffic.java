@@ -49,14 +49,12 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 	/**
 	 * Represents a mobile network for storage
 	 */
-	public static final int NETWORK_TYPE_MOBILE = ConnectionType.MOBILE
-			.value();
+	public static final int NETWORK_TYPE_MOBILE = ConnectionType.MOBILE.value();
 
 	/**
 	 * Represents a wifi network for storage
 	 */
-	public static final int NETWORK_TYPE_WIFI = ConnectionType.WIFI
-			.value();
+	public static final int NETWORK_TYPE_WIFI = ConnectionType.WIFI.value();
 
 	private Context mContext = this;
 
@@ -79,7 +77,7 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 	private long wifiTcpTxBytes;
 	private long wifiTcpRxSegments;
 	private long wifiTcpTxSegments;
-	
+
 	private long appWifiRxBytes;
 
 	private Runnable mobileTask = new Runnable() {
@@ -90,14 +88,15 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 			long newMobileRxPackets = TrafficStats.getMobileRxPackets();
 			long newMobileTxPackets = TrafficStats.getMobileTxPackets();
 
-			long [] tcpData = getTcpData(mContext);
+			long[] tcpData = getTcpData(mContext);
 
 			long dMobileRxBytes = newMobileRxBytes - mobileRxBytes;
 			long dMobileTxBytes = newMobileTxBytes - mobileTxBytes;
 			long dMobileTxPackets = newMobileTxPackets - mobileTxPackets;
 			long dMobileRxPackets = newMobileRxPackets - mobileRxPackets;
 
-			TrafficObservation mobileData = new TrafficObservation(TRAFFIC_MOBILE, Time.currentTimeMillis());
+			TrafficObservation mobileData = new TrafficObservation(
+					TRAFFIC_MOBILE, Time.currentTimeMillis());
 			mobileData.setNetworkType(NETWORK_TYPE_MOBILE);
 			mobileData.setRxBytes(dMobileRxBytes);
 			mobileData.setTxBytes(dMobileTxBytes);
@@ -181,7 +180,8 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 			long dWifiRxPackets = newWifiRxPackets - wifiRxPackets;
 			long dWifiTxPackets = newWifiTxPackets - wifiTxPackets;
 
-			TrafficObservation wifiData = new TrafficObservation(TRAFFIC_WIFI, Time.currentTimeMillis());
+			TrafficObservation wifiData = new TrafficObservation(TRAFFIC_WIFI,
+					Time.currentTimeMillis());
 			wifiData.setNetworkType(NETWORK_TYPE_WIFI);
 			wifiData.setRxBytes(dWifiRxBytes);
 			wifiData.setTxBytes(dWifiTxBytes);
@@ -248,19 +248,20 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 	private Runnable appTask = new Runnable() {
 		@Override
 		public void run() {
-			long newWifiRxBytes = TrafficStats.getTotalRxBytes() - TrafficStats.getMobileRxBytes();
+			long newWifiRxBytes = TrafficStats.getTotalRxBytes()
+					- TrafficStats.getMobileRxBytes();
 			long dWifiRxBytes = newWifiRxBytes - appWifiRxBytes;
-			
+
 			int networkType = NETWORK_TYPE_MOBILE;
 			if (dWifiRxBytes > 0) {
 				networkType = NETWORK_TYPE_WIFI;
 			}
-			
+
 			ArrayList<Integer> uids = geRunningProcessesUids(mContext);
 			for (int uid : uids) {
 				notifyAppTraffic(networkType, uid);
 			}
-			
+
 			appWifiRxBytes = newWifiRxBytes;
 		}
 	};
@@ -272,11 +273,11 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 
 	private ArrayList<Integer> uids;
 
-	
 	@SuppressLint("NewApi")
 	private void notifyAppTraffic(int networkType, int uid) {
 
-		TrafficObservation appData = new TrafficObservation(TRAFFIC_APPLICATION, Time.currentTimeMillis());
+		TrafficObservation appData = new TrafficObservation(
+				TRAFFIC_APPLICATION, Time.currentTimeMillis());
 		appData.setUid(uid);
 
 		long newAppRxBytes = TrafficStats.getUidRxBytes(uid);
@@ -311,11 +312,11 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 
 			if (dAppRxPackets >= 0) {
 				appData.setRxPackets(dAppRxPackets);
-				
+
 				/* Update state vars */
 				appRxPackets.put(uid, newAppRxPackets);
 			}
-			
+
 			if (dAppTxPackets >= 0) {
 				appData.setTxPackets(dAppTxPackets);
 				appTxPackets.put(uid, newAppTxPackets);
@@ -362,8 +363,9 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 					mobileTcpTxSegments = tcpData[3];
 				}
 
-				future = Scheduler.getInstance().scheduleAtFixedRate(mobileTask, 0,
-						TRAFFIC_UPDATE_INTERVAL, TimeUnit.SECONDS);
+				future = Scheduler.getInstance().scheduleAtFixedRate(
+						mobileTask, 0, TRAFFIC_UPDATE_INTERVAL,
+						TimeUnit.SECONDS);
 				super.activate();
 
 				if (DEBUG)
@@ -430,8 +432,8 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 					wifiTcpTxSegments = tcpData[3];
 				}
 
-				future = Scheduler.getInstance().scheduleAtFixedRate(wifiTask, 0,
-						TRAFFIC_UPDATE_INTERVAL, TimeUnit.SECONDS);
+				future = Scheduler.getInstance().scheduleAtFixedRate(wifiTask,
+						0, TRAFFIC_UPDATE_INTERVAL, TimeUnit.SECONDS);
 				super.activate();
 
 				if (DEBUG)
@@ -471,20 +473,22 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 					stopSelf();
 					return false;
 				}
-					
+
 				/**
-				 * Save the total WiFi bytes to detect the connection type 
+				 * Save the total WiFi bytes to detect the connection type
 				 */
-				appWifiRxBytes = TrafficStats.getTotalRxBytes() - TrafficStats.getMobileRxBytes();
-				
-				appRxBytes = new SparseArray<Long>();
-				appTxBytes = new SparseArray<Long>();
-				appRxPackets = new SparseArray<Long>();
-				appTxPackets = new SparseArray<Long>();
+				appWifiRxBytes = TrafficStats.getTotalRxBytes()
+						- TrafficStats.getMobileRxBytes();
+				if (appRxBytes == null) {
+					appRxBytes = new SparseArray<Long>();
+					appTxBytes = new SparseArray<Long>();
+					appRxPackets = new SparseArray<Long>();
+					appTxPackets = new SparseArray<Long>();
+				}
 				uids = new ArrayList<Integer>();
 
-				future = Scheduler.getInstance().scheduleAtFixedRate(appTask, 0,
-						TRAFFIC_UPDATE_INTERVAL, TimeUnit.SECONDS);
+				future = Scheduler.getInstance().scheduleAtFixedRate(appTask,
+						0, TRAFFIC_UPDATE_INTERVAL, TimeUnit.SECONDS);
 				super.activate();
 
 				if (DEBUG)
@@ -501,7 +505,8 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 				super.deactivate();
 
 				if (DEBUG)
-					Log.d(TAG, "Application traffic service has been deactivated");
+					Log.d(TAG,
+							"Application traffic service has been deactivated");
 			}
 		}
 
@@ -510,7 +515,7 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 			listener.onApplicationTrafficChange((TrafficObservation) result);
 		}
 	};
-	
+
 	/**
 	 * Activity-Service binder
 	 */
