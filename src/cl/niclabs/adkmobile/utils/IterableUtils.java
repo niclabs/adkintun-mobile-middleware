@@ -17,24 +17,32 @@ public class IterableUtils {
 		
 		@Override
 		public boolean hasNext() {
-			return index < iterators.size() && iterators.get(index).hasNext();
+			int i = index;
+			while (i < iterators.size()){
+				if (iterators.get(i).hasNext()) return true;
+				++i;
+			}
+			return false;
+
 		}
 
 		@Override
 		public E next() {
-			if (index >= iterators.size() || !iterators.get(index).hasNext()) {
-				throw new NoSuchElementException();
-			}
 			
-			// Get the next element
-			E element = iterators.get(index).next();
+			if (!this.hasNext()) throw new NoSuchElementException();
 			
-			// If we reached the end of the current iterator increase the index
-			if (!iterators.get(index).hasNext()) {
-				index++;
+			E element = null;
+			while (index < iterators.size()){
+				if (iterators.get(index).hasNext()){
+					element = iterators.get(index).next();
+					break;	
+				}
+				++index;
 			}
 			
 			return element;
+			
+
 		}
 
 		@Override
