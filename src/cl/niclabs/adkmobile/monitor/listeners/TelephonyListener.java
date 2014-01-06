@@ -12,6 +12,15 @@ import cl.niclabs.adkmobile.monitor.data.TelephonyObservation;
 public interface TelephonyListener extends MonitorListener{
 	/**
 	 * Inform the listener of a telephony change. 
+	 * 
+	 * This method is called each time the antenna, signal strength or network type changes.
+	 * However, if signal strength changes the same instance of TelephonyObservation is used
+	 * changing only the TelephonyObservation.signalStrength and GsmObservation.signalBer instance
+	 * variables. 
+	 * 
+	 * This allows storage services to avoid saving different entries for the same observation when
+	 * all that changes is a Sample variable 
+	 * 
 	 * @param trafficState the new telephony data
 	 */
 	public void onMobileTelephonyChange(TelephonyObservation<?> telephonyState);
@@ -31,6 +40,7 @@ public interface TelephonyListener extends MonitorListener{
 	/**
 	 * Notified when the Data Connection state changes
 	 * @param stateChange
+	 * @deprecated not used
 	 */
 	public void onDataConnectionStateChange(StateChange stateChange);
 	
