@@ -259,7 +259,7 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 
 			ArrayList<Integer> uids = geRunningProcessesUids(mContext);
 			for (int uid : uids) {
-				notifyAppTraffic(networkType, uid);
+				calculateApplicationTrafficForUid(networkType, uid);
 			}
 
 			appWifiRxBytes = newWifiRxBytes;
@@ -274,7 +274,7 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 	private ArrayList<Integer> uids;
 
 	@SuppressLint("NewApi")
-	private void notifyAppTraffic(int networkType, int uid) {
+	private void calculateApplicationTrafficForUid(int networkType, int uid) {
 
 		TrafficObservation appData = new TrafficObservation(
 				TRAFFIC_APPLICATION, Time.currentTimeMillis());
@@ -283,11 +283,16 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 		long newAppRxBytes = TrafficStats.getUidRxBytes(uid);
 		long newAppTxBytes = TrafficStats.getUidTxBytes(uid);
 
+		// IF the entry does not exist, the delta is 0
 		long dAppRxBytes = newAppRxBytes
-				- (appRxBytes.indexOfKey(uid) < 0 ? 0 : appRxBytes.get(uid));
+				- (appRxBytes.indexOfKey(uid) < 0 ? newAppRxBytes : appRxBytes.get(uid));
 		long dAppTxBytes = newAppTxBytes
-				- (appTxBytes.indexOfKey(uid) < 0 ? 0 : appTxBytes.get(uid));
+				- (appTxBytes.indexOfKey(uid) < 0 ? newAppTxBytes : appTxBytes.get(uid));
 
+		/* Update state vars */
+		appRxBytes.put(uid, newAppRxBytes);
+		appTxBytes.put(uid, newAppTxBytes);
+		
 		if (dAppRxBytes <= 0 && dAppTxBytes <= 0)
 			return;
 
@@ -295,19 +300,16 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 		appData.setRxBytes(dAppRxBytes);
 		appData.setTxBytes(dAppTxBytes);
 
-		/* Update state vars */
-		appRxBytes.put(uid, newAppRxBytes);
-		appTxBytes.put(uid, newAppTxBytes);
-
 		if (VERSION.SDK_INT >= 12) {
 			long newAppRxPackets = TrafficStats.getUidRxPackets(uid);
 			long newAppTxPackets = TrafficStats.getUidTxPackets(uid);
 
+			// If the entry does not exist, the delta is 0
 			long dAppRxPackets = newAppRxPackets
-					- (appRxPackets.indexOfKey(uid) < 0 ? 0 : appRxPackets
+					- (appRxPackets.indexOfKey(uid) < 0 ? newAppRxPackets : appRxPackets
 							.get(uid));
 			long dAppTxPackets = newAppTxPackets
-					- (appTxPackets.indexOfKey(uid) < 0 ? 0 : appTxPackets
+					- (appTxPackets.indexOfKey(uid) < 0 ? newAppRxPackets : appTxPackets
 							.get(uid));
 
 			if (dAppRxPackets >= 0) {

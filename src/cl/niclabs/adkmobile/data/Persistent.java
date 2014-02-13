@@ -87,7 +87,7 @@ public class Persistent<E extends Persistent<E>> extends SugarRecord<E> implemen
     }
 	
 	/**
-	 * Delete all records that fulfill the where clause
+	 * Delete all records that fulfill the where condition
 	 * @param type
 	 * @param whereClause
 	 * @param whereArgs
