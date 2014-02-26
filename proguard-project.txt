@@ -12,9 +12,60 @@
 
 # Add any project specific keep options here:
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+
+# Keep InnerClasses
+-keepattributes Exceptions,InnerClasses
+
+# Keep classes mentioned in the manifest
+-keep public class cl.niclabs.adkmobile.AdkintunMobileApp{*;}
+-keep public interface cl.niclabs.adkmobile.monitor.events.MonitorEvent{*;}
+
+# Keep application services
+-keep public class cl.niclabs.adkmobile.services.Monitoring{*;}
+
+# Keep services
+-keep public class cl.niclabs.adkmobile.monitor.Connectivity{*;}
+-keep public class cl.niclabs.adkmobile.monitor.Telephony{*;}
+-keep public class cl.niclabs.adkmobile.monitor.Traffic{*;}
+-keep public class cl.niclabs.adkmobile.monitor.Screen{*;}
+-keep public class cl.niclabs.adkmobile.monitor.Device{*;}
+-keep public class cl.niclabs.adkmobile.monitor.Location{*;}
+
+# Keep descriptor classes
+-keep public interface cl.niclabs.adkmobile.monitor.listeners.MonitorListener{*;}
+-keep public interface cl.niclabs.adkmobile.monitor.data.Observation{*;}
+-keep public class cl.niclabs.adkmobile.monitor.data.ConnectivityObservation{*;}
+-keep public class cl.niclabs.adkmobile.monitor.data.TelephonyObservation{*;}
+-keep public class cl.niclabs.adkmobile.data.Persistent{*;}
+-keep public class com.orm.SugarRecord{*;}
+
+# Do not obfuscate serializable or persistent fields
+-keepclassmembers class * extends cl.niclabs.adkmobile.data.Persistent {
+    private <fields>;
+}
+
+-keepclassmembers class * extends cl.niclabs.adkmobile.data.AbstractSerializable {
+    private <fields>;
+}
+
+-keepclassmembers class * implements cl.niclabs.adkmobile.data.Serializable {
+    private <fields>;
+}
+
+# Enums
+-keep public enum cl.niclabs.adkmobile.monitor.data.constants.NetworkType{*;}
+-keep public enum cl.niclabs.adkmobile.monitor.data.constants.SimState{*;}
+-keep public enum cl.niclabs.adkmobile.monitor.data.constants.NetworkState{*;}
+-keep public enum cl.niclabs.adkmobile.monitor.data.constants.ConnectionType{*;}
+-keep public enum cl.niclabs.adkmobile.monitor.data.constants.TelephonyStandard{*;}
+
+
+# Remove logging
+-assumenosideeffects class android.util.Log {
+    public static boolean isLoggable(java.lang.String, int);
+    public static int v(...);
+    public static int i(...);
+    public static int w(...);
+    public static int d(...);
+    public static int e(...);
+}
