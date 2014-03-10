@@ -5,7 +5,7 @@
 
     <uses-sdk
         android:minSdkVersion="8"
-        android:targetSdkVersion="18" />
+        android:targetSdkVersion="19" />
 
     <!-- Required by Connectivity service -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
