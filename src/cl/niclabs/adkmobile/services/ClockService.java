@@ -1,8 +1,10 @@
 package cl.niclabs.adkmobile.services;
 
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.IBinder;
 import android.os.SystemClock;
 import android.util.Log;
 import cl.niclabs.adkmobile.AdkintunMobileApp;
@@ -45,7 +47,7 @@ import cl.niclabs.adkmobile.net.SntpClient;
  * 
  * @author Felipe Lalanne <flalanne@niclabs.cl>
  */
-public final class ClockService extends ApplicationService implements ConnectivityStatusListener {
+public final class ClockService extends Service implements ConnectivityStatusListener {
 	/**
 	 * Timeout for NTP server (in milliseconds)
 	 */
@@ -69,6 +71,9 @@ public final class ClockService extends ApplicationService implements Connectivi
 	private static long lastSynchronizationTime = 0L;
 	private static long lastSynchronizationAttempt = 0L;
 	
+	
+	private static boolean running = false;
+	
 	/**
 	 * Return the time in milliseconds, if the service was able to synchronize
 	 * correctly with an NTP service the returned time is the real time of the 
@@ -87,11 +92,21 @@ public final class ClockService extends ApplicationService implements Connectivi
 		return realTime;
 	}
 	
+	public static boolean isRunning() {
+		return running;
+	}
 	
 	
 	@Override
+	public IBinder onBind(Intent intent) {
+		return null;
+	}
+
+	@Override
 	public void onCreate() {
 		super.onCreate();
+		
+		running = true;
 		
 		// Restore clock status as early as possible
 		if (!restoreClockStatus() && AdkintunMobileApp.isPersistenceAvailable()) {
@@ -137,6 +152,8 @@ public final class ClockService extends ApplicationService implements Connectivi
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
+		
+		running = false;
 		
 		// Stop listening
 		connectivityProxy.listen(this, false);
@@ -235,5 +252,4 @@ public final class ClockService extends ApplicationService implements Connectivi
 			}
 		}
 	}
-
 }

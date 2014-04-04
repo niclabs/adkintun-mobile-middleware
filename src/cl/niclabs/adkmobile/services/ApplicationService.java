@@ -9,6 +9,7 @@ import android.os.IBinder;
  * service
  * 
  * @author Felipe Lalanne <flalanne@niclabs.cl>
+ * @deprecated this class does not work
  */
 public abstract class ApplicationService extends Service {
 	private static boolean running = false;
