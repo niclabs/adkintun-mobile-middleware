@@ -101,6 +101,11 @@ public interface Monitor<E extends MonitorListener> {
 	 * Defines the clock synchronization event
 	 */
 	public static final int CLOCK = 512;
+	
+	/**
+	 * Defines the accelerometer synchronization event
+	 */
+	public static final int ACCELEROMETER = 1024;
 
 	/**
 	 * Reserved ids for custom events in the application using this library
