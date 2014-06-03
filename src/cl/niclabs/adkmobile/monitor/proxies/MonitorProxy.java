@@ -11,6 +11,9 @@ import cl.niclabs.adkmobile.utils.Notifier;
  * the listeners when the battery level has gone below a certain threshold
  * or traffic has reached a certain level.
  * 
+ * Ideally classes extending MonitorProxy should use the singleton pattern
+ * in order to avoid users creating multiple instances of the proxy 
+ * 
  * @author Felipe Lalanne <flalanne@niclabs.cl>
  */
 public abstract class MonitorProxy<E extends MonitorProxyListener> {

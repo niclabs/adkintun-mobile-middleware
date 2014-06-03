@@ -16,6 +16,22 @@ public class ConnectivityStatus extends MonitorProxy<ConnectivityStatusListener>
 	boolean switchedRoamingStatus	= false;
 	boolean connectedToNetwork		= false;
 	
+	private static ConnectivityStatus instance;
+	
+	/**
+	 * Return an instance of ConnectivityStatus
+	 * @return
+	 */
+	public static ConnectivityStatus getInstance() {
+		if (instance == null) instance = new ConnectivityStatus();
+		return instance;
+	}
+	
+	/**
+	 * Left private to force users to use getInstance()
+	 */
+	private ConnectivityStatus() {}
+	
 	/**
 	 * Detect a change in network status and notify the listener
 	 * 

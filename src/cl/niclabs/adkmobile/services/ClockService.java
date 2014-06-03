@@ -123,7 +123,7 @@ public final class ClockService extends Service implements ConnectivityStatusLis
 			@Override
 			public void onServiceConnected(Connectivity service) {
 				// Add time service service to the proxy
-				connectivityProxy = new ConnectivityStatus();
+				connectivityProxy = ConnectivityStatus.getInstance();
 				connectivityProxy.listen(context, true);
 				
 				// Add the proxy as a listener to the connectivity service
