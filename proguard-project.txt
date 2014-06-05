@@ -1,0 +1,58 @@
+# To enable ProGuard in your project, edit project.properties
+# to define the proguard.config property as described in that file.
+#
+# Add project specific ProGuard rules here.
+# By default, the flags in this file are appended to flags specified
+# in ${sdk.dir}/tools/proguard/proguard-android.txt
+# You can edit the include path and order by changing the ProGuard
+# include property in project.properties.
+#
+# For more details, see
+#   http://developer.android.com/guide/developing/tools/proguard.html
+
+# Add any project specific keep options here:
+
+# Do not skip public libraries
+-dontskipnonpubliclibraryclasses
+
+# Keep InnerClasses
+-keepattributes Exceptions,InnerClasses
+
+
+# Keep classes mentioned in the manifest
+-keep public class cl.niclabs.adkmobile.AdkintunMobileApp{*;}
+-keep public class cl.niclabs.becity.BootTasks{*;}
+-keep public interface cl.niclabs.adkmobile.monitor.events.MonitorEvent{*;}
+
+# Keep services
+-keep public class cl.niclabs.adkmobile.monitor.GlobalAccelerometer{*;}
+-keep public class cl.niclabs.adkmobile.monitor.Location{*;}
+-keep public class cl.niclabs.adkmobile.monitor.Connectivity{*;}
+-keep public class cl.niclabs.adkmobile.monitor.Device{*;}
+
+# Keep descriptor classes
+-keep public interface cl.niclabs.adkmobile.monitor.listeners.MonitorListener{*;}
+-keep public interface cl.niclabs.adkmobile.monitor.data.Observation{*;}
+-keep public class cl.niclabs.adkmobile.monitor.data.ConnectivityObservation{*;}
+-keep public class cl.niclabs.adkmobile.data.Persistent{*;}
+-keep public class com.orm.SugarRecord{*;}
+
+# Do not obfuscate serializable or persistent fieldsx
+-keepclassmembers class * extends cl.niclabs.adkmobile.data.Persistent {
+    private <fields>;
+}
+
+-keepclassmembers class * extends cl.niclabs.adkmobile.data.AbstractSerializable {
+    private <fields>;
+}
+
+-keepclassmembers class * implements cl.niclabs.adkmobile.data.Serializable {
+    private <fields>;
+}
+
+# Enums
+
+-keep public enum cl.niclabs.adkmobile.monitor.data.constants.NetworkState{*;}
+-keep public enum cl.niclabs.adkmobile.monitor.data.constants.ConnectionType{*;}
+
+# Remove logging
