@@ -33,3 +33,9 @@ local.properties
 *.swp
 
 /project.properties
+
+# Server data
+server/data/
+
+# Python compiled files
+*.pyc
