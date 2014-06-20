@@ -21,7 +21,8 @@ public class Dispatcher<E extends Listener> {
 	/**
 	 * List of listeners by event type
 	 */
-	private List<E> listeners = new CopyOnWriteArrayList<E>();
+	private List<E> listenersList = new CopyOnWriteArrayList<E>();
+	private Set<E> listenersSet = new HashSet<E>();
 
 	/**
 	 * Add a listener to be notified by the dispatcher.
@@ -32,9 +33,13 @@ public class Dispatcher<E extends Listener> {
 	 */
 	public void listen(E listener, boolean listen) {
 		if (listen) {
-			listeners.add(listener);
+			listenersList.add(listener);
+			listenersSet.add(listener);
 		} else {
-			listeners.remove(listener);
+			listenersList.remove(listener);
+			if (!listenersList.contains(listener)) {
+				listenersSet.remove(listener);
+			}
 		}
 	}
 
@@ -45,7 +50,6 @@ public class Dispatcher<E extends Listener> {
 	 *            controller to perform the notification actions
 	 */
 	public void notifyListeners(final Notifier<E> notifier) {
-		Set<E> listenersSet = new HashSet<E>(listeners);
 		for (final E listener : listenersSet) {
 			// Notify the listener in a new thread
 			Scheduler.getInstance().execute(new Runnable() {
@@ -54,7 +58,6 @@ public class Dispatcher<E extends Listener> {
 					notifier.notify(listener);
 				}
 			});
-
 		}
 	}
 }
