@@ -36,6 +36,8 @@
 -keep public interface cl.niclabs.adkmobile.monitor.data.Observation{*;}
 -keep public class cl.niclabs.adkmobile.monitor.data.ConnectivityObservation{*;}
 -keep public class cl.niclabs.adkmobile.monitor.data.TelephonyObservation{*;}
+-keep public class cl.niclabs.adkmobile.monitor.data.GsmObservation{*;}
+-keep public class cl.niclabs.adkmobile.monitor.data.CdmaObservation{*;}
 -keep public class cl.niclabs.adkmobile.data.Persistent{*;}
 -keep public class com.orm.SugarRecord{*;}
 
