@@ -70,7 +70,7 @@ public class CdmaObservation extends TelephonyObservation<CdmaObservation> {
 	}
 	
 	@Override
-	public void save() {
+	public long save() {
 		if (cdmaEcio != null)
 			cdmaEcio.save();
 		
@@ -83,7 +83,7 @@ public class CdmaObservation extends TelephonyObservation<CdmaObservation> {
 		if (evdoSnr != null)
 			evdoSnr.save();
 		
-		super.save();
+		return super.save();
 	}
 
 	public void setCdmaBaseLatitude(int cdmaBaseLatitude) {
