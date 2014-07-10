@@ -165,7 +165,7 @@ public class Persistent<E extends Persistent<E>> extends SugarRecord<E>
 
 	/**
 	 * Save the object to the database
-	 * @return 
+	 * @return id of the recently saved record
 	 */
 	@Override
 	public long save() {

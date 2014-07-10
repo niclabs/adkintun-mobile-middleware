@@ -69,7 +69,7 @@ public class GsmObservation extends TelephonyObservation<GsmObservation> {
 		if (signalBer != null)
 			signalBer.save();
 		
-		long records = super.save();
+		long id = super.save();
 		
 		if (this.getId() != null) {
 			if (neighborList != null) {
@@ -80,7 +80,7 @@ public class GsmObservation extends TelephonyObservation<GsmObservation> {
 			}
 		}
 		
-		return records;
+		return id;
 	}
  
 	@Override
