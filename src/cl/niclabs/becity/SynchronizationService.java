@@ -24,7 +24,7 @@ public class SynchronizationService extends Service implements ConnectivityStatu
 	private Controller<ConnectivityListener> connectivity;
 	private ConnectivityStatus connectivityProxy;
 	
-	protected final String URL = "http://www.adkintunmobile.cl:8080/upload";
+	protected final String URL = "http://dev.becity.cl:8080/upload";
 	
 	private static boolean running = false;
 	
