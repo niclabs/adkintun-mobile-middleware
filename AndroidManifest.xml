@@ -40,7 +40,7 @@
         <service android:label="SamplerService" android:name="cl.niclabs.becity.SamplerService"></service>
         
         <meta-data android:name="DATABASE" android:value="adkmobile.db" />
-		<meta-data android:name="VERSION" android:value="1" />
+		<meta-data android:name="VERSION" android:value="2" />
 		<meta-data android:name="QUERY_LOG" android:value="true" />
 		<meta-data android:name="DOMAIN_PACKAGE_NAME" android:value="cl.niclabs.adkmobile.monitor.data" />
 		
