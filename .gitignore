@@ -17,3 +17,22 @@ local.properties
 
 # Eclipse project files
 .settings/
+
+# Android Studio
+.idea/
+.gradle
+/*/local.properties
+/*/out
+/*/*/build
+/*/*/production
+*.iml
+*.iws
+*.ipr
+*~
+*.swp
+
+# Server data
+server/data/
+
+# Python compiled files
+*.pyc

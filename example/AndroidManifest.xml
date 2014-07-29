@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="cl.niclabs.becity.sampler"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="8"
+        android:targetSdkVersion="19" />
+    
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_UPDATES" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme"
+        android:name="cl.niclabs.adkmobile.AdkintunMobileApp">
+        <activity
+            android:name="cl.niclabs.becity.SamplerActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
+        <service android:label="Location" android:name="cl.niclabs.adkmobile.monitor.Location"></service>
+        <service android:label="Accelerometer" android:name="cl.niclabs.adkmobile.monitor.GlobalAccelerometer"></service>
+        <service android:label="Connectivity" android:name="cl.niclabs.adkmobile.monitor.Connectivity"></service>
+       
+        <service android:label="Synchronization" android:name="cl.niclabs.becity.SynchronizationService"></service>
+        <service android:label="SamplerService" android:name="cl.niclabs.becity.SamplerService"></service>
+        
+        <meta-data android:name="DATABASE" android:value="adkmobile.db" />
+		<meta-data android:name="VERSION" android:value="2" />
+		<meta-data android:name="QUERY_LOG" android:value="true" />
+		<meta-data android:name="DOMAIN_PACKAGE_NAME" android:value="cl.niclabs.adkmobile.monitor.data" />
+		
+		
+		<!-- Register receiver in order to monitor device boot state -->
+        <receiver
+            android:name="cl.niclabs.becity.BootTasks"
+            android:enabled="true"
+            android:permission="android.permission.RECEIVE_BOOT_COMPLETED" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.ACTION_SHUTDOWN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
+    </application>
+
+</manifest>
