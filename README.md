@@ -40,6 +40,18 @@ The library only has two software dependencies, included as jars under the `libs
 * [GSON](https://code.google.com/p/google-gson/) (tested with version 2.2.4), for object serialization to JSON.
 * [Sugar ORM](http://satyan.github.io/sugar/) (tested with version 1.3), as a SQLite ORM. 
 
+
+Implemented Monitors
+--------------------
+
+* Accelerometer. Monitors raw accelerometer data in the [device coordinate system](http://developer.android.com/reference/android/hardware/SensorEvent.html)
+* GlobalAccelerometer. Monitors device accelerometer data in the Earth coordinate system. It implements a Low pass filter to isolate device accelerometer data from the earth gravity.
+* Connectivity. Monitors changes in Internet connectivity of the device. If supported by the device, it provides detailed connection status change data (authenticating, connecting, connected)
+* Location. Monitors position changes on the device. Monitoring can be enabled using coarse or fine location.
+* Screen. Monitors screen status change (on, unlocked, locked, off).
+* Telephony. Monitors antenna, signal power, airplane mode and connection status changes. A new instance of `TelephonyObservation` (can be GSM or CDMA) is provided for each change, except on the case of signal power, where the instance is kept as long as there are no antena changes and only the signal strenght `Sample` is updated.
+* Traffic, monitor device traffic statistics. It can perform monitoring of WiFi, Mobile and per Application statistics independently. Monitoring is perform periodically, with the period being configurable.
+
 Usage
 -----
 
@@ -118,6 +130,7 @@ public class MonitorActivity extends Activity implements TrafficListener {
 
 	@Override
 	public void onMobileTrafficChange(TrafficObservation trafficState) {
+		/* The state will be serialized to JSON */
 		Log.i(TAG, "Received new mobile traffic state "+trafficState);
 	}
 
