@@ -35,6 +35,10 @@ Scheduling of notifications is performed to ensure that observations arrive in t
 Dependencies
 ------------
 
+The library only has two software dependencies, included as jars under the `libs/` directory (we know is not good practice but maven is a pain)
+
+* [GSON](https://code.google.com/p/google-gson/) (tested with version 2.2.4), for object serialization to JSON.
+* [Sugar ORM](http://satyan.github.io/sugar/) (tested with version 1.3), as a database ORM. 
 
 Usage
 -----
