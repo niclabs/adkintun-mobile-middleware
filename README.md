@@ -51,6 +51,8 @@ Implemented Monitors
 * Screen. Monitors screen status change (on, unlocked, locked, off).
 * Telephony. Monitors antenna, signal power, airplane mode and connection status changes. A new instance of `TelephonyObservation` (can be GSM or CDMA) is provided for each change, except on the case of signal power, where the instance is kept as long as there are no antena changes and only the signal strenght `Sample` is updated.
 * Traffic, monitor device traffic statistics. It can perform monitoring of WiFi, Mobile and per Application statistics independently. Monitoring is perform periodically, with the period being configurable.
+* Device Data. Although not a Monitor, the class `DeviceInfo` provides a summary of all device information (IMEI, baseband, model, brand, etc.)
+* Boot detection. If configured, the library can monitor device and shutdown through the class 'Device'.
 
 Usage
 -----
@@ -149,5 +151,42 @@ public class MonitorActivity extends Activity implements TrafficListener {
 
 Configuration
 -------------
+
+The permissions required for each monitor are specified in the code documentation. The following configuration is required in the `AndroidManifest.xml` of the application in order to activate clock synchronization (implemented on `cl.niclabs.adkmobile.services.ClockService`) and persistence with Sugar ORM.
+
+```xml
+<application android:name="cl.niclabs.adkmobile.AdkintunMobileApp"><!-- android:name is required to activate clock synchronization and persistance !-->
+	   <!-- Give permission to the Traffic monitor. It must be added for each service required in the platform !-->
+        <service android:name="cl.niclabs.adkmobile.monitor.Traffic" ></service>
+</application>
+```
+
+The same configuration as [Sugar ORM](http://satyan.github.io/sugar/) is required on the manifest to enable persistance
+
+```xml
+<!-- Database configuration -->
+<meta-data android:name="DATABASE" android:value="mydb.db" />
+<meta-data android:name="VERSION" android:value="1" />
+<meta-data android:name="QUERY_LOG" android:value="true" />
+
+<!-- Do not change, required to store monitor observations !-->
+<meta-data android:name="DOMAIN_PACKAGE_NAME" android:value="cl.niclabs.adkmobile.monitor.data" />
+```
+
+In order to listen to boot status changes, the following code must be added inside `<application></application>` on the manifest.
+
+```xml
+<!-- Register receiver in order to monitor device boot state -->
+<receiver android:name="cl.niclabs.adkmobile.monitor.Device" 
+  android:enabled="true"
+  android:permission="android.permission.RECEIVE_BOOT_COMPLETED" >
+  <intent-filter>
+    <action android:name="android.intent.action.BOOT_COMPLETED" />
+    <action android:name="android.intent.action.ACTION_SHUTDOWN" />
+    <category android:name="android.intent.category.DEFAULT" />
+  </intent-filter>
+</receiver>
+```
+
 
 
