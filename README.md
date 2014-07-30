@@ -163,9 +163,19 @@ Configuration
 The permissions required for each monitor are specified in the code documentation. The following configuration is required in the `AndroidManifest.xml` of the application in order to activate clock synchronization (implemented on `cl.niclabs.adkmobile.services.ClockService`) and persistence with Sugar ORM.
 
 ```xml
+<!-- Required by connectivity service -->
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+<!-- For access to NTP server -->
+<uses-permission android:name="android.permission.INTERNET" />
+
 <application android:name="cl.niclabs.adkmobile.AdkintunMobileApp"><!-- android:name is required to activate clock synchronization and persistance !-->
 	   <!-- Give permission to the Traffic monitor. It must be added for each service required in the platform !-->
         <service android:name="cl.niclabs.adkmobile.monitor.Traffic" ></service>
+        
+        <!-- Give permission to Connectivity monitor and ClockService for time synchronization -->
+        <service android:name="cl.niclabs.adkmobile.monitor.Connectivity" />
+        <service android:name="cl.niclabs.adkmobile.services.ClockService" />
 </application>
 ```
 
