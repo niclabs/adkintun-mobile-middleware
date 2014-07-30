@@ -7,10 +7,7 @@ Android Middleware for performing mobile sensing and monitoring. Originally crea
 Software Architecture
 ----------------------
 
-The general structure of the library is shown in the following figure ...
-
-
-he following requirements guided the actual design and development of the middleware:
+The following requirements guided the actual design and development of the middleware:
 * extensibility, in order to add monitoring for new events with ease and requiring minimal modification of the existing code,
 * small memory footprint, by storing the sensor data in memory the shortest time possible,
 * ease of use, to integrate monitoring in an application as quickly as possible,
