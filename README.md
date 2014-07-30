@@ -38,11 +38,100 @@ Dependencies
 The library only has two software dependencies, included as jars under the `libs/` directory (we know is not good practice but maven is a pain)
 
 * [GSON](https://code.google.com/p/google-gson/) (tested with version 2.2.4), for object serialization to JSON.
-* [Sugar ORM](http://satyan.github.io/sugar/) (tested with version 1.3), as a database ORM. 
+* [Sugar ORM](http://satyan.github.io/sugar/) (tested with version 1.3), as a SQLite ORM. 
 
 Usage
 -----
 
+A full example of a working application is provided under the `examples/` folder in the code. However, here is a quick start.
+
+1. First, create a monitor controller for binding your application to, although you can bind to a `Monitor` as you would [bind to any other Android Service](http://developer.android.com/guide/components/bound-services.html), controllers simplify the task. Here is how you create a `Traffic` monitor controller
+```java
+Controller<TrafficListener> trafficController = Traffic.bind(Traffic.class, context);
+```
+2. Asign a listener to the controller, which will append it to the Traffic monitor when this is activated.
+```java
+trafficController.listen(trafficListener, true);
+```
+3. Configure the monitor, creating a Bundle with the configuration data. Here is how you configure the sampling frequency of the Traffic monitor 
+```java
+Bundle bundle = new Bundle();
+
+/* Configure the sampling frequency to 20 seconds */
+bundle.putInt(Traffic.TRAFFIC_UPDATE_INTERVAL_EXTRA, 20);
+```
+4. Activate the monitor, defining the events you wish to activate. 
+```java
+trafficController.activate(Monitor.TRAFFIC_MOBILE | Monitor.TRAFFIC_WIFI, bundle);
+```
+5. Done! The listener will receive traffic data through the methods `onMobileTrafficChange` and `onWiFiTrafficChange`.
+
+
+Below is a full example Activity
+
+```java
+package cl.niclabs.adkmobile;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.util.Log;
+import cl.niclabs.adkmobile.monitor.Monitor;
+import cl.niclabs.adkmobile.monitor.Monitor.Controller;
+import cl.niclabs.adkmobile.monitor.Traffic;
+import cl.niclabs.adkmobile.monitor.data.TrafficObservation;
+import cl.niclabs.adkmobile.monitor.listeners.TrafficListener;
+
+public class MonitorActivity extends Activity implements TrafficListener {
+	private static final String TAG = "MonitorActivity";
+	
+	/* Monitor controllers make easier binding to a Monitor */
+	private Controller<TrafficListener> trafficController;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		
+		/* Bind controller to the current application context */
+		trafficController = Traffic.bind(Traffic.class, this);
+		
+		/* Append this class as listener */
+		trafficController.listen(this, true);
+		
+		Bundle bundle = new Bundle();
+		
+		/* Configure the sampling frequency to 20 seconds */
+		bundle.putInt(Traffic.TRAFFIC_UPDATE_INTERVAL_EXTRA, 20);
+		
+		/* Activate controller for monitoring mobile and WiFi traffic */
+		trafficController.activate(Monitor.TRAFFIC_MOBILE | Monitor.TRAFFIC_WIFI, bundle);
+	}
+
+	@Override
+	protected void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+		
+		/* Unbind from the monitor and destroy the service if there are
+		 * no other classes bound to it  */
+		trafficController.unbind();
+	}
+
+	@Override
+	public void onMobileTrafficChange(TrafficObservation trafficState) {
+		Log.i(TAG, "Received new mobile traffic state "+trafficState);
+	}
+
+	@Override
+	public void onWiFiTrafficChange(TrafficObservation trafficState) {
+		Log.i(TAG, "Received new WiFi traffic state "+trafficState);
+	}
+
+	@Override
+	public void onApplicationTrafficChange(TrafficObservation trafficState) {
+		// This will never be used
+	}
+}
+```
 
 
 Configuration
