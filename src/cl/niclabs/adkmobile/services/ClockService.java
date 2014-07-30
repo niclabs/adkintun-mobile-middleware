@@ -36,6 +36,9 @@ import cl.niclabs.adkmobile.net.SntpClient;
  * 
  * The example below shows the configuration parameters required.
  * <code>
+ * <!-- Required for accessing the NTP server -->
+ * <uses-permission android:name="android.permission.INTERNET" />
+ * 
  * <application
  *      ...
  *      android:name="cl.niclabs.adkmobile.AdkintunMobileApp"> <!-- To start the service automatically --> 
