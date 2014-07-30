@@ -1,5 +1,6 @@
 package cl.niclabs.adkmobile.monitor;
 
+import android.content.Context;
 import android.content.Intent;
 import android.location.GpsStatus;
 import android.location.LocationManager;
@@ -443,6 +444,26 @@ public class Location extends AbstractMonitor<LocationListener> {
 		if ((events & LOCATION_NETWORK) == LOCATION_NETWORK) {
 			deactivate(networkLocationEvent);
 		}
+	}
+	
+	/**
+	 * Return true if high accuracy (GPS + Network) location is enabled on the device
+	 * @param context android context to perform the request
+	 * @return
+	 */
+	public static boolean isHighAccuracyEnabled(Context context) {
+		LocationManager locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
+		return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) && locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+	}
+	
+	/**
+	 * Return true if location is enabled on the device
+	 * @param context android context to perform the request
+	 * @return
+	 */
+	public static boolean isEnabled(Context context) {
+		LocationManager locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
+		return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 	}
 
 	@Override
