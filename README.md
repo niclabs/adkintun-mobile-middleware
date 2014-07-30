@@ -17,7 +17,7 @@ The following requirements guided the actual design and development of the middl
 
 The general design of the middleware is inspired by the [AWARE Framework](http://www.awareframework.com/), and some of the code for the different monitors was based on that project, given that they already had resolved many of the issues related to Android development. However that framework did not fulfill all of our requirements, motivating the development the present library.
 
-![Main Library Classes](doc/img/software-design.png "Main Library Classes")
+![Main Library Classes](https://raw.githubusercontent.com/niclabs/adkintun-mobile-middleware/master/doc/img/software-design.png "Main Library Classes")
 
 The structure of the main entities in the middleware is shown on Figure above, where the architecture of the central classes follows the observer and factory patterns. A general description of the different entities is provided below.
 
