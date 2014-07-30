@@ -59,30 +59,34 @@ Usage
 
 A full example of a working application is provided under the `examples/` folder in the code. However, here is a quick start.
 
-1. First, create a monitor controller for binding your application to, although you can bind to a `Monitor` as you would [bind to any other Android Service](http://developer.android.com/guide/components/bound-services.html), controllers simplify the task. Here is how you create a `Traffic` monitor controller
+* First, create a monitor controller for binding your application to, although you can bind to a `Monitor` as you would [bind to any other Android Service](http://developer.android.com/guide/components/bound-services.html), controllers simplify the task. Here is how you create a `Traffic` monitor controller
 
 ```java
 Controller<TrafficListener> trafficController = Traffic.bind(Traffic.class, context);
 ```
 
-2. Asign a listener to the controller, which will append it to the Traffic monitor when this is activated.
+* Asign a listener to the controller, which will append it to the Traffic monitor when this is activated.
 
 ```java
 trafficController.listen(trafficListener, true);
 ```
 
-3. Configure the monitor, creating a Bundle with the configuration data. Here is how you configure the sampling frequency of the Traffic monitor 
+* Configure the monitor, creating a Bundle with the configuration data. Here is how you configure the sampling frequency of the Traffic monitor 
+
 ```java
 Bundle bundle = new Bundle();
 
 /* Configure the sampling frequency to 20 seconds */
 bundle.putInt(Traffic.TRAFFIC_UPDATE_INTERVAL_EXTRA, 20);
 ```
-4. Activate the monitor, defining the events you wish to activate. 
+
+* Activate the monitor, defining the events you wish to activate. 
+
 ```java
 trafficController.activate(Monitor.TRAFFIC_MOBILE | Monitor.TRAFFIC_WIFI, bundle);
 ```
-5. Done! The listener will receive traffic data through the methods `onMobileTrafficChange` and `onWiFiTrafficChange`.
+
+* Done! The listener will receive traffic data through the methods `onMobileTrafficChange` and `onWiFiTrafficChange`.
 
 
 Below is a full example Activity
