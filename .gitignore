@@ -17,6 +17,7 @@ local.properties
 
 # Eclipse project files
 .settings/
+.classpath
 
 # Android Studio
 .idea/
