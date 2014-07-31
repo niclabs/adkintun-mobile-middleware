@@ -54,11 +54,11 @@ public abstract class TelephonyObservation<E extends TelephonyObservation<E>> ex
 	}
 
 	@Override
-	public long save() {
+	public void save() {
 		if (signalStrength != null)
 			signalStrength.save();
 		
-		return super.save();
+		super.save();
 	}
 
 	/**
