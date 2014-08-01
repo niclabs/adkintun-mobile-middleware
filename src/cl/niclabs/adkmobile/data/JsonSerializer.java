@@ -119,28 +119,31 @@ public class JsonSerializer implements Serializer {
 		 * @return
 		 * @throws IOException
 		 */
-		protected List<?> readObjectList(Class<?> type, JsonReader reader) throws IOException {
+		protected List<?> readPrimitiveDataTypeList(Class<?> type, JsonReader reader) throws IOException {
 			List<Object> list = null;
 			
 			reader.beginArray();
-			if ((Number.class.isAssignableFrom(type)) ||
-					(type.equals(Integer.class)) ||
-	                (type.equals(Integer.TYPE)) ||
-	                (type.equals(Long.class)) ||
-	                (type.equals(Long.TYPE)) ||
-	                (type.equals(Double.class)) ||
+			if ((type.equals(Integer.class)) || (type.equals(Integer.TYPE))) {
+				list = new ArrayList<Object>();
+				while (reader.hasNext()) {
+					list.add(reader.nextInt());
+				}
+			}
+			else if ((type.equals(Long.class)) ||
+	                (type.equals(Long.TYPE))) {
+				list = new ArrayList<Object>();
+				while (reader.hasNext()) {
+					list.add(reader.nextLong());
+				}
+			}
+			else if ((type.equals(Double.class)) ||
 	                (type.equals(Double.TYPE)) ||
 	                (type.equals(Float.class)) ||
 	                (type.equals(Float.TYPE))) {
 				
 				list = new ArrayList<Object>();
 				while (reader.hasNext()) {
-					double d = reader.nextDouble();
-					if (d == (int)d) {
-						list.add((int)d);
-						continue;
-					}
-					list.add(d);
+					list.add(reader.nextDouble());
 				}
 			}
 			else if (type.equals(Boolean.class)
@@ -223,28 +226,24 @@ public class JsonSerializer implements Serializer {
 		             		}
 		             		else {
 		             			// Deserialize lists from basic types
-		             			field.set(obj, readObjectList((Class<?>)listType, reader));
+		             			field.set(obj, readPrimitiveDataTypeList((Class<?>)listType, reader));
 		             		}
 		             	}
 					}
-					else if ((Number.class.isAssignableFrom(fieldType)) ||
-							(fieldType.equals(Integer.class)) ||
-			                (fieldType.equals(Integer.TYPE)) ||
-			                (fieldType.equals(Long.class)) ||
-			                (fieldType.equals(Long.TYPE)) ||
-			                (fieldType.equals(Double.class)) ||
+					else if ((fieldType.equals(Integer.class)) || 
+							 (fieldType.equals(Integer.TYPE))) {
+						field.setInt(obj, reader.nextInt());
+					}
+					else if ((fieldType.equals(Long.class)) ||
+			                (fieldType.equals(Long.TYPE))) {
+						field.setLong(obj, reader.nextLong());
+					}
+					else if ((fieldType.equals(Double.class)) ||
 			                (fieldType.equals(Double.TYPE)) ||
 			                (fieldType.equals(Float.class)) ||
 			                (fieldType.equals(Float.TYPE))) {
 						
-						double value = reader.nextDouble();
-						
-						if (value == (int) value) {
-							field.setInt(obj, (int) value);
-						}
-						else {
-							field.set(obj, value);
-						}
+						field.setDouble(obj, reader.nextDouble());
 					}
 					else if (fieldType.equals(Boolean.class)
 							|| fieldType.equals(boolean.class)) {

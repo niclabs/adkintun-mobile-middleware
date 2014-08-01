@@ -48,9 +48,11 @@ public class JsonSerializerTest extends TestCase {
 	
 	protected static class Post extends AbstractSerializable<Post> {
 		String title;
-		int visits;
+		long visits;
 		boolean read;
 		double rate;
+		
+		int integer;
 		
 		@DoNotSerialize
 		String body;
@@ -74,6 +76,8 @@ public class JsonSerializerTest extends TestCase {
 		}
 	}
 	
+	private static final String TAG = "AdkintunMobile::JsonTest";
+	
 	/**
 	 * Test object serialization
 	 * 
@@ -85,7 +89,7 @@ public class JsonSerializerTest extends TestCase {
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		
 		String title = "title", body = "this is the body", tag1 = "new", tag2 = "info";
-		int visits = 132;
+		long visits = 2147483648912L;
 		double rate = 0.54;
 		boolean read = false;
 		List<Integer> readers = Arrays.asList(new Integer[]{1,2,3});
@@ -116,7 +120,7 @@ public class JsonSerializerTest extends TestCase {
 		// Obtain the result
 		String json = new String(output.toByteArray());
 		
-		Log.d("AdkintunMobile::JsonTest", "Serialized Object: " + json);
+		Log.d(TAG, "Serialized Object: " + json);
 		
 		// Deserialize the object
 		JSONObject testObject = new JSONObject(json);
@@ -144,7 +148,7 @@ public class JsonSerializerTest extends TestCase {
 		// Test deserialization
 		Post deserializedPost = serializer.deserialize(Post.class, json);
 		
-		Log.d("AdkintunMobile::JsonTest", "DeSerialized Object: " + deserializedPost);
+		Log.d(TAG, "DeSerialized Object: " + deserializedPost);
 		
 		// Result must not be null
 		assertNotSame(null, deserializedPost);
