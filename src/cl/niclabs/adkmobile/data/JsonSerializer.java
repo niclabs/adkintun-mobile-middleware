@@ -23,7 +23,7 @@ import com.google.gson.stream.JsonWriter;
 
 
 /**
- * Serializes an object or a list to JSON.
+ * Serializes/deserializes an object or a list to/from JSON.
  * 
  * Note that this is a single usage serializer and two consecutive calls to an
  * open stream will render invalid JSON
@@ -36,6 +36,26 @@ import com.google.gson.stream.JsonWriter;
  * serializer.serialize(out, object1);
  * serializer.serialize(out, object2);
  * </code>
+ * 
+ * For deserialization, given an object
+ * 
+ * <code>
+ * public class Post extends AbstractSeriablizable<Post> {
+ * 		String title;
+ * 		String body;
+ *
+ *		// Empty constructor is required 
+ *		public Post() {}
+ * }
+ * </code>
+ * 
+ * Deserialization is performed the following way
+ * 
+ * <code>
+ * JsonSerializer serializer = new JsonSerializer();
+ * Post p = serializer.deserialize(Post.class, "{\"title\":\"this is the title\",\"body\":\"this is the body\"}");
+ * 
+ * Log.i(TAG, p.title); // Prints 'this is the title'
  * 
  * @author Felipe Lalanne <flalanne@niclabs.cl>
  */
