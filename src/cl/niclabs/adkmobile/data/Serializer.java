@@ -1,6 +1,7 @@
 package cl.niclabs.adkmobile.data;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.List;
@@ -11,6 +12,24 @@ import java.util.List;
  * @author Felipe Lalanne <flalanne@niclabs.cl>
  */
 public interface Serializer {
+	/**
+	 * Read an object of the specified class from the provided input stream
+	 * @param cls
+	 * @param in
+	 * @return
+	 * @throws IOException
+	 */
+	public <E extends Serializable<E>> E deserialize(Class<E> cls, InputStream in) throws IOException;
+	
+	/**
+	 * Read an object of the specified class from the provided input string
+	 * @param cls
+	 * @param input
+	 * @return an object of the specified class
+	 * @throws IOException
+	 */
+	public <E extends Serializable<E>> E deserialize(Class<E> cls, String input) throws IOException;
+	
 	/**
 	 * Write a serializable object to the specified output stream
 	 * @param out

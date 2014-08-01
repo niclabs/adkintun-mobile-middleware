@@ -1,11 +1,15 @@
 package cl.niclabs.adkmobile.data;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -13,6 +17,8 @@ import java.util.Locale;
 import android.util.Base64;
 import cl.niclabs.adkmobile.utils.StringUtil;
 
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 
@@ -35,51 +41,288 @@ import com.google.gson.stream.JsonWriter;
  */
 public class JsonSerializer implements Serializer {
 	/**
-	 * Open a JsonWriter and write the object provided as input. It is responsibility of the user to close 
-	 * the writer later.
-	 * 
-	 * @param out
-	 * @param object
-	 * @throws IOException
+	 * GSON adapter to parse Serializable objects
+	 * @author Felipe Lalanne <flalanne@niclabs.cl>
+	 *
+	 * @param <E>
 	 */
-	@Override
-	public void serialize(OutputStream out, Serializable<?> object) throws IOException {
-		JsonWriter writer = new JsonWriter(new OutputStreamWriter(out, "UTF-8"));
-		serialize(writer, object);
-		writer.flush();
+	protected class SerializableTypeAdapter<E extends Serializable<E>> extends TypeAdapter<E> {
+		private Class<E> cls;
+		
+		public SerializableTypeAdapter(Class<E> cls) {
+			this.cls = cls;
+		}
+		
+		@Override
+		public E read(JsonReader reader) throws IOException {
+			try {
+				// Asume is an object
+				return readObject(reader);
+			} catch (InstantiationException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			} 
+			
+			return null;
+		}
+		
+		/**
+		 * Read a list from the specified reader
+		 * @param reader
+		 * @return
+		 * @throws IOException
+		 */
+		public List<E> readList(JsonReader reader) throws IOException {
+			reader.beginArray();
+			
+			List<E> list = new ArrayList<E>();
+			
+			while (reader.hasNext()) {
+				try {
+					list.add(readObject(reader));
+				} catch (InstantiationException e) {
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					e.printStackTrace();
+				}
+			}
+			
+			reader.endArray();
+			
+			return list;
+		}
+		
+		/**
+		 * Read a list of objects the specified reader
+		 * @param reader
+		 * @return
+		 * @throws IOException
+		 */
+		protected List<?> readObjectList(Class<?> type, JsonReader reader) throws IOException {
+			List<Object> list = null;
+			
+			reader.beginArray();
+			if ((Number.class.isAssignableFrom(type)) ||
+					(type.equals(Integer.class)) ||
+	                (type.equals(Integer.TYPE)) ||
+	                (type.equals(Long.class)) ||
+	                (type.equals(Long.TYPE)) ||
+	                (type.equals(Double.class)) ||
+	                (type.equals(Double.TYPE)) ||
+	                (type.equals(Float.class)) ||
+	                (type.equals(Float.TYPE))) {
+				
+				list = new ArrayList<Object>();
+				while (reader.hasNext()) {
+					double d = reader.nextDouble();
+					if (d == (int)d) {
+						list.add((int)d);
+						continue;
+					}
+					list.add(d);
+				}
+			}
+			else if (type.equals(Boolean.class)
+					|| type.equals(boolean.class)) {
+				
+				list = new ArrayList<Object>();
+				while (reader.hasNext()) {
+					list.add(reader.nextBoolean());
+				}
+			} 
+			else if (type.getName().equals("[B")) {
+				list = new ArrayList<Object>();
+				while (reader.hasNext()) {
+					list.add(Base64.decode(reader.nextString(), Base64.DEFAULT));
+				}
+			} 
+			else if (type.equals(String.class)) {
+				list = new ArrayList<Object>();
+				while (reader.hasNext()) {
+					list.add(reader.nextString());
+				}
+			}
+			else {
+				// Read until reaching the end of the array
+				while (reader.hasNext()) {
+					reader.nextString();
+				}
+			}
+			reader.endArray();
+			
+			return list;
+		}
+		
+		/**
+		 * Read an object from the specified reader
+		 * @param reader
+		 * @return
+		 * @throws IOException
+		 * @throws InstantiationException
+		 * @throws IllegalAccessException
+		 */
+		@SuppressWarnings("unchecked")
+		public E readObject(JsonReader reader) throws IOException, InstantiationException, IllegalAccessException {
+			reader.beginObject();
+			
+			// Create a new instance of the object. Requires that all serializable objects have an empty constructor
+			E obj = cls.newInstance();
+			
+			List<Field> fields = obj.getSerializableFields();
+			
+			while (reader.hasNext()) {
+				String javaName = StringUtil.fromSQLName(reader.nextName());
+				
+				Field field;
+				try {
+					field = obj.getClass().getDeclaredField(javaName);
+				} catch (NoSuchFieldException e) {
+					reader.skipValue();
+					continue;
+				}
+				
+				if (fields.contains(field)) {
+					Class<?> fieldType = field.getType();
+					
+					// Save accessibility for restoring later
+					boolean accessible = field.isAccessible();
+					
+					// Change accessibility of the field
+					field.setAccessible(true);
+					
+					if (Serializable.class.isAssignableFrom(fieldType)) {
+						field.set(obj, self.deserialize(fieldType.asSubclass(Serializable.class), reader));
+					}
+					else if (List.class.isAssignableFrom(fieldType)) {
+		             	Type genericType = field.getGenericType();
+		             	if (genericType instanceof ParameterizedType) {
+		             		Type listType = ((ParameterizedType) genericType).getActualTypeArguments()[0];
+		             		if (Serializable.class.isAssignableFrom((Class<?>)listType)) {
+		             			field.set(obj, self.deserializeList(((Class<?>)listType).asSubclass(Serializable.class), reader));
+		             		}
+		             		else {
+		             			// Deserialize lists from basic types
+		             			field.set(obj, readObjectList((Class<?>)listType, reader));
+		             		}
+		             	}
+					}
+					else if ((Number.class.isAssignableFrom(fieldType)) ||
+							(fieldType.equals(Integer.class)) ||
+			                (fieldType.equals(Integer.TYPE)) ||
+			                (fieldType.equals(Long.class)) ||
+			                (fieldType.equals(Long.TYPE)) ||
+			                (fieldType.equals(Double.class)) ||
+			                (fieldType.equals(Double.TYPE)) ||
+			                (fieldType.equals(Float.class)) ||
+			                (fieldType.equals(Float.TYPE))) {
+						
+						double value = reader.nextDouble();
+						
+						if (value == (int) value) {
+							field.setInt(obj, (int) value);
+						}
+						else {
+							field.set(obj, value);
+						}
+					}
+					else if (fieldType.equals(Boolean.class)
+							|| fieldType.equals(boolean.class)) {
+						field.setBoolean(obj, reader.nextBoolean());
+					} 
+					else if (fieldType.getName().equals("[B")) {
+						field.set(obj, Base64.decode(reader.nextString(), Base64.DEFAULT));
+					} 
+					else if (fieldType.equals(String.class)) {
+						field.set(obj, reader.nextString());
+					}
+					
+					// Revert accessibility
+					field.setAccessible(accessible);
+				}
+				else {
+					reader.skipValue();
+				}
+			}
+			reader.endObject();
+			
+			return obj;
+		}
+
+		@Override
+		public void write(JsonWriter writer, E value) throws IOException {
+			new JsonSerializer().serialize(writer, value);
+		}	
+	}
+	
+	private JsonSerializer self;
+	
+	public JsonSerializer() {
+		self = this;
 	}
 	
 	/**
-	 * Open a JsonWriter and write the object provided as input. It is responsibility of the user to close
-	 * the writer later
-	 * 
-	 * @param out
-	 * @param list
+	 * Read an object of the specified class from the provided input stream
+	 * @param cls
+	 * @param in
 	 * @return
 	 * @throws IOException
 	 */
 	@Override
-	public void serialize(OutputStream out, List<Serializable<?>> list) throws IOException {
-		JsonWriter writer = new JsonWriter(new OutputStreamWriter(out, "UTF-8"));
-		serialize(writer, list.iterator());
-		writer.flush();
+	public <E extends Serializable<E>> E deserialize(Class<E> cls, InputStream in) throws IOException {
+		JsonReader reader = new JsonReader(new InputStreamReader(in));
+		return deserialize(cls, reader);
 	}
 	
 	/**
-	 * Open a JsonWriter and write the contents of the iterator. It is responsibility of the user to close
-	 * the writer later
-	 * 
-	 * @param out
-	 * @param list
+	 * Read an object of the specified class from the provided json reader
+	 * @param cls
+	 * @param in
+	 * @return
+	 * @throws IOException
+	 */
+	protected <E extends Serializable<E>> E deserialize(Class<E> cls, JsonReader reader) throws IOException {
+		return new SerializableTypeAdapter<E>(cls).read(reader);
+	}
+	
+	/**
+	 * Read an object of the specified class from the provided input string
+	 * @param cls
+	 * @param in
 	 * @return
 	 * @throws IOException
 	 */
 	@Override
-	public void serialize(OutputStream out, Iterator<Serializable<?>> iterator) throws IOException {
-		JsonWriter writer = new JsonWriter(new OutputStreamWriter(out, "UTF-8"));
-		serialize(writer, iterator);
-		writer.flush();
+	public <E extends Serializable<E>> E deserialize(Class<E> cls, String input) throws IOException {
+		return deserialize(cls, new ByteArrayInputStream(input.getBytes()));
 	}
+	
+	/**
+	 * Read list of elements of the specified class from the provided json reader
+	 * @param cls
+	 * @param in
+	 * @return
+	 * @throws IOException
+	 */
+	protected <E extends Serializable<E>> List<E> deserializeList(Class<E> cls, JsonReader reader) throws IOException {
+		return new SerializableTypeAdapter<E>(cls).readList(reader);
+	}
+	
+	/**
+	 * Write an iterator to the specified writer
+	 * 
+	 * @param writer
+	 * @param list
+	 * @throws IOException
+	 */
+	protected void serialize(JsonWriter writer, Iterator<Serializable<?>> iterator) throws IOException {
+		writer.beginArray();
+		while (iterator.hasNext()) {
+			serialize(writer, iterator.next());
+		}
+		writer.endArray();		
+	}
+	
 	
 	/**
 	 * Write an object to the specified JsonWriter
@@ -106,6 +349,7 @@ public class JsonSerializer implements Serializer {
 				
 				if (Serializable.class.isAssignableFrom(fieldType)) {
 					writer.name(fieldName);
+					
 					serialize(writer, (Serializable)fieldValue);
 				}
 				else if (List.class.isAssignableFrom(fieldType)) {
@@ -116,6 +360,9 @@ public class JsonSerializer implements Serializer {
 	             			// If it is a list of Serializable objects write the list
 	             			writer.name(fieldName);
 	             			serialize(writer, ((List) fieldValue).iterator());	             			
+	             		}
+	             		else {
+	             			serialize((Class<?>)listType, fieldName, writer, (List)fieldValue);
 	             		}
 	             	}
 				}
@@ -149,18 +396,108 @@ public class JsonSerializer implements Serializer {
 		writer.endObject();
 	}
 	
+	
 	/**
-	 * Write an iterator to the specified writer
-	 * 
+	 * Serializes the list if the element type for the list (given by listType)
+	 * is one of Number, Boolean, String, or byte array
+	 * @param listType
+	 * @param name
 	 * @param writer
 	 * @param list
 	 * @throws IOException
 	 */
-	protected void serialize(JsonWriter writer, Iterator<Serializable<?>> iterator) throws IOException {
-		writer.beginArray();
-		while (iterator.hasNext()) {
-			serialize(writer, iterator.next());
+	public void serialize(Class<?> listType, String name, JsonWriter writer, List<?> list) throws IOException {
+		if ((Number.class.isAssignableFrom(listType)) ||
+				(listType.equals(Integer.class)) ||
+                (listType.equals(Integer.TYPE)) ||
+                (listType.equals(Long.class)) ||
+                (listType.equals(Long.TYPE)) ||
+                (listType.equals(Double.class)) ||
+                (listType.equals(Double.TYPE)) ||
+                (listType.equals(Float.class)) ||
+                (listType.equals(Float.TYPE))) {
+			
+			
+			writer.name(name);
+			writer.beginArray();
+			for (Object o: list) {
+				writer.value((Number)o);
+			}
+			writer.endArray();
 		}
-		writer.endArray();		
+		else if (listType.equals(Boolean.class)
+				|| listType.equals(boolean.class)) {
+			
+			writer.name(name);
+			writer.beginArray();
+			for (Object o: list) {
+				writer.value((Boolean)o);
+			}
+			writer.endArray();
+		} 
+		else if (listType.getName().equals("[B")) {
+			writer.name(name);
+			writer.beginArray();
+			for (Object o: list) {
+				writer.value(Base64.encodeToString((byte[]) o,
+						Base64.NO_WRAP));
+			}
+			writer.endArray();
+		} 
+		else {
+			writer.name(name);
+			writer.beginArray();
+			for (Object o: list) {
+				writer.value(o.toString());
+			}
+			writer.endArray();
+		}
+	}
+	
+	/**
+	 * Open a JsonWriter and write the contents of the iterator. It is responsibility of the user to close
+	 * the writer later
+	 * 
+	 * @param out
+	 * @param list
+	 * @return
+	 * @throws IOException
+	 */
+	@Override
+	public void serialize(OutputStream out, Iterator<Serializable<?>> iterator) throws IOException {
+		JsonWriter writer = new JsonWriter(new OutputStreamWriter(out, "UTF-8"));
+		serialize(writer, iterator);
+		writer.flush();
+	}
+	
+	/**
+	 * Open a JsonWriter and write the object provided as input. It is responsibility of the user to close
+	 * the writer later
+	 * 
+	 * @param out
+	 * @param list
+	 * @return
+	 * @throws IOException
+	 */
+	@Override
+	public void serialize(OutputStream out, List<Serializable<?>> list) throws IOException {
+		JsonWriter writer = new JsonWriter(new OutputStreamWriter(out, "UTF-8"));
+		serialize(writer, list.iterator());
+		writer.flush();
+	}
+	
+	/**
+	 * Open a JsonWriter and write the object provided as input. It is responsibility of the user to close 
+	 * the writer later.
+	 * 
+	 * @param out
+	 * @param object
+	 * @throws IOException
+	 */
+	@Override
+	public void serialize(OutputStream out, Serializable<?> object) throws IOException {
+		JsonWriter writer = new JsonWriter(new OutputStreamWriter(out, "UTF-8"));
+		serialize(writer, object);
+		writer.flush();
 	}
 }
