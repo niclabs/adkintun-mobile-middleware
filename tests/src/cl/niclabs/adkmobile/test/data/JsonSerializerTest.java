@@ -186,6 +186,7 @@ public class JsonSerializerTest extends TestCase {
 		Post post = s.deserialize(Post.class, json);
 		
 		assertEquals("this is the title", post.title);
+		assertEquals(null, post.values);
 		assertEquals(100, post.visits);
 	}
 }
