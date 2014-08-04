@@ -4,7 +4,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
+import com.orm.dsl.Ignore;
 
 /**
  * Generic implementation for serializable objects. 
@@ -21,14 +24,37 @@ public abstract class AbstractSerializable<E extends AbstractSerializable<E>> im
 	 */
 	@Override
 	public List<Field> getSerializableFields() {
-        List<Field> toStore = new ArrayList<Field>();
-        for (Field field : this.getClass().getDeclaredFields()) {
-			if (!field.isAnnotationPresent(DoNotSerialize.class)) {
-                toStore.add(field);
-            }
-        }
-        return toStore;
+		List<Field> typeFields = new ArrayList<Field>();
+
+		getAllFields(typeFields, getClass());
+
+		List<Field> toStore = new ArrayList<Field>();
+		for (Field field : typeFields) {
+			if ((!field.isAnnotationPresent(Ignore.class) && !field
+					.isAnnotationPresent(DoNotSerialize.class))) {
+				toStore.add(field);
+			}
+		}
+		return toStore;
 	}
+	
+	/**
+	 * Get all the fields for the class, including those of the super classes
+	 * 
+	 * @param fields
+	 * @param type
+	 * @return
+	 */
+	private static List<Field> getAllFields(List<Field> fields, Class<?> type) {
+		Collections.addAll(fields, type.getDeclaredFields());
+
+		if (type.getSuperclass() != null) {
+			fields = getAllFields(fields, type.getSuperclass());
+		}
+
+		return fields;
+	}
+
 	
 	public String toString() {
 		Serializer serializer = SerializerFactory.getInstance().getSerializer();

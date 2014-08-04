@@ -170,6 +170,8 @@ public class JsonSerializerTest extends TestCase {
 		for (int i = 0; i < readers.size(); i++) {
 			assertEquals(readers.get(i), deserializedPost.readers.get(i));
 		}
+		
+		assertEquals(null, deserializedPost.readerObjects);
 	}
 	
 	public void testDeserialize() throws IOException {

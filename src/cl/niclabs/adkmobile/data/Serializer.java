@@ -19,7 +19,7 @@ public interface Serializer {
 	 * @return
 	 * @throws IOException
 	 */
-	public <E extends Serializable<E>> E deserialize(Class<E> cls, InputStream in) throws IOException;
+	public <E extends Serializable<?>> E deserialize(Class<E> cls, InputStream in) throws IOException;
 	
 	/**
 	 * Read an object of the specified class from the provided input string
@@ -28,7 +28,7 @@ public interface Serializer {
 	 * @return an object of the specified class
 	 * @throws IOException
 	 */
-	public <E extends Serializable<E>> E deserialize(Class<E> cls, String input) throws IOException;
+	public <E extends Serializable<?>> E deserialize(Class<E> cls, String input) throws IOException;
 	
 	/**
 	 * Write a serializable object to the specified output stream

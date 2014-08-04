@@ -66,7 +66,7 @@ public class JsonSerializer implements Serializer {
 	 *
 	 * @param <E>
 	 */
-	protected class SerializableTypeAdapter<E extends Serializable<E>> extends TypeAdapter<E> {
+	protected class SerializableTypeAdapter<E extends Serializable<?>> extends TypeAdapter<E> {
 		private Class<E> cls;
 		
 		public SerializableTypeAdapter(Class<E> cls) {
@@ -288,7 +288,7 @@ public class JsonSerializer implements Serializer {
 	 * @throws IOException
 	 */
 	@Override
-	public <E extends Serializable<E>> E deserialize(Class<E> cls, InputStream in) throws IOException {
+	public <E extends Serializable<?>> E deserialize(Class<E> cls, InputStream in) throws IOException {
 		JsonReader reader = new JsonReader(new InputStreamReader(in));
 		return deserialize(cls, reader);
 	}
@@ -300,7 +300,7 @@ public class JsonSerializer implements Serializer {
 	 * @return
 	 * @throws IOException
 	 */
-	protected <E extends Serializable<E>> E deserialize(Class<E> cls, JsonReader reader) throws IOException {
+	protected <E extends Serializable<?>> E deserialize(Class<E> cls, JsonReader reader) throws IOException {
 		return new SerializableTypeAdapter<E>(cls).read(reader);
 	}
 	
@@ -312,7 +312,7 @@ public class JsonSerializer implements Serializer {
 	 * @throws IOException
 	 */
 	@Override
-	public <E extends Serializable<E>> E deserialize(Class<E> cls, String input) throws IOException {
+	public <E extends Serializable<?>> E deserialize(Class<E> cls, String input) throws IOException {
 		return deserialize(cls, new ByteArrayInputStream(input.getBytes()));
 	}
 	
