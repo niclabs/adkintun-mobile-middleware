@@ -19,6 +19,7 @@ import cl.niclabs.adkmobile.utils.StringUtil;
 
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 
 
@@ -197,6 +198,12 @@ public class JsonSerializer implements Serializer {
 			while (reader.hasNext()) {
 				String javaName = StringUtil.fromSQLName(reader.nextName());
 				
+				JsonToken jsonToken = reader.peek();
+				if (jsonToken.equals(JsonToken.NULL)) {
+					reader.skipValue();
+					continue;
+				}
+				
 				Field field;
 				try {
 					field = obj.getClass().getDeclaredField(javaName);
@@ -232,22 +239,22 @@ public class JsonSerializer implements Serializer {
 					}
 					else if ((fieldType.equals(Integer.class)) || 
 							 (fieldType.equals(Integer.TYPE))) {
-						field.setInt(obj, reader.nextInt());
+						field.set(obj, reader.nextInt());
 					}
 					else if ((fieldType.equals(Long.class)) ||
 			                (fieldType.equals(Long.TYPE))) {
-						field.setLong(obj, reader.nextLong());
+						field.set(obj, reader.nextLong());
 					}
 					else if ((fieldType.equals(Double.class)) ||
 			                (fieldType.equals(Double.TYPE)) ||
 			                (fieldType.equals(Float.class)) ||
 			                (fieldType.equals(Float.TYPE))) {
 						
-						field.setDouble(obj, reader.nextDouble());
+						field.set(obj, reader.nextDouble());
 					}
 					else if (fieldType.equals(Boolean.class)
 							|| fieldType.equals(boolean.class)) {
-						field.setBoolean(obj, reader.nextBoolean());
+						field.set(obj, reader.nextBoolean());
 					} 
 					else if (fieldType.getName().equals("[B")) {
 						field.set(obj, Base64.decode(reader.nextString(), Base64.DEFAULT));

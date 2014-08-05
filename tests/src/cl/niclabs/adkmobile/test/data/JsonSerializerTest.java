@@ -48,7 +48,7 @@ public class JsonSerializerTest extends TestCase {
 	
 	protected static class Post extends AbstractSerializable<Post> {
 		String title;
-		long visits;
+		Long visits;
 		boolean read;
 		double rate;
 		
@@ -89,7 +89,7 @@ public class JsonSerializerTest extends TestCase {
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		
 		String title = "title", body = "this is the body", tag1 = "new", tag2 = "info";
-		long visits = 2147483648912L;
+		Long visits = 2147483648912L;
 		double rate = 0.54;
 		boolean read = false;
 		List<Integer> readers = Arrays.asList(new Integer[]{1,2,3});
@@ -181,7 +181,7 @@ public class JsonSerializerTest extends TestCase {
 		Post post = s.deserialize(Post.class, json);
 		
 		assertEquals("this is the title", post.title);
-		assertEquals(100, post.visits);
+		assertEquals(new Long(100L), post.visits);
 	}
 	
 	
@@ -193,6 +193,17 @@ public class JsonSerializerTest extends TestCase {
 		
 		assertEquals("this is the title", post.title);
 		assertEquals(null, post.values);
-		assertEquals(100, post.visits);
+		assertEquals(new Long(100), post.visits);
+	}
+	
+	public void testDeserialize3() throws IOException {
+		String json = "{\"title\":null, \"values\":[1,2,3],\"visits\":0}";
+		
+		JsonSerializer s = new JsonSerializer();
+		Post post = s.deserialize(Post.class, json);
+		
+		assertEquals(null, post.title);
+		assertEquals(null, post.values);
+		assertEquals(new Long(0), post.visits);
 	}
 }
