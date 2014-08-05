@@ -83,7 +83,10 @@ public class JsonSerializer implements Serializer {
 				e.printStackTrace();
 			} catch (IllegalAccessException e) {
 				e.printStackTrace();
-			} 
+			} catch (IllegalStateException e) {
+				// If the object is not correctly defined (for instance, expects an object when the json specifies a list)
+				e.printStackTrace();
+			}
 			
 			return null;
 		}
@@ -105,6 +108,8 @@ public class JsonSerializer implements Serializer {
 				} catch (InstantiationException e) {
 					e.printStackTrace();
 				} catch (IllegalAccessException e) {
+					e.printStackTrace();
+				} catch (IllegalStateException e) {
 					e.printStackTrace();
 				}
 			}
