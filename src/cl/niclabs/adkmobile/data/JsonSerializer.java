@@ -61,6 +61,33 @@ import com.google.gson.stream.JsonWriter;
  * @author Felipe Lalanne <flalanne@niclabs.cl>
  */
 public class JsonSerializer implements Serializer {
+	protected enum Token {
+		 OTHER(0), PRIMITIVE(1), LIST(2), OBJECT(3), NULL(4);
+		
+		int value;
+		
+		private Token(int value) {
+			this.value = value;
+		}
+		
+		public static Token fromJsonToken(JsonToken token) {
+			switch(token) {
+				case BEGIN_ARRAY:
+					return LIST;
+				case BEGIN_OBJECT:
+					return OBJECT;
+				case BOOLEAN:
+				case NUMBER:
+				case STRING:
+					return PRIMITIVE;
+				case NULL:
+					return NULL;
+				default:
+					return OTHER;
+			}
+		}
+	}
+	
 	/**
 	 * GSON adapter to parse Serializable objects
 	 * @author Felipe Lalanne <flalanne@niclabs.cl>
@@ -83,8 +110,7 @@ public class JsonSerializer implements Serializer {
 				e.printStackTrace();
 			} catch (IllegalAccessException e) {
 				e.printStackTrace();
-			} catch (IllegalStateException e) {
-				// If the object is not correctly defined (for instance, expects an object when the json specifies a list)
+			} catch (IllegalStateException e) { // When the token is incorrect
 				e.printStackTrace();
 			}
 			
@@ -117,6 +143,19 @@ public class JsonSerializer implements Serializer {
 			reader.endArray();
 			
 			return list;
+		}
+		
+		/**
+		 * Check that the expected token and the found token match
+		 * @param name
+		 * @param expected
+		 * @param found
+		 * @throws IllegalStateException if the tokens do not match
+		 */
+		protected void assertTokenMatch(String name, Token expected, Token found) throws IllegalStateException {
+			if (!expected.equals(found)) {
+				throw new IllegalStateException(expected + " element expected for the field '"+name+"', but "+found+" element was found on the json");
+			}
 		}
 		
 		/**
@@ -183,6 +222,8 @@ public class JsonSerializer implements Serializer {
 			return list;
 		}
 		
+
+		
 		/**
 		 * Read an object from the specified reader
 		 * @param reader
@@ -227,9 +268,15 @@ public class JsonSerializer implements Serializer {
 					field.setAccessible(true);
 					
 					if (Serializable.class.isAssignableFrom(fieldType)) {
+						// Check that the json element is an object
+						assertTokenMatch(javaName, Token.OBJECT, Token.fromJsonToken(jsonToken));
+						
 						field.set(obj, self.deserialize(fieldType.asSubclass(Serializable.class), reader));
 					}
 					else if (List.class.isAssignableFrom(fieldType)) {
+						// Check that the json element is a list
+						assertTokenMatch(javaName, Token.LIST, Token.fromJsonToken(jsonToken));
+						
 		             	Type genericType = field.getGenericType();
 		             	if (genericType instanceof ParameterizedType) {
 		             		Type listType = ((ParameterizedType) genericType).getActualTypeArguments()[0];
@@ -242,30 +289,35 @@ public class JsonSerializer implements Serializer {
 		             		}
 		             	}
 					}
-					else if ((fieldType.equals(Integer.class)) || 
-							 (fieldType.equals(Integer.TYPE))) {
-						field.set(obj, reader.nextInt());
-					}
-					else if ((fieldType.equals(Long.class)) ||
-			                (fieldType.equals(Long.TYPE))) {
-						field.set(obj, reader.nextLong());
-					}
-					else if ((fieldType.equals(Double.class)) ||
-			                (fieldType.equals(Double.TYPE)) ||
-			                (fieldType.equals(Float.class)) ||
-			                (fieldType.equals(Float.TYPE))) {
+					else {
+						// Check that the JsonElement is a primitive
+						assertTokenMatch(javaName, Token.PRIMITIVE, Token.fromJsonToken(jsonToken));
 						
-						field.set(obj, reader.nextDouble());
-					}
-					else if (fieldType.equals(Boolean.class)
-							|| fieldType.equals(boolean.class)) {
-						field.set(obj, reader.nextBoolean());
-					} 
-					else if (fieldType.getName().equals("[B")) {
-						field.set(obj, Base64.decode(reader.nextString(), Base64.DEFAULT));
-					} 
-					else if (fieldType.equals(String.class)) {
-						field.set(obj, reader.nextString());
+						if ((fieldType.equals(Integer.class)) || 
+								 (fieldType.equals(Integer.TYPE))) {
+							field.set(obj, reader.nextInt());
+						}
+						else if ((fieldType.equals(Long.class)) ||
+				                (fieldType.equals(Long.TYPE))) {
+							field.set(obj, reader.nextLong());
+						}
+						else if ((fieldType.equals(Double.class)) ||
+				                (fieldType.equals(Double.TYPE)) ||
+				                (fieldType.equals(Float.class)) ||
+				                (fieldType.equals(Float.TYPE))) {
+							
+							field.set(obj, reader.nextDouble());
+						}
+						else if (fieldType.equals(Boolean.class)
+								|| fieldType.equals(boolean.class)) {
+							field.set(obj, reader.nextBoolean());
+						} 
+						else if (fieldType.getName().equals("[B")) {
+							field.set(obj, Base64.decode(reader.nextString(), Base64.DEFAULT));
+						} 
+						else if (fieldType.equals(String.class)) {
+							field.set(obj, reader.nextString());
+						}
 					}
 					
 					// Revert accessibility

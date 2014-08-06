@@ -206,4 +206,19 @@ public class JsonSerializerTest extends TestCase {
 		assertEquals(null, post.values);
 		assertEquals(new Long(0), post.visits);
 	}
+	
+	public void testDeserializeWronglyDefinedElement() throws IOException {
+		String json = "{\"tags\":{\"name\":\"tagname\"}, \"values\":[1,2,3],\"visits\":0}";
+		
+		JsonSerializer s = new JsonSerializer();
+		try {
+			Post post = s.deserialize(Post.class, json);
+			
+			assertTrue("Deserializer should not fail", true);
+			assertTrue("Post must be null", post == null);
+		}
+		catch (IllegalStateException e) {
+			assertTrue("Deserializer should not fail", false);
+		}
+	}
 }
