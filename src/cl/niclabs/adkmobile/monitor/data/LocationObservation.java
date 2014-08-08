@@ -1,5 +1,6 @@
 package cl.niclabs.adkmobile.monitor.data;
 
+import android.location.Location;
 import cl.niclabs.adkmobile.monitor.Monitor;
 import cl.niclabs.adkmobile.utils.Time;
 
@@ -83,5 +84,17 @@ public class LocationObservation extends AbstractObservation<LocationObservation
 	
 	public void setSpeed(float speed) {
 		this.speed = speed;
+	}
+	
+	/**
+	 * Returns the distance to the provided observation
+	 * @param location
+	 * @return
+	 */
+	public float distanceTo(LocationObservation location) {
+		float [] results = new float[3];
+		Location.distanceBetween(location.getLatitude(), location.getLongitude(), latitude, longitude, results);
+		
+		return results[0];
 	}
 }
