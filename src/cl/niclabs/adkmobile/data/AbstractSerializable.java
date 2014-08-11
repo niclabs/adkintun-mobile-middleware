@@ -10,16 +10,19 @@ import java.util.List;
 import com.orm.dsl.Ignore;
 
 /**
- * Generic implementation for serializable objects. 
+ * Generic implementation for serializable objects.
  * 
  * @author Felipe Lalanne <flalanne@niclabs.cl>
- *
- * @param <E> sub-class to serialize
+ * 
+ * @param <E>
+ *            sub-class to serialize
  */
-public abstract class AbstractSerializable<E extends AbstractSerializable<E>> implements Serializable<E> {
+public abstract class AbstractSerializable<E extends AbstractSerializable<E>>
+		implements Serializable<E> {
 	/**
 	 * Return the list of fields of the object except for those with the @DoNotSerizalize
 	 * annotation.
+	 * 
 	 * @return
 	 */
 	@Override
@@ -37,7 +40,7 @@ public abstract class AbstractSerializable<E extends AbstractSerializable<E>> im
 		}
 		return toStore;
 	}
-	
+
 	/**
 	 * Get all the fields for the class, including those of the super classes
 	 * 
@@ -55,7 +58,6 @@ public abstract class AbstractSerializable<E extends AbstractSerializable<E>> im
 		return fields;
 	}
 
-	
 	public String toString() {
 		Serializer serializer = SerializerFactory.getInstance().getSerializer();
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -65,5 +67,15 @@ public abstract class AbstractSerializable<E extends AbstractSerializable<E>> im
 		} catch (IOException e) {
 		}
 		return out.toString();
+	}
+
+	public static <E extends AbstractSerializable<?>> E fromString(Class<E> type,
+			String json) {
+		JsonSerializer s = new JsonSerializer();
+		try {
+			return s.deserialize(type, json);
+		} catch (IOException e) {
+		}
+		return null;
 	}
 }
