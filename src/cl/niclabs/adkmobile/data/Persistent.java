@@ -122,7 +122,7 @@ public class Persistent<E extends Persistent<E>> extends SugarRecord<E>
 	 * @return an instance of the object with the specified id, or null if not
 	 *         found
 	 */
-	public static <T extends Persistent<T>> T findById(Class<T> type, Long id) {
+	public static <T extends Persistent<?>> T findById(Class<T> type, Long id) {
 		return SugarRecord.findById(type, id);
 	}
 
@@ -134,7 +134,7 @@ public class Persistent<E extends Persistent<E>> extends SugarRecord<E>
 	 * @param whereArgs
 	 * @return
 	 */
-	public static <T extends Persistent<T>> Iterator<T> find(Class<T> type,
+	public static <T extends Persistent<?>> Iterator<T> find(Class<T> type,
 			String whereClause, String... whereArgs) {
 		return SugarRecord.findAsIterator(type, whereClause, whereArgs);
 	}
@@ -147,7 +147,7 @@ public class Persistent<E extends Persistent<E>> extends SugarRecord<E>
 	 * @param whereArgs
 	 * @return
 	 */
-	public static <T extends Persistent<T>> Iterator<T> find(Class<T> type,
+	public static <T extends Persistent<?>> Iterator<T> find(Class<T> type,
 			String whereClause, String[] whereArgs, String orderBy) {
 		return SugarRecord.findAsIterator(type, whereClause, whereArgs, null,
 				orderBy, null);
@@ -159,7 +159,7 @@ public class Persistent<E extends Persistent<E>> extends SugarRecord<E>
 	 * @param type
 	 * @return
 	 */
-	public static <T extends Persistent<T>> Iterator<T> findAll(Class<T> type) {
+	public static <T extends Persistent<?>> Iterator<T> findAll(Class<T> type) {
 		return SugarRecord.findAll(type);
 	}
 
