@@ -10,6 +10,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -198,6 +199,12 @@ public class JsonSerializer implements Serializer {
 				while (reader.hasNext()) {
 					list.add(reader.nextBoolean());
 				}
+			}
+			else if (type.equals(Date.class)) {
+				list = new ArrayList<Object>();
+				while (reader.hasNext()) {
+					list.add(new Date(reader.nextLong()));
+				}
 			} 
 			else if (type.getName().equals("[B")) {
 				list = new ArrayList<Object>();
@@ -312,6 +319,9 @@ public class JsonSerializer implements Serializer {
 								|| fieldType.equals(boolean.class)) {
 							field.set(obj, reader.nextBoolean());
 						} 
+						else if (fieldType.equals(Date.class)) {
+							field.set(obj, new Date(reader.nextLong()));
+						}
 						else if (fieldType.getName().equals("[B")) {
 							field.set(obj, Base64.decode(reader.nextString(), Base64.DEFAULT));
 						} 
@@ -469,7 +479,10 @@ public class JsonSerializer implements Serializer {
 					writer.name(fieldName).value(
 							Base64.encodeToString((byte[]) fieldValue,
 									Base64.NO_WRAP));
-				} 
+				}
+				else if (fieldType.equals(Date.class)) {
+					writer.name(fieldName).value(((Date)fieldValue).getTime());
+				}
 				else {
 					writer.name(fieldName).value(fieldValue.toString());
 				}
@@ -524,6 +537,14 @@ public class JsonSerializer implements Serializer {
 			for (Object o: list) {
 				writer.value(Base64.encodeToString((byte[]) o,
 						Base64.NO_WRAP));
+			}
+			writer.endArray();
+		} 
+		else if (listType.equals(Date.class)) {
+			writer.name(name);
+			writer.beginArray();
+			for (Object o: list) {
+				writer.value(((Date)o).getTime());
 			}
 			writer.endArray();
 		} 

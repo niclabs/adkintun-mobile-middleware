@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -52,6 +53,8 @@ public class JsonSerializerTest extends TestCase {
 		boolean read;
 		double rate;
 		
+		Date date;
+		
 		int integer;
 		
 		@DoNotSerialize
@@ -93,6 +96,7 @@ public class JsonSerializerTest extends TestCase {
 		double rate = 0.54;
 		boolean read = false;
 		List<Integer> readers = Arrays.asList(new Integer[]{1,2,3});
+		Date now = new Date();
 		
 		List<Tag> tags = new ArrayList<Tag>();
 		
@@ -113,6 +117,7 @@ public class JsonSerializerTest extends TestCase {
 		object.tags = tags;
 		object.readers = readers;
 		object.readerObjects = readerObjects;
+		object.date = now;
 		
 		// Serialize the object to a byte array
 		serializer.serialize(output, object);
@@ -129,6 +134,8 @@ public class JsonSerializerTest extends TestCase {
 		assertEquals(visits, testObject.get("visits"));
 		assertEquals(read, testObject.get("read"));
 		assertEquals(rate, testObject.get("rate"));
+		assertTrue("Serialized date must equal now timestamp", now.getTime() == testObject.getLong("date"));
+		
 		
 		// The body should not have been serialized
 		assertTrue(!testObject.has("body"));
@@ -159,6 +166,9 @@ public class JsonSerializerTest extends TestCase {
 		assertEquals(rate, deserializedPost.rate);
 		
 		assertNotSame(null, deserializedPost.tags);
+		
+		assertTrue("Deserialized date must not be null", deserializedPost.date != null);
+		assertTrue("Deserialized date must equal the original date timestamp", deserializedPost.date.getTime() == now.getTime());
 		
 		assertEquals(2, deserializedPost.tags.size());
 		assertEquals(tag1, deserializedPost.tags.get(0).name);
