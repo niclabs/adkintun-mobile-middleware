@@ -184,6 +184,26 @@ public class JsonSerializerTest extends TestCase {
 		assertEquals(null, deserializedPost.readerObjects);
 	}
 	
+	public void testSerializeEmptyObject() throws IOException {
+		JsonSerializer s = new JsonSerializer();
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		s.serialize(output, new Tag());
+		
+		// Obtain the result
+		String json = new String(output.toByteArray());
+		
+		Log.d(TAG, "Empty serialized object "+json);
+		assertTrue("Serialization of empty tag must equal the string '{}'", json.equals("{}"));
+	}
+	
+	public void testDeSerializeEmptyObject() throws IOException {
+		String json = "{}";	
+		JsonSerializer s = new JsonSerializer();
+		Tag tag = s.deserialize(Tag.class, json);
+		
+		assertTrue("Tag object must be non-null", tag != null);
+	}
+	
 	public void testDeserialize() throws IOException {
 		String json = "{\"title\":\"this is the title\", \"extra\":{\"value\":1},\"visits\":100}";
 		
