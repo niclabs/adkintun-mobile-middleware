@@ -117,7 +117,7 @@ public class LocationObservation extends AbstractObservation<LocationObservation
 	/**
 	 * Returns the distance to the provided observation
 	 * @param location
-	 * @return
+	 * @return distance between the two observations, in meters
 	 */
 	public float distanceTo(LocationObservation location) {
 		float [] results = new float[3];
