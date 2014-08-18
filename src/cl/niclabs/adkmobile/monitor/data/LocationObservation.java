@@ -30,30 +30,58 @@ public class LocationObservation extends AbstractObservation<LocationObservation
 		super(Monitor.LOCATION, timestamp);
 	}
 
+	/**
+	 * 
+	 * @return accuracy of the observation in meters
+	 */
 	public float getAccuracy() {
 		return accuracy;
 	}
 
+	/**
+	 * 
+	 * @return altitude of the device, in meters above sea level
+	 */
 	public double getAltitude() {
 		return altitude;
 	}
 
+	/**
+	 * 
+	 * @return bearing, in degrees
+	 */
 	public float getBearing() {
 		return bearing;
 	}
 
+	/**
+	 * 
+	 * @return latitude, in degrees
+	 */
 	public double getLatitude() {
 		return latitude;
 	}
 
+	/**
+	 * 
+	 * @return longitude, in degrees
+	 */
 	public double getLongitude() {
 		return longitude;
 	}
 
+	/**
+	 * 
+	 * @return name of the provider that generated this observation
+	 */
 	public String getProvider() {
 		return provider;
 	}
 
+	/**
+	 * 
+	 * @return speed, in m/s
+	 */
 	public float getSpeed() {
 		return speed;
 	}
