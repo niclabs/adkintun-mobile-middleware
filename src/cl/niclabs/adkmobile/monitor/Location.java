@@ -23,21 +23,24 @@ import cl.niclabs.adkmobile.utils.Time;
  * the system as a listener. Version adapted from Locations.java in the Aware
  * Framework
  * 
- * It requires permissions android.permission.ACCESS_COARSE_LOCATION to use LOCATION_NETWORK event,
- * and android.permission.ACCESS_FINE_LOCATION to use LOCATION_GPS event
+ * It requires permissions android.permission.ACCESS_COARSE_LOCATION to use
+ * LOCATION_NETWORK event, and android.permission.ACCESS_FINE_LOCATION to use
+ * LOCATION_GPS event
  * 
  * @author nico <nicolas@niclabs.cl>. Created 5-11-2013.
  */
 public class Location extends AbstractMonitor<LocationListener> {
-	private LocationManager locationManager = null;
-	
-	private android.location.Location bestLocation = null;
+	private static LocationManager locationManager = null;
+
+	private static android.location.Location bestLocation = null;
 	private android.location.Location lastGps = null;
 	private android.location.Location lastNetwork = null;
 
-	private LocationObservation getObservationFromLocation(android.location.Location loc) {
-		LocationObservation locData = new LocationObservation(Time.currentTimeMillis());
-		
+	private static LocationObservation getObservationFromLocation(
+			android.location.Location loc) {
+		LocationObservation locData = new LocationObservation(
+				Time.currentTimeMillis());
+
 		locData.setLatitude(loc.getLatitude());
 		locData.setLongitude(loc.getLongitude());
 		locData.setBearing(loc.getBearing());
@@ -62,12 +65,14 @@ public class Location extends AbstractMonitor<LocationListener> {
 			case GpsStatus.GPS_EVENT_SATELLITE_STATUS:
 				break;
 			case GpsStatus.GPS_EVENT_STARTED:
-				stateChange = new StateChange(LOCATION_GPS, Time.currentTimeMillis());
+				stateChange = new StateChange(LOCATION_GPS,
+						Time.currentTimeMillis());
 				stateChange.setStateType(StateType.LOCATION);
 				stateChange.setState(LocationState.ENABLED.value());
 				notifyListeners(gpsLocationEvent, stateChange);
-				
-				if (DEBUG) Log.v(TAG, stateChange.toString());
+
+				if (DEBUG)
+					Log.v(TAG, stateChange.toString());
 				break;
 			case GpsStatus.GPS_EVENT_STOPPED:
 				if (bestLocation == null)
@@ -79,17 +84,18 @@ public class Location extends AbstractMonitor<LocationListener> {
 				notifyListeners(gpsLocationEvent, locationData);
 
 				/* Notify state change */
-				stateChange = new StateChange(LOCATION_GPS, Time.currentTimeMillis());
+				stateChange = new StateChange(LOCATION_GPS,
+						Time.currentTimeMillis());
 				stateChange.setStateType(StateType.LOCATION);
 				stateChange.setState(LocationState.DISABLED.value());
 				notifyListeners(gpsLocationEvent, stateChange);
-				
+
 				/* Log the results */
 				if (DEBUG) {
 					Log.v(TAG, locationData.toString());
 					Log.v(TAG, stateChange.toString());
 				}
-				
+
 				break;
 			}
 		}
@@ -99,7 +105,7 @@ public class Location extends AbstractMonitor<LocationListener> {
 	 * Update interval for GPS, in seconds (default = 180) 0 = realtime updates
 	 */
 	public static int UPDATE_TIME_GPS = 10;
-	
+
 	/**
 	 * Extra for configuring the update interval for gps
 	 */
@@ -110,7 +116,7 @@ public class Location extends AbstractMonitor<LocationListener> {
 	 * updates
 	 */
 	public static int UPDATE_TIME_NETWORK = 300;
-	
+
 	/**
 	 * Extra for configuring the update interval for network location
 	 */
@@ -120,7 +126,7 @@ public class Location extends AbstractMonitor<LocationListener> {
 	 * Minimum accuracy value acceptable for GPS, in meters (default = 150)
 	 */
 	public static int UPDATE_DISTANCE_GPS = 150;
-	
+
 	/**
 	 * Extra for configuring the update distance for gps
 	 */
@@ -136,28 +142,29 @@ public class Location extends AbstractMonitor<LocationListener> {
 	 * Extra for configuring the update distance for network
 	 */
 	public static String UPDATE_DISTANCE_NETWORK_EXTRA = "update_distance_network";
-	
+
 	/**
 	 * For how long is the last best location considered valid, in seconds (
 	 * default = 300 )
 	 */
 	public static int EXPIRATION_TIME = 300;
-	
+
 	/**
 	 * Extra for configuring the update distance for gps
 	 */
 	public static String EXPIRATION_TIME_EXTRA = "expiration_time";
 
-	
 	/**
-	 * Compares two android.location.Location events according to accuracy and expiration time parameters
-	 * and returns true if the new location is better than the previous one.
-	 *
+	 * Compares two android.location.Location events according to accuracy and
+	 * expiration time parameters and returns true if the new location is better
+	 * than the previous one.
+	 * 
 	 * @param newLocation
 	 * @param lastLocation
 	 * @return
 	 */
-	private boolean isBetterLocation(android.location.Location newLocation, android.location.Location lastLocation) {
+	private boolean isBetterLocation(android.location.Location newLocation,
+			android.location.Location lastLocation) {
 		if (newLocation != null && lastLocation == null) {
 			return true;
 		}
@@ -205,44 +212,54 @@ public class Location extends AbstractMonitor<LocationListener> {
 		 * Get notified on new location
 		 */
 		@Override
-        public void onLocationChanged(android.location.Location newLocation) {
-            
-            lastGps = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            lastNetwork = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-            
-            if(isBetterLocation(lastNetwork, lastGps)) {
-                if(DEBUG) Log.d(TAG,"Best location is lastNetwork so far");
-                    
-                if(isBetterLocation(newLocation, lastNetwork)) {
-                    bestLocation = newLocation;
-                    if(DEBUG) Log.d(TAG,"Changed from lastNetwork to new location as it is better");
-                }else{
-                    bestLocation = lastNetwork;
-                    if(DEBUG) Log.d(TAG,"Kept lastNetwork as it is better");
-                }
-            } 
-            else{
-                if (DEBUG) Log.d(TAG,"Best location is lastGps so far");
-                
-                if(isBetterLocation(newLocation, lastGps)){
-                    bestLocation = newLocation;
-                    if(DEBUG) Log.d(TAG,"Changed from lastGps to new location as it is better");
-                }else{
-                    bestLocation = lastGps;
-                    if(DEBUG) Log.d(TAG,"Kept lastGps as it is better");
-                }
-            }
-                
-            Observation observation = getObservationFromLocation(bestLocation);
-         
+		public void onLocationChanged(android.location.Location newLocation) {
+
+			lastGps = locationManager
+					.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+			lastNetwork = locationManager
+					.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+
+			if (isBetterLocation(lastNetwork, lastGps)) {
+				if (DEBUG)
+					Log.d(TAG, "Best location is lastNetwork so far");
+
+				if (isBetterLocation(newLocation, lastNetwork)) {
+					bestLocation = newLocation;
+					if (DEBUG)
+						Log.d(TAG,
+								"Changed from lastNetwork to new location as it is better");
+				} else {
+					bestLocation = lastNetwork;
+					if (DEBUG)
+						Log.d(TAG, "Kept lastNetwork as it is better");
+				}
+			} else {
+				if (DEBUG)
+					Log.d(TAG, "Best location is lastGps so far");
+
+				if (isBetterLocation(newLocation, lastGps)) {
+					bestLocation = newLocation;
+					if (DEBUG)
+						Log.d(TAG,
+								"Changed from lastGps to new location as it is better");
+				} else {
+					bestLocation = lastGps;
+					if (DEBUG)
+						Log.d(TAG, "Kept lastGps as it is better");
+				}
+			}
+
+			Observation observation = getObservationFromLocation(bestLocation);
+
 			if (bestLocation.getProvider().equals(LocationManager.GPS_PROVIDER)) {
 				notifyListeners(gpsLocationEvent, observation);
 			} else {
 				notifyListeners(networkLocationEvent, observation);
 			}
-			
-			if (DEBUG) Log.v(TAG, observation.toString());
-        }
+
+			if (DEBUG)
+				Log.v(TAG, observation.toString());
+		}
 
 		/**
 		 * Get notified on user de-activation of a location provider
@@ -251,24 +268,29 @@ public class Location extends AbstractMonitor<LocationListener> {
 		public void onProviderDisabled(String provider) {
 			StateChange stateChange;
 			if (provider.equals(LocationManager.GPS_PROVIDER)) {
-				if (DEBUG) Log.d(TAG, "Gps location provider is disabled");
-				
+				if (DEBUG)
+					Log.d(TAG, "Gps location provider is disabled");
+
 				/* Notify state change */
-				stateChange = new StateChange(LOCATION_GPS, Time.currentTimeMillis());
+				stateChange = new StateChange(LOCATION_GPS,
+						Time.currentTimeMillis());
 				stateChange.setState(LocationState.DISABLED.value());
 				stateChange.setStateType(StateType.LOCATION);
 				notifyListeners(gpsLocationEvent, stateChange);
-				if (DEBUG) Log.v(TAG, stateChange.toString());
-			}
-			else if (provider.equals(LocationManager.NETWORK_PROVIDER)) {
-				if (DEBUG) Log.d(TAG, "Network location provider is disabled");
-				
+				if (DEBUG)
+					Log.v(TAG, stateChange.toString());
+			} else if (provider.equals(LocationManager.NETWORK_PROVIDER)) {
+				if (DEBUG)
+					Log.d(TAG, "Network location provider is disabled");
+
 				/* Notify state change */
-				stateChange = new StateChange(LOCATION_NETWORK, Time.currentTimeMillis());
+				stateChange = new StateChange(LOCATION_NETWORK,
+						Time.currentTimeMillis());
 				stateChange.setState(LocationState.DISABLED.value());
 				stateChange.setStateType(StateType.LOCATION);
 				notifyListeners(networkLocationEvent, stateChange);
-				if (DEBUG) Log.v(TAG, stateChange.toString());
+				if (DEBUG)
+					Log.v(TAG, stateChange.toString());
 			}
 		}
 
@@ -279,24 +301,29 @@ public class Location extends AbstractMonitor<LocationListener> {
 		public void onProviderEnabled(String provider) {
 			StateChange stateChange;
 			if (provider.equals(LocationManager.GPS_PROVIDER)) {
-				if (DEBUG) Log.d(TAG, "Gps location provider is enabled");
-				
+				if (DEBUG)
+					Log.d(TAG, "Gps location provider is enabled");
+
 				/* Notify state change */
-				stateChange = new StateChange(LOCATION_GPS, Time.currentTimeMillis());
+				stateChange = new StateChange(LOCATION_GPS,
+						Time.currentTimeMillis());
 				stateChange.setState(LocationState.ENABLED.value());
 				stateChange.setStateType(StateType.LOCATION);
 				notifyListeners(gpsLocationEvent, stateChange);
-				if (DEBUG) Log.v(TAG, stateChange.toString());
-			}
-			else if (provider.equals(LocationManager.NETWORK_PROVIDER)) {
-				if (DEBUG) Log.d(TAG, "Network location provider is enabled");
-				
+				if (DEBUG)
+					Log.v(TAG, stateChange.toString());
+			} else if (provider.equals(LocationManager.NETWORK_PROVIDER)) {
+				if (DEBUG)
+					Log.d(TAG, "Network location provider is enabled");
+
 				/* Notify state change */
-				stateChange = new StateChange(LOCATION_NETWORK, Time.currentTimeMillis());
+				stateChange = new StateChange(LOCATION_NETWORK,
+						Time.currentTimeMillis());
 				stateChange.setState(LocationState.ENABLED.value());
 				stateChange.setStateType(StateType.LOCATION);
 				notifyListeners(networkLocationEvent, stateChange);
-				if (DEBUG) Log.v(TAG, stateChange.toString());
+				if (DEBUG)
+					Log.v(TAG, stateChange.toString());
 			}
 		}
 
@@ -304,26 +331,26 @@ public class Location extends AbstractMonitor<LocationListener> {
 		 * Get notified on a provided information status change
 		 */
 		@Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-            if( status == LocationProvider.AVAILABLE ) {
-            	//Save best location, could be GPS or network
-				//This covers the case when the GPS stopped and we did not get a location fix.
-				if ( bestLocation == null ) return;
-				
+		public void onStatusChanged(String provider, int status, Bundle extras) {
+			if (status == LocationProvider.AVAILABLE) {
+				// Save best location, could be GPS or network
+				// This covers the case when the GPS stopped and we did not get
+				// a location fix.
+				if (bestLocation == null)
+					return;
+
 				Observation locationData = getObservationFromLocation(bestLocation);
 				if (provider.equals(LocationManager.GPS_PROVIDER)) {
 					notifyListeners(gpsLocationEvent, locationData);
-				}
-				else {
+				} else {
 					notifyListeners(networkLocationEvent, locationData);
 				}
-	            
-            }
-        }
+
+			}
+		}
 	};
 
-	private final IBinder serviceBinder = new ServiceBinder<Location>(
-			this);
+	private final IBinder serviceBinder = new ServiceBinder<Location>(this);
 
 	protected String TAG = "AdkintunMobile::Location";
 
@@ -341,7 +368,7 @@ public class Location extends AbstractMonitor<LocationListener> {
 						UPDATE_DISTANCE_GPS, locationListener);
 
 				Log.d(TAG, "Location GPS service has been activated");
-				
+
 				super.activate();
 			}
 			return true;
@@ -355,7 +382,8 @@ public class Location extends AbstractMonitor<LocationListener> {
 				locationManager.removeUpdates(locationListener);
 				locationManager.removeGpsStatusListener(gpsStatusListener);
 
-				if (DEBUG) Log.d(TAG, "Location GPS service terminated...");
+				if (DEBUG)
+					Log.d(TAG, "Location GPS service terminated...");
 			}
 		}
 
@@ -363,8 +391,7 @@ public class Location extends AbstractMonitor<LocationListener> {
 		public void onDataReceived(LocationListener listener, Observation result) {
 			if (result instanceof LocationObservation) {
 				listener.onLocationChanged((LocationObservation) result);
-			}
-			else if (result instanceof StateChange) {
+			} else if (result instanceof StateChange) {
 				listener.onLocationStateChanged((StateChange) result);
 			}
 		}
@@ -385,7 +412,8 @@ public class Location extends AbstractMonitor<LocationListener> {
 						LocationManager.NETWORK_PROVIDER,
 						UPDATE_TIME_NETWORK * 1000, UPDATE_DISTANCE_NETWORK,
 						locationListener);
-				if (DEBUG) Log.d(TAG, "Location tracking with Network is active");
+				if (DEBUG)
+					Log.d(TAG, "Location tracking with Network is active");
 			}
 			return true;
 		}
@@ -397,7 +425,8 @@ public class Location extends AbstractMonitor<LocationListener> {
 
 				locationManager.removeUpdates(locationListener);
 
-				if (DEBUG) Log.d(TAG, "Locations network service terminated...");
+				if (DEBUG)
+					Log.d(TAG, "Locations network service terminated...");
 			}
 		}
 
@@ -405,8 +434,7 @@ public class Location extends AbstractMonitor<LocationListener> {
 		public void onDataReceived(LocationListener listener, Observation result) {
 			if (result instanceof LocationObservation) {
 				listener.onLocationChanged((LocationObservation) result);
-			}
-			else if (result instanceof StateChange) {
+			} else if (result instanceof StateChange) {
 				listener.onLocationStateChanged((StateChange) result);
 			}
 		}
@@ -415,15 +443,15 @@ public class Location extends AbstractMonitor<LocationListener> {
 
 	@Override
 	public void activate(int events, Bundle configuration) {
-		EXPIRATION_TIME = configuration.getInt(
-				EXPIRATION_TIME_EXTRA, EXPIRATION_TIME);
-		
+		EXPIRATION_TIME = configuration.getInt(EXPIRATION_TIME_EXTRA,
+				EXPIRATION_TIME);
+
 		if ((events & LOCATION_GPS) == LOCATION_GPS) {
-			UPDATE_TIME_GPS = configuration.getInt(
-					UPDATE_TIME_GPS_EXTRA, UPDATE_TIME_GPS);
+			UPDATE_TIME_GPS = configuration.getInt(UPDATE_TIME_GPS_EXTRA,
+					UPDATE_TIME_GPS);
 			UPDATE_DISTANCE_GPS = configuration.getInt(
 					UPDATE_DISTANCE_GPS_EXTRA, UPDATE_DISTANCE_GPS);
-			
+
 			activate(gpsLocationEvent);
 		}
 		if ((events & LOCATION_NETWORK) == LOCATION_NETWORK) {
@@ -431,7 +459,7 @@ public class Location extends AbstractMonitor<LocationListener> {
 					UPDATE_TIME_NETWORK_EXTRA, UPDATE_TIME_NETWORK);
 			UPDATE_DISTANCE_NETWORK = configuration.getInt(
 					UPDATE_DISTANCE_NETWORK_EXTRA, UPDATE_DISTANCE_NETWORK);
-			
+
 			activate(networkLocationEvent);
 		}
 	}
@@ -445,25 +473,50 @@ public class Location extends AbstractMonitor<LocationListener> {
 			deactivate(networkLocationEvent);
 		}
 	}
-	
+
 	/**
-	 * Return true if high accuracy (GPS + Network) location is enabled on the device
-	 * @param context android context to perform the request
+	 * Return true if high accuracy (GPS + Network) location is enabled on the
+	 * device
+	 * 
+	 * @param context
+	 *            android context to perform the request
 	 * @return
 	 */
 	public static boolean isHighAccuracyEnabled(Context context) {
-		LocationManager locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
-		return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) && locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+		LocationManager locationManager = (LocationManager) context
+				.getSystemService(LOCATION_SERVICE);
+		return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+				&& locationManager
+						.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 	}
-	
+
 	/**
 	 * Return true if location is enabled on the device
-	 * @param context android context to perform the request
+	 * 
+	 * @param context
+	 *            android context to perform the request
 	 * @return
 	 */
 	public static boolean isEnabled(Context context) {
-		LocationManager locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
-		return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+		LocationManager locationManager = (LocationManager) context
+				.getSystemService(LOCATION_SERVICE);
+		return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+				|| locationManager
+						.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+	}
+
+	public static LocationObservation getLastLocation() {
+		if (bestLocation != null) {
+			return getObservationFromLocation(bestLocation);
+		}
+		if (locationManager != null) {
+			android.location.Location aux = locationManager
+					.getLastKnownLocation(null);
+			if (aux != null) {
+				return getObservationFromLocation(aux);
+			}
+		}
+		return null;
 	}
 
 	@Override
