@@ -511,7 +511,7 @@ public class Location extends AbstractMonitor<LocationListener> {
 		}
 		if (locationManager != null) {
 			android.location.Location aux = locationManager
-					.getLastKnownLocation(null);
+					.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 			if (aux != null) {
 				return getObservationFromLocation(aux);
 			}
