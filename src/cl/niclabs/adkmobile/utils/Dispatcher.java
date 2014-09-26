@@ -23,13 +23,27 @@ public class Dispatcher<E extends Listener> {
 	 */
 	private List<E> listenersList = new CopyOnWriteArrayList<E>();
 	private Set<E> listenersSet = new HashSet<E>();
-
+	
+	private boolean runOnNewThread = true;
+	
+	/**
+	 * Creates a new dispatcher that notifies the new listeners on a new thread by default
+	 */
+	public Dispatcher() {}
+	
+	/**
+	 * Creates a new dispatcher
+	 * @param runOnNewThread defines if the listeners are notified on a new thread or immediately
+	 */
+	public Dispatcher(boolean runOnNewThread) {
+		this.runOnNewThread = runOnNewThread;
+	}
+ 
 	/**
 	 * Add a listener to be notified by the dispatcher.
 	 * 
 	 * @param listener
-	 * @param listen
-	 *            true in order to add the listener, false in order to remove it
+	 * @param listen true in order to add the listener, false in order to remove it
 	 */
 	public void listen(E listener, boolean listen) {
 		if (listen) {
@@ -51,13 +65,26 @@ public class Dispatcher<E extends Listener> {
 	 */
 	public void notifyListeners(final Notifier<E> notifier) {
 		for (final E listener : listenersSet) {
-			// Notify the listener in a new thread
-			Scheduler.getInstance().execute(new Runnable() {
-				@Override
-				public void run() {
-					notifier.notify(listener);
-				}
-			});
+			if (runOnNewThread) {
+				// Notify the listener in a new thread
+				Scheduler.getInstance().execute(new Runnable() {
+					@Override
+					public void run() {
+						notifier.notify(listener);
+					}
+				});
+			}
+			else {
+				notifier.notify(listener);
+			}
 		}
+	}
+	
+	/**
+	 * Return number of listeners
+	 * @return
+	 */
+	public int size() {
+		return listenersSet.size();
 	}
 }
