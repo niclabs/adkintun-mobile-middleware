@@ -163,7 +163,7 @@ public class Location extends AbstractMonitor<LocationListener> {
 	 * @param lastLocation
 	 * @return
 	 */
-	private boolean isBetterLocation(android.location.Location newLocation,
+	private static boolean isBetterLocation(android.location.Location newLocation,
 			android.location.Location lastLocation) {
 		if (newLocation != null && lastLocation == null) {
 			return true;
@@ -510,11 +510,14 @@ public class Location extends AbstractMonitor<LocationListener> {
 			return getObservationFromLocation(bestLocation);
 		}
 		if (locationManager != null) {
-			android.location.Location aux = locationManager
+			android.location.Location lastNetwork = locationManager
+					.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+			android.location.Location lastGps = locationManager
 					.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-			if (aux != null) {
-				return getObservationFromLocation(aux);
+			if (isBetterLocation(lastGps, lastNetwork)) {
+				return getObservationFromLocation(lastGps);
 			}
+			if (lastNetwork != null) return getObservationFromLocation(lastNetwork);
 		}
 		return null;
 	}
