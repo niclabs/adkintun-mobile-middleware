@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import android.os.Handler;
+import android.os.Looper;
+
 /**
  * Generic dispatcher for the observer design pattern.
  * 
@@ -19,24 +22,58 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class Dispatcher<E extends Listener> {
 	/**
+	 * Defines a notification behavior for the dispatcher
+	 * 
+	 * Depending on Behavior value, the dispatcher will
+	 * deliver notifications on the same thread as the calling
+	 * class, on a new thread or on the main thread.
+	 * 
+	 * @author Felipe Lalanne <flalanne@niclabs.cl>
+	 */
+	public static enum Behavior {
+		/**
+		 * Deliver the notification on a new thread
+		 * by calling {@link Scheduler.execute()}
+		 */
+		RUN_ON_NEW_THREAD, 
+		
+		/**
+		 * Deliver the notification on the same thread
+		 * as the calling object, by running the notification
+		 * immediately
+		 */
+		RUN_ON_SAME_THREAD, 
+		
+		/**
+		 * Deliver the notification on the main thread, by passing
+		 * the object to the main Looper. Use with caution since
+		 * long executions may block the UI thread and affect
+		 * responsiveness of the application.
+		 */
+		RUN_ON_MAIN_THREAD;
+	}
+	
+	
+	/**
 	 * List of listeners by event type
 	 */
 	private List<E> listenersList = new CopyOnWriteArrayList<E>();
 	private Set<E> listenersSet = new HashSet<E>();
-	
-	private boolean runOnNewThread = true;
+		
+	private Behavior behavior = Behavior.RUN_ON_NEW_THREAD;
+	private Handler mainHandler = new Handler(Looper.getMainLooper());
 	
 	/**
 	 * Creates a new dispatcher that notifies the new listeners on a new thread by default
 	 */
 	public Dispatcher() {}
-	
+		
 	/**
-	 * Creates a new dispatcher
-	 * @param runOnNewThread defines if the listeners are notified on a new thread or immediately
+	 * Create a new dispatcher with the specified behavior
+	 * @param behavior
 	 */
-	public Dispatcher(boolean runOnNewThread) {
-		this.runOnNewThread = runOnNewThread;
+	public Dispatcher(Behavior behavior) {
+		this.behavior = behavior;
 	}
  
 	/**
@@ -65,17 +102,23 @@ public class Dispatcher<E extends Listener> {
 	 */
 	public void notifyListeners(final Notifier<E> notifier) {
 		for (final E listener : listenersSet) {
-			if (runOnNewThread) {
-				// Notify the listener in a new thread
-				Scheduler.getInstance().execute(new Runnable() {
-					@Override
-					public void run() {
-						notifier.notify(listener);
-					}
-				});
-			}
-			else {
-				notifier.notify(listener);
+			Runnable runnable = new Runnable() {
+				@Override
+				public void run() {
+					notifier.notify(listener);
+				}
+			};
+			
+			switch (behavior) {
+			case RUN_ON_MAIN_THREAD:
+				mainHandler.post(runnable);
+				break;
+			case RUN_ON_NEW_THREAD:
+				Scheduler.getInstance().execute(runnable);
+				break;
+			case RUN_ON_SAME_THREAD:
+				runnable.run();
+				break;
 			}
 		}
 	}
