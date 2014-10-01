@@ -153,7 +153,7 @@ public class JsonSerializerTest extends TestCase {
 		}
 		
 		// Test deserialization
-		Post deserializedPost = serializer.deserialize(Post.class, json);
+		Post deserializedPost = Post.fromString(Post.class, json);
 		
 		Log.d(TAG, "DeSerialized Object: " + deserializedPost);
 		

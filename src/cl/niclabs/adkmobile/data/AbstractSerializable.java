@@ -69,11 +69,11 @@ public abstract class AbstractSerializable<E extends AbstractSerializable<E>>
 		return out.toString();
 	}
 
-	public static <E extends AbstractSerializable<?>> E fromString(Class<E> type,
-			String json) {
-		JsonSerializer s = new JsonSerializer();
+	public static <E extends Serializable<?>> E fromString(Class<E> type,
+			String serializedObject) {
+		Serializer s = SerializerFactory.getInstance().getSerializer();
 		try {
-			return s.deserialize(type, json);
+			return s.deserialize(type, serializedObject);
 		} catch (IOException e) {
 		}
 		return null;
