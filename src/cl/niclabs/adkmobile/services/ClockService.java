@@ -4,6 +4,9 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.util.Log;
@@ -74,7 +77,7 @@ public final class ClockService extends Service implements ConnectivityStatusLis
 	private static long lastSynchronizationTime = 0L;
 	private static long lastSynchronizationAttempt = 0L;
 	
-	
+	private boolean storeSynchronizationState = true;
 	private static boolean running = false;
 	
 	/**
@@ -109,10 +112,19 @@ public final class ClockService extends Service implements ConnectivityStatusLis
 	public void onCreate() {
 		super.onCreate();
 		
+		
+		ApplicationInfo ai;
+		try {
+			// Check the storage configuration
+			ai = getPackageManager().getApplicationInfo(this.getPackageName(), PackageManager.GET_META_DATA);
+			storeSynchronizationState = ai.metaData.getBoolean("CLOCK_SYNCHRONIZATION_STATE", storeSynchronizationState);
+		} catch (NameNotFoundException e) {
+		}
+		
 		running = true;
 		
 		// Restore clock status as early as possible
-		if (!restoreClockStatus() && AdkintunMobileApp.isPersistenceAvailable()) {
+		if (!restoreClockStatus() && AdkintunMobileApp.isPersistenceAvailable() && storeSynchronizationState) {
 			// save time state to persistence
 			ClockSynchronizationState state = new ClockSynchronizationState(System.currentTimeMillis());
 			state.setState(ClockState.UNSYNCHRONIZED);
@@ -247,7 +259,7 @@ public final class ClockService extends Service implements ConnectivityStatusLis
 		if (!isMobileRoaming && synchronizeClock()) {
 			saveClockStatus();
 			
-			if (AdkintunMobileApp.isPersistenceAvailable()) {
+			if (AdkintunMobileApp.isPersistenceAvailable() && storeSynchronizationState) {
 				ClockSynchronizationState state = new ClockSynchronizationState(System.currentTimeMillis());
 				state.setRealTime(currentTimeMillis());
 				state.setState(ClockState.SYNCHRONIZED);
