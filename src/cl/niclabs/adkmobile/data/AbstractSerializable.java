@@ -69,6 +69,15 @@ public abstract class AbstractSerializable<E extends AbstractSerializable<E>>
 		return out.toString();
 	}
 
+	/**
+	 * Deserialize object from a string
+	 * 
+	 * Uses the default serializer
+	 * 
+	 * @param type
+	 * @param serializedObject
+	 * @return
+	 */
 	public static <E extends Serializable<?>> E fromString(Class<E> type,
 			String serializedObject) {
 		Serializer s = SerializerFactory.getInstance().getSerializer();
