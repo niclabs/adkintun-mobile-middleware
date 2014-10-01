@@ -84,6 +84,7 @@ public abstract class AbstractSerializable<E extends AbstractSerializable<E>>
 		try {
 			return s.deserialize(type, serializedObject);
 		} catch (IOException e) {
+			// Parsing error: safe to ignore
 		}
 		return null;
 	}
