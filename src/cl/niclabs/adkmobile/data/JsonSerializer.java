@@ -6,7 +6,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -113,6 +115,12 @@ public class JsonSerializer implements Serializer {
 				e.printStackTrace();
 			} catch (IllegalStateException e) { // When the token is incorrect
 				e.printStackTrace();
+			} catch (NoSuchMethodException e) {
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				e.printStackTrace();
 			}
 			
 			return null;
@@ -137,6 +145,12 @@ public class JsonSerializer implements Serializer {
 				} catch (IllegalAccessException e) {
 					e.printStackTrace();
 				} catch (IllegalStateException e) {
+					e.printStackTrace();
+				} catch (NoSuchMethodException e) {
+					e.printStackTrace();
+				} catch (IllegalArgumentException e) {
+					e.printStackTrace();
+				} catch (InvocationTargetException e) {
 					e.printStackTrace();
 				}
 			}
@@ -238,13 +252,35 @@ public class JsonSerializer implements Serializer {
 		 * @throws IOException
 		 * @throws InstantiationException
 		 * @throws IllegalAccessException
+		 * @throws NoSuchMethodException 
+		 * @throws InvocationTargetException 
+		 * @throws IllegalArgumentException 
 		 */
 		@SuppressWarnings("unchecked")
-		public E readObject(JsonReader reader) throws IOException, InstantiationException, IllegalAccessException {
+		public E readObject(JsonReader reader) throws IOException, InstantiationException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
 			reader.beginObject();
 			
 			// Create a new instance of the object. Requires that all serializable objects have an empty constructor
-			E obj = cls.newInstance();
+			E obj;
+			
+			try {
+				// Get the default constructor
+				Constructor<E> constructor = cls.getDeclaredConstructor();
+				
+				// Change the accesibility to public
+				boolean accessible = constructor.isAccessible();
+				constructor.setAccessible(true);
+				
+				// Create a new instance
+				obj = constructor.newInstance();
+				
+				// Set the accessibility back (probably unnecessary)
+				constructor.setAccessible(accessible);
+			} catch (NoSuchMethodException e) {
+				throw new NoSuchMethodException("Serializable objects require an empty constructor");
+			} catch (IllegalArgumentException e) {
+				throw new IllegalArgumentException("Serializable objects require an empty constructor");
+			}
 			
 			List<Field> fields = obj.getSerializableFields();
 			
