@@ -65,13 +65,7 @@ import com.google.gson.stream.JsonWriter;
  */
 public class JsonSerializer implements Serializer {
 	protected enum Token {
-		 OTHER(0), PRIMITIVE(1), LIST(2), OBJECT(3), NULL(4);
-		
-		int value;
-		
-		private Token(int value) {
-			this.value = value;
-		}
+		 OTHER, PRIMITIVE, LIST, OBJECT, NULL;
 		
 		public static Token fromJsonToken(JsonToken token) {
 			switch(token) {
