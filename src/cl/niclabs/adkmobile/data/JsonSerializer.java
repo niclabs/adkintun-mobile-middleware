@@ -237,6 +237,16 @@ public class JsonSerializer implements Serializer {
 			return list;
 		}
 		
+		private Field getDeclaredField(Class<?> cls, String name) throws NoSuchFieldException {
+			try {
+				return cls.getDeclaredField(name);
+			} catch (NoSuchFieldException e) {
+				if (cls.getSuperclass() != null) {
+					return getDeclaredField(cls.getSuperclass(), name);
+				}
+			}
+			throw new NoSuchFieldException("Field does not exist "+name);
+		}
 
 		
 		/**
@@ -289,7 +299,7 @@ public class JsonSerializer implements Serializer {
 				
 				Field field;
 				try {
-					field = obj.getClass().getDeclaredField(javaName);
+					field = getDeclaredField(cls, javaName);
 				} catch (NoSuchFieldException e) {
 					reader.skipValue();
 					continue;
