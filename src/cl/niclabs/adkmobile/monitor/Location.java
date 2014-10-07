@@ -514,7 +514,7 @@ public class Location extends AbstractMonitor<LocationListener> {
 					.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 			android.location.Location lastGps = locationManager
 					.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-			if (isBetterLocation(lastGps, lastNetwork)) {
+			if (lastGps != null && isBetterLocation(lastGps, lastNetwork)) {
 				return getObservationFromLocation(lastGps);
 			}
 			if (lastNetwork != null) return getObservationFromLocation(lastNetwork);
