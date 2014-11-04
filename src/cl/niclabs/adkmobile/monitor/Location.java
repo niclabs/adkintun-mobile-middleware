@@ -36,7 +36,7 @@ public class Location extends AbstractMonitor<LocationListener> {
 	private android.location.Location lastGps = null;
 	private android.location.Location lastNetwork = null;
 
-	private static LocationObservation getObservationFromLocation(
+	protected static LocationObservation getObservationFromLocation(
 			android.location.Location loc) {
 		LocationObservation locData = new LocationObservation(
 				Time.currentTimeMillis());
