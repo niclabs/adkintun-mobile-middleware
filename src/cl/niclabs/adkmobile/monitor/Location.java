@@ -8,6 +8,7 @@ import android.location.LocationProvider;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import cl.niclabs.adkmobile.AdkintunMobileApp;
 import cl.niclabs.adkmobile.monitor.data.LocationObservation;
 import cl.niclabs.adkmobile.monitor.data.Observation;
 import cl.niclabs.adkmobile.monitor.data.StateChange;
@@ -509,10 +510,16 @@ public class Location extends AbstractMonitor<LocationListener> {
 		if (bestLocation != null) {
 			return getObservationFromLocation(bestLocation);
 		}
-		if (locationManager != null) {
-			android.location.Location lastNetwork = locationManager
+		
+		LocationManager lm = locationManager;
+		if (lm == null && AdkintunMobileApp.getContext() != null) {
+			lm = (LocationManager) AdkintunMobileApp.getContext().getSystemService(LOCATION_SERVICE);
+		}
+	
+		if (lm != null) {
+			android.location.Location lastNetwork = lm
 					.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-			android.location.Location lastGps = locationManager
+			android.location.Location lastGps = lm
 					.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 			if (lastGps != null && isBetterLocation(lastGps, lastNetwork)) {
 				return getObservationFromLocation(lastGps);
