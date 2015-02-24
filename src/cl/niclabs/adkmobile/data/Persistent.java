@@ -3,6 +3,7 @@ package cl.niclabs.adkmobile.data;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -223,8 +224,11 @@ public class Persistent<E extends Persistent<E>> extends SugarRecord<E>
 
 		List<Field> toStore = new ArrayList<Field>();
 		for (Field field : typeFields) {
-			if ((!field.getName().equals("id") && !field.isAnnotationPresent(Ignore.class) && !field
-					.isAnnotationPresent(DoNotSerialize.class))
+			if ((!field.getName().equals("id")
+					&& !field.isAnnotationPresent(Ignore.class) 
+					&& !field.isAnnotationPresent(DoNotSerialize.class)
+					&& !Modifier.isStatic(field.getModifiers()) 
+					&& !Modifier.isTransient(field.getModifiers()))
 					|| isListOf(Persistent.class, field)) {
 				toStore.add(field);
 			}
@@ -260,7 +264,9 @@ public class Persistent<E extends Persistent<E>> extends SugarRecord<E>
 		for (Field field : typeFields) {
 			// Ignore Persistent lists as well
 			if (!field.isAnnotationPresent(Ignore.class)
-					&& !isListOf(Persistent.class, field)) {
+					&& !isListOf(Persistent.class, field)
+					&& !Modifier.isStatic(field.getModifiers())
+					&& !Modifier.isTransient(field.getModifiers())) {
 				toStore.add(field);
 			}
 		}
