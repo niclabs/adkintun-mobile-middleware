@@ -2,6 +2,8 @@ package cl.niclabs.adkmobile.utils;
 
 import java.util.Date;
 
+import cl.niclabs.android.utils.Clock;
+
 /**
  * Helper class to access the methods of Clock
  * 

@@ -16,7 +16,7 @@ import cl.niclabs.adkmobile.monitor.listeners.ClockSynchronizationListener;
 import cl.niclabs.adkmobile.monitor.listeners.ConnectivityListener;
 import cl.niclabs.adkmobile.monitor.proxies.ConnectivityStatus;
 import cl.niclabs.adkmobile.monitor.proxies.ConnectivityStatusListener;
-import cl.niclabs.adkmobile.utils.Clock;
+import cl.niclabs.android.utils.Clock;
 
 /**
  * Service to monitor and maintain synchronization status of the library clock
