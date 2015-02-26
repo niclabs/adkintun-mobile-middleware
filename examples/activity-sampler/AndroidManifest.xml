@@ -35,6 +35,8 @@
         <service android:label="Location" android:name="cl.niclabs.adkmobile.monitor.Location"></service>
         <service android:label="Accelerometer" android:name="cl.niclabs.adkmobile.monitor.GlobalAccelerometer"></service>
         <service android:label="Connectivity" android:name="cl.niclabs.adkmobile.monitor.Connectivity"></service>
+        <service android:label="ClockSynchronization" android:name="cl.niclabs.adkmobile.monitor.ClockSynchronization"></service>
+        <service android:label="Clock" android:name="cl.niclabs.adkmobile.utils.Clock"></service>
        
         <service android:label="Synchronization" android:name="cl.niclabs.becity.SynchronizationService"></service>
         <service android:label="SamplerService" android:name="cl.niclabs.becity.SamplerService"></service>

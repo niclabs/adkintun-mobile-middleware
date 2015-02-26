@@ -1,11 +1,11 @@
 package cl.niclabs.adkmobile;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import cl.niclabs.adkmobile.services.ClockService;
+import cl.niclabs.adkmobile.monitor.ClockSynchronization;
+import cl.niclabs.adkmobile.monitor.Monitor;
 import cl.niclabs.adkmobile.utils.Scheduler;
 
 import com.orm.SugarApp;
@@ -104,8 +104,10 @@ public class AdkintunMobileApp extends SugarApp {
 		PERSISTENCE_ENABLED = isPersistenceEnabled();
 		DEBUG = inDebugEnabled();
 		
-		if (!ClockService.isRunning())
-			startService(new Intent(this, ClockService.class));
+		// Start the ClockSynchronization monitor
+		ClockSynchronization
+			.bind(ClockSynchronization.class, this)
+			.activate(Monitor.CLOCK);
 		
 		/* Set context (it will be null if application is not added to manifest_ */
 		adkintunMobileContext = this;
