@@ -1,7 +1,7 @@
 package cl.niclabs.adkmobile.monitor.data;
 
 import cl.niclabs.adkmobile.monitor.Monitor;
-import cl.niclabs.adkmobile.utils.Time;
+import cl.niclabs.android.utils.Time;
 
 public class TrafficObservation extends AbstractObservation<TrafficObservation> {
 	private int networkType;

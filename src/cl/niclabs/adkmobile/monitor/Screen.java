@@ -15,7 +15,7 @@ import cl.niclabs.adkmobile.monitor.data.constants.StateType;
 import cl.niclabs.adkmobile.monitor.events.AbstractMonitorEvent;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
 import cl.niclabs.adkmobile.monitor.listeners.ScreenListener;
-import cl.niclabs.adkmobile.utils.Time;
+import cl.niclabs.android.utils.Time;
 
 /**
  * Implement monitoring of the Screen status change. Screen is

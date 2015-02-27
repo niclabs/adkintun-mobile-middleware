@@ -2,7 +2,7 @@ package cl.niclabs.adkmobile.monitor.data;
 
 import android.location.Location;
 import cl.niclabs.adkmobile.monitor.Monitor;
-import cl.niclabs.adkmobile.utils.Time;
+import cl.niclabs.android.utils.Time;
 
 public class LocationObservation extends AbstractObservation<LocationObservation> {	
 	private float accuracy;
