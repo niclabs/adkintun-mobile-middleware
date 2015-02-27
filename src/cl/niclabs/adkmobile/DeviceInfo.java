@@ -4,9 +4,9 @@ package cl.niclabs.adkmobile;
 import android.content.Context;
 import android.os.Build;
 import android.telephony.TelephonyManager;
-import cl.niclabs.adkmobile.data.AbstractSerializable;
 import cl.niclabs.adkmobile.data.DoNotSerialize;
-import cl.niclabs.adkmobile.utils.Time;
+import cl.niclabs.adkmobile.data.AbstractSerializable;
+import cl.niclabs.android.utils.Time;
 
 /**
  * Singleton class to obtain information about the device (brand, manufacturer, etc)
@@ -14,6 +14,7 @@ import cl.niclabs.adkmobile.utils.Time;
  * An instance can be obtained with getInstance(context)
  * 
  * @author Felipe Lalanne <flalanne@niclabs.cl>
+ * @deprecated use cl.niclabs.android.DeviceInfo
  */
 public class DeviceInfo extends AbstractSerializable<DeviceInfo> {
 	@DoNotSerialize
@@ -38,7 +39,7 @@ public class DeviceInfo extends AbstractSerializable<DeviceInfo> {
 	private Integer simMnc;
 	private Integer simMcc;
 	
-	private DeviceInfo(Context context) {
+	protected DeviceInfo(Context context) {
 		telephonyManager = (TelephonyManager) context
 				.getSystemService(Context.TELEPHONY_SERVICE);
 		

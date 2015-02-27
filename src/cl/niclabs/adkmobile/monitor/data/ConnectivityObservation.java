@@ -3,7 +3,7 @@ package cl.niclabs.adkmobile.monitor.data;
 import cl.niclabs.adkmobile.monitor.Monitor;
 import cl.niclabs.adkmobile.monitor.data.constants.ConnectionType;
 import cl.niclabs.adkmobile.monitor.data.constants.NetworkState;
-import cl.niclabs.adkmobile.utils.Time;
+import cl.niclabs.android.utils.Time;
 
 /**
  * Defines an observation for the connectivity monitor

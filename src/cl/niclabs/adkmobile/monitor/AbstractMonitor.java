@@ -15,8 +15,8 @@ import android.os.IBinder;
 import cl.niclabs.adkmobile.monitor.data.Observation;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
 import cl.niclabs.adkmobile.monitor.listeners.MonitorListener;
-import cl.niclabs.adkmobile.utils.Dispatcher;
-import cl.niclabs.adkmobile.utils.Notifier;
+import cl.niclabs.android.utils.Dispatcher;
+import cl.niclabs.android.utils.Notifier;
 
 /**
  * Base class for all monitoring services. It allows implementing classes to

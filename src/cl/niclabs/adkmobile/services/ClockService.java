@@ -1,6 +1,6 @@
 package cl.niclabs.adkmobile.services;
 
-import cl.niclabs.adkmobile.utils.Clock;
+import cl.niclabs.android.utils.Clock;
 
 /**
  * Class left for backwards compatibility. All functionality

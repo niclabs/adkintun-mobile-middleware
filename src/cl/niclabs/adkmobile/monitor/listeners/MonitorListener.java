@@ -1,6 +1,6 @@
 package cl.niclabs.adkmobile.monitor.listeners;
 
-import cl.niclabs.adkmobile.utils.Listener;
+import cl.niclabs.android.utils.Listener;
 
 /**
  * Interface to group all monitor listeners, it must be extended by each type of

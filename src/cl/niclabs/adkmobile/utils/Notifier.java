@@ -1,17 +1,11 @@
 package cl.niclabs.adkmobile.utils;
 
 /**
- * Defines the action to perform on notification of the listener
+ * Base interface for all notifiers
+ * 
+ * This is a stub interface for backwards compatibility
+ * 
  * @author Felipe Lalanne <flalanne@niclabs.cl>
- *
- * @param <E> Listener for the notifier to work on
+ * @deprecated Use cl.niclabs.android.utils.Notifier instead
  */
-public interface Notifier<E extends Listener> {
-	/**
-	 * Notify the listener of a specific action. Is the duty of implementors
-	 * to check that the type of the listener is correct.
-	 * 
-	 * @param listener
-	 */
-	public void notify(E listener);
-}
+public interface Notifier<L extends Listener> extends cl.niclabs.android.utils.Notifier<L> {}

@@ -10,9 +10,9 @@ import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
 import android.util.Log;
-import cl.niclabs.adkmobile.data.Serializable;
-import cl.niclabs.adkmobile.data.Serializer;
-import cl.niclabs.adkmobile.data.SerializerFactory;
+import cl.niclabs.android.data.Serializable;
+import cl.niclabs.android.data.Serializer;
+import cl.niclabs.android.data.SerializerFactory;
 
 /**
  * This class defines the methods to send serializable objects to a server.

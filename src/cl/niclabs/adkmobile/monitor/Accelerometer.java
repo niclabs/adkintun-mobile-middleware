@@ -14,7 +14,7 @@ import cl.niclabs.adkmobile.monitor.data.Observation;
 import cl.niclabs.adkmobile.monitor.events.AbstractMonitorEvent;
 import cl.niclabs.adkmobile.monitor.events.MonitorEvent;
 import cl.niclabs.adkmobile.monitor.listeners.AccelerometerListener;
-import cl.niclabs.adkmobile.utils.Time;
+import cl.niclabs.android.utils.Time;
 
 /**
  * Implements monitoring of accelerometer data and returns the values

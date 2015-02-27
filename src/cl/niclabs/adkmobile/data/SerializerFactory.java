@@ -6,6 +6,7 @@ package cl.niclabs.adkmobile.data;
  * to encapsulate the implementation of the writer
  * 
  * @author Felipe Lalanne <flalanne@niclabs.cl>
+ * @deprecated moved to cl.niclabs.android.data
  */
 public final class SerializerFactory {
 	private static SerializerFactory self;
