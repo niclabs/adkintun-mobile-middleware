@@ -5,6 +5,8 @@ import cl.niclabs.adkmobile.data.Persistent;
 /**
  * Base class for all observations by monitors
  * 
+ * Implements cl.niclabs.adkmobile.data.Serializable for backwards compatibility 
+ * 
  * @author Felipe Lalanne <flalanne@niclabs.cl>
  * 
  * @param <E>

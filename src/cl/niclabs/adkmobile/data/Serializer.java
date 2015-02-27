@@ -10,6 +10,7 @@ import java.util.List;
  * Define the methods and behavior that must be implemented by all serializers 
  * 
  * @author Felipe Lalanne <flalanne@niclabs.cl>
+ * @deprecated
  */
 public interface Serializer {
 	/**

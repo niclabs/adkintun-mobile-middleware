@@ -1,17 +1,11 @@
 package cl.niclabs.adkmobile.data;
 
-import java.lang.reflect.Field;
-import java.util.List;
-
 /**
  * Interface to represent all serializable objects. 
  * 
- * Serializable objects can be exported into different formats as XML or JSON for transmission
+ * This is a stub interface for backwards compatibility
  * 
- * @author Felipe Lalanne <flalanne@niclabs.cl>
- *
  * @param <E> serializable
+ * @deprecated moved to cl.niclabs.android.data
  */
-public interface Serializable<E extends Serializable<E>> {
-	public List<Field> getSerializableFields();
-}
+public interface Serializable<E extends Serializable<E>> extends cl.niclabs.android.data.Serializable<E> {}

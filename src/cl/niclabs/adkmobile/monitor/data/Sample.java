@@ -3,8 +3,8 @@ package cl.niclabs.adkmobile.monitor.data;
 import java.lang.reflect.Field;
 import java.util.List;
 
-import cl.niclabs.adkmobile.data.DoNotSerialize;
-import cl.niclabs.adkmobile.data.Persistent;
+import cl.niclabs.android.data.DoNotSerialize;
+import cl.niclabs.android.data.Persistent;
 
 /**
  * Mantain statistics on a sample  
