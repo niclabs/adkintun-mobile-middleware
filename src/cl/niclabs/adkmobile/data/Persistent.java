@@ -38,8 +38,7 @@ public class Persistent<E extends Persistent<E>> extends cl.niclabs.android.data
 					&& !field.isAnnotationPresent(cl.niclabs.android.data.DoNotSerialize.class)
 					&& !field.isAnnotationPresent(DoNotSerialize.class)
 					&& !Modifier.isStatic(field.getModifiers()) 
-					&& !Modifier.isTransient(field.getModifiers()))
-					|| ReflectionUtils.isListOf(Persistent.class, field)) {
+					&& !Modifier.isTransient(field.getModifiers()))) {
 				toStore.add(field);
 			}
 		}
