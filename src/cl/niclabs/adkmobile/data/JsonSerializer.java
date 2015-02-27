@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Locale;
 
 import android.util.Base64;
-import cl.niclabs.adkmobile.utils.StringUtil;
+import cl.niclabs.android.utils.StringUtil;
 
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
