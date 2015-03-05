@@ -27,3 +27,72 @@ dependencies {
     compile 'com.google.code.gson:gson:2.3'
     compile 'cl.niclabs:commons-android:1.3.2b'
 }
+
+android.libraryVariants.all { variant ->
+    def name = variant.buildType.name
+    if (name.equals(com.android.builder.core.BuilderConstants.DEBUG)) {
+        return; // Skip debug builds.
+    }
+    def task = project.tasks.create "jar${name.capitalize()}", Jar
+    task.dependsOn variant.javaCompile
+    task.from variant.javaCompile.destinationDir
+    artifacts.add('archives', task);
+}
+
+apply plugin: 'bintray-release'
+
+publishing {
+    publications {
+        // This publication is temporary until plugin is fixed
+        myMaven(MavenPublication) {
+            groupId project.publish.groupId
+            artifactId project.publish.artifactId
+            version project.publish.version
+
+
+            task myAndroidSourcesJar(type: Jar) {
+                classifier = 'sources'
+                from project.android.sourceSets.main.java.srcDirs
+            }
+
+            android.libraryVariants.all { variant ->
+                task("${variant.name}Javadoc", type: Javadoc) {
+                    description "Generates Javadoc for $variant.name."
+                    source = variant.javaCompile.source
+                    classpath = files(variant.javaCompile.classpath.files) + files(project.android.getBootClasspath())
+                }
+
+            }
+
+            task myAndroidJavadocsJar(type: Jar, dependsOn: releaseJavadoc) {
+                classifier = 'javadoc'
+                from androidJavadocs.destinationDir
+            }
+
+            artifact(myAndroidSourcesJar)
+            artifact(myAndroidJavadocsJar)
+            artifact("$project.buildDir/outputs/aar/$project.name-release.aar")
+        }
+
+        archives(MavenPublication) {
+            groupId project.publish.groupId
+            artifactId project.publish.artifactId
+            version project.publish.version
+
+            artifact(jarRelease)
+        }
+    }
+}
+
+publish {
+    bintrayUser = bintrayUser
+    bintrayKey = bintrayApiKey
+    userOrg = 'niclabs-cl'
+    groupId = 'cl.niclabs'
+    artifactId = 'adkintun-mobile-middleware'
+    version = project.version
+    description = 'Middleware for performing mobile sensing and monitoring.'
+    website = 'https://github.com/niclabs/adkintun-mobile-middleware'
+    licences = ['Apache-2.0']
+    publications = ['myMaven', 'archives']
+}
