@@ -8,7 +8,7 @@ android {
         minSdkVersion 8
         targetSdkVersion 19
 
-        testApplicationId "cl.niclabs.adkmobile"
+        testApplicationId "cl.niclabs.adkmobile.test"
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
     }
 
