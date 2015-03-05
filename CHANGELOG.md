@@ -1,3 +1,9 @@
+## 1.3.3b (2015-03-05)
+
+Features:
+  - refactored code be compatible with android studio. Release jars can now be downloaded at the [niclabs bintray repository](https://bintray.com/niclabs-cl/maven/adkintun-mobile-middleware/1.3.3b/view)
+  - updated library to use latest gson (2.3)
+
 ## 1.3.2b (2015-03-02)
 
 Features:
