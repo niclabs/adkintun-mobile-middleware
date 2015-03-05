@@ -10,5 +10,12 @@
         android:allowBackup="true"
         android:label="@string/app_name"
         android:name="cl.niclabs.adkmobile.AdkintunMobileApp"> <!-- android:name required in order to enable persistence -->
+
+        <!-- Start Clock Service -->
+        <service android:label="Clock" android:name="cl.niclabs.android.utils.Clock"></service>
+
+        <!-- Start clock synchronization service -->
+        <service android:label="Connectivity" android:name="cl.niclabs.adkmobile.monitor.Connectivity"></service>
+        <service android:label="ClockSynchronization" android:name="cl.niclabs.adkmobile.monitor.ClockSynchronization"></service>
     </application>
 </manifest>
