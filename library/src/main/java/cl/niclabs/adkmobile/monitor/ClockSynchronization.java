@@ -56,7 +56,8 @@ public class ClockSynchronization extends AbstractMonitor<ClockSynchronizationLi
 	public static final String NTP_RETRY_FREQUENCY_EXTRA = "cl.niclabs.clock_monitor.ntp_retry_frequency";
 	public static final String NTP_SYNC_FREQUENCY_EXTRA = "cl.niclabs.clock_monitor.ntp_sync_frequency";
 	public static final String NTP_TIMEOUT_EXTRA = "cl.niclabs.clock_monitor.ntp_timeout";
-	public static final String TAG = "AdkintunMobile::ClockSynchronization";
+
+	public static final String TAG = "AdkintunMobile::Clock";
 	
 	private Clock clock;
 	/**

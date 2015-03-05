@@ -23,7 +23,7 @@ import cl.niclabs.android.data.SerializerFactory;
  *         Created 09-10-2013.
  */
 public class HttpUtils {
-	protected static final String TAG = "AdkintunMobile::HttpUtils";
+	protected static final String TAG = "AdkintunMobile::Http";
 	
 	protected static final String POST_FILE_NAME = "measurements.json.gz";
 	protected static final String POST_FILE_TYPE = "application/x-gzip";
