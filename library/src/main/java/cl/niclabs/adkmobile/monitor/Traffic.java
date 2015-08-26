@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
@@ -256,8 +255,11 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 			if (dWifiRxBytes > 0) {
 				networkType = NETWORK_TYPE_WIFI;
 			}
-
-			ArrayList<Integer> uids = geRunningProcessesUids(mContext);
+			if (VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT_WATCH) {
+				uids = geRunningProcessesUids(mContext);
+			} else {
+				uids = getUids(mContext);
+			}
 			for (int uid : uids) {
 				calculateApplicationTrafficForUid(networkType, uid);
 			}
@@ -273,7 +275,7 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 
 	private ArrayList<Integer> uids;
 
-	@SuppressLint("NewApi")
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
 	private void calculateApplicationTrafficForUid(int networkType, int uid) {
 
 		TrafficObservation appData = new TrafficObservation(
@@ -285,14 +287,16 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 
 		// IF the entry does not exist, the delta is 0
 		long dAppRxBytes = newAppRxBytes
-				- (appRxBytes.indexOfKey(uid) < 0 ? newAppRxBytes : appRxBytes.get(uid));
+				- (appRxBytes.indexOfKey(uid) < 0 ? newAppRxBytes : appRxBytes
+						.get(uid));
 		long dAppTxBytes = newAppTxBytes
-				- (appTxBytes.indexOfKey(uid) < 0 ? newAppTxBytes : appTxBytes.get(uid));
+				- (appTxBytes.indexOfKey(uid) < 0 ? newAppTxBytes : appTxBytes
+						.get(uid));
 
 		/* Update state vars */
 		appRxBytes.put(uid, newAppRxBytes);
 		appTxBytes.put(uid, newAppTxBytes);
-		
+
 		if (dAppRxBytes <= 0 && dAppTxBytes <= 0)
 			return;
 
@@ -306,11 +310,11 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 
 			// If the entry does not exist, the delta is 0
 			long dAppRxPackets = newAppRxPackets
-					- (appRxPackets.indexOfKey(uid) < 0 ? newAppRxPackets : appRxPackets
-							.get(uid));
+					- (appRxPackets.indexOfKey(uid) < 0 ? newAppRxPackets
+							: appRxPackets.get(uid));
 			long dAppTxPackets = newAppTxPackets
-					- (appTxPackets.indexOfKey(uid) < 0 ? newAppRxPackets : appTxPackets
-							.get(uid));
+					- (appTxPackets.indexOfKey(uid) < 0 ? newAppRxPackets
+							: appTxPackets.get(uid));
 
 			if (dAppRxPackets >= 0) {
 				appData.setRxPackets(dAppRxPackets);
@@ -339,6 +343,11 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 		@Override
 		public synchronized boolean activate() {
 			if (!isActive()) {
+
+				if (uids == null) {
+					uids = new ArrayList<Integer>();
+				}
+
 				mobileRxBytes = TrafficStats.getMobileRxBytes();
 
 				if (mobileRxBytes == TrafficStats.UNSUPPORTED) {
@@ -423,6 +432,10 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 				wifiTxPackets = startTotalTxPackets
 						- TrafficStats.getMobileTxPackets();
 
+				if (uids == null) {
+					uids = new ArrayList<Integer>();
+				}
+
 				long[] tcpData = getTcpData(mContext);
 				if (tcpData[0] > 0) {
 					wifiTcpRxBytes = tcpData[0];
@@ -487,7 +500,10 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 					appRxPackets = new SparseArray<Long>();
 					appTxPackets = new SparseArray<Long>();
 				}
-				uids = new ArrayList<Integer>();
+
+				if (uids == null) {
+					uids = new ArrayList<Integer>();
+				}
 
 				future = Scheduler.getInstance().scheduleAtFixedRate(appTask,
 						0, TRAFFIC_UPDATE_INTERVAL, TimeUnit.SECONDS);
@@ -585,13 +601,13 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 
 			long rxBytes, txBytes, rxSegments, txSegments;
 			for (int uid : uids) {
-				rxBytes = TrafficStats.getUidTcpRxBytes(uid);
+				rxBytes = TrafficStats.getUidRxBytes(uid);
 				if (rxBytes >= 0) {
 					isTcpBytesSupported = true;
 					totalTcpRxBytes += rxBytes;
 				}
 
-				txBytes = TrafficStats.getUidTcpTxBytes(uid);
+				txBytes = TrafficStats.getUidTxBytes(uid);
 				if (txBytes >= 0) {
 					isTcpBytesSupported = true;
 					totalTcpTxBytes += txBytes;
@@ -638,10 +654,9 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 				.getInstalledApplications(
 						PackageManager.GET_UNINSTALLED_PACKAGES);
 
-		ArrayList<Integer> uids = new ArrayList<Integer>();
-		for (int i = 0; i < appsInfo.size(); i++) {
-			if (!uids.contains(appsInfo.get(i).uid)) {
-				uids.add(appsInfo.get(i).uid);
+		for (ApplicationInfo info : appsInfo) {
+			if (!uids.contains(info.uid)) {
+				uids.add(info.uid);
 			}
 		}
 		return uids;
