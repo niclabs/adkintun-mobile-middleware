@@ -1,11 +1,11 @@
 package cl.niclabs.adkmobile.monitor.data;
 
-import cl.niclabs.adkmobile.data.Persistent;
+import cl.niclabs.android.data.Persistent;
 
 /**
  * Base class for all observations by monitors
  * 
- * Implements cl.niclabs.adkmobile.data.Serializable for backwards compatibility 
+ * Implements cl.niclabs.adkmobile.data.Serializable for backwards compatibility
  * 
  * @author Felipe Lalanne <flalanne@niclabs.cl>
  * 
@@ -15,9 +15,9 @@ public abstract class AbstractObservation<E extends AbstractObservation<E>>
 		extends Persistent<E> implements Observation {
 	protected int eventType;
 	protected long timestamp;
-	
+
 	/**
-	 * Required by Sugar ORM. 
+	 * Required by Sugar ORM.
 	 */
 	public AbstractObservation() {
 	}
