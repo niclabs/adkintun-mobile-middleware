@@ -23,6 +23,18 @@ android {
     }
 }
 
+android.libraryVariants.all { variant ->
+    def name = variant.buildType.name
+    if (name.equals(com.android.builder.core.BuilderConstants.DEBUG)) {
+        return; // Skip debug builds.
+    }
+
+    def task = project.tasks.create "jar${name.capitalize()}", Jar
+    task.dependsOn variant.javaCompile
+    task.from variant.javaCompile.destinationDir
+    artifacts.add('archives', task);
+}
+
 dependencies {
     compile 'com.google.code.gson:gson:2.3'
     compile 'cl.niclabs:commons-android:1.3.2b'
@@ -40,4 +52,5 @@ publish {
     description = 'Middleware for performing mobile sensing and monitoring.'
     website = 'https://github.com/niclabs/adkintun-mobile-middleware'
     licences = ['Apache-2.0']
+    publications = ['maven', 'archives']
 }
