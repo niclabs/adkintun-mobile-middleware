@@ -1,3 +1,9 @@
+## 1.3.4b (2015-10-19)
+
+Features:
+  - Added Gradle 1.3.0 compatibility
+  - Updated SDK support to version 21
+
 ## 1.3.3b (2015-03-05)
 
 Features:
