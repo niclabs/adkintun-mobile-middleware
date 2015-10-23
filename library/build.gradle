@@ -9,7 +9,7 @@ android {
         targetSdkVersion 21
 
         // Library version
-        version = "1.3.4b"
+        version = "1.3.5b"
 
         testApplicationId "cl.niclabs.adkmobile.test"
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
@@ -19,7 +19,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
-        }
+        }   
     }
 }
 
