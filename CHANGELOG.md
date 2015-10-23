@@ -1,3 +1,8 @@
+## 1.3.5b (2015-10-23)
+
+Features:
+    - Fix traffic monitoring per application to work with API changes in Lollipop.
+
 ## 1.3.4b (2015-10-19)
 
 Features:
