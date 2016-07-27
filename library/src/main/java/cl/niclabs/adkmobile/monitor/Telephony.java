@@ -276,7 +276,6 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
                             .updateSignalStrength(currentSignalStrength);
 
                     changed = true;
-                    Log.d("DIEGO", "Using Reflection ");
 
                 } catch (Exception e) {
                     if (signalStrength.isGsm()) {
