@@ -1,5 +1,6 @@
 package cl.niclabs.adkmobile.monitor;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -265,45 +266,59 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
 			if (lastObservation != null) {
 				boolean changed = false;
 
-				if (signalStrength.isGsm()) {
-					GsmObservation updatedObservation = (GsmObservation) lastObservation;
+                /* Try reflection to use the 'getDbm' method, else use the classic method */
+                try {
+                    Method currentSignalStrengthMethod = signalStrength.getClass().getDeclaredMethod("getDbm");
+                    int currentSignalStrength = (int)currentSignalStrengthMethod.invoke(signalStrength);
+
+                    GsmObservation updatedObservation = (GsmObservation) lastObservation;
+                    updatedObservation
+                            .updateSignalStrength(currentSignalStrength);
+
+                    changed = true;
+                    Log.d("DIEGO", "Using Reflection ");
+
+                } catch (Exception e) {
+                    if (signalStrength.isGsm()) {
+                        GsmObservation updatedObservation = (GsmObservation) lastObservation;
 
 					/* convert the Signal Strength from GSM to Dbm */
-					if (signalStrength.getGsmSignalStrength() != 99) {
-						int signalStrengthDbm = (signalStrength
-								.getGsmSignalStrength() * 2) - 113;
-						updatedObservation
-								.updateSignalStrength(signalStrengthDbm);
+                        if (signalStrength.getGsmSignalStrength() != 99) {
+                            int signalStrengthDbm = (signalStrength
+                                    .getGsmSignalStrength() * 2) - 113;
+                            updatedObservation
+                                    .updateSignalStrength(signalStrengthDbm);
 
-						changed = true;
-					}
+                            changed = true;
+                        }
 
-					// Check that bit error rate is in correct range, since not
-					// all devices return the correct value
-					if (signalStrength.getGsmBitErrorRate() >= 0
-							&& signalStrength.getGsmBitErrorRate() <= 7) {
-						double gsmBerPercent = gsmBerTable[signalStrength
-								.getGsmBitErrorRate()] / 100;
-						updatedObservation.updateSignalBer(gsmBerPercent);
+                        // Check that bit error rate is in correct range, since not
+                        // all devices return the correct value
+                        if (signalStrength.getGsmBitErrorRate() >= 0
+                                && signalStrength.getGsmBitErrorRate() <= 7) {
+                            double gsmBerPercent = gsmBerTable[signalStrength
+                                    .getGsmBitErrorRate()] / 100;
+                            updatedObservation.updateSignalBer(gsmBerPercent);
 
-						changed = true;
-					}
-				} else {
-					CdmaObservation updatedObservation = (CdmaObservation) lastObservation;
+                            changed = true;
+                        }
+                    } else {
+                        CdmaObservation updatedObservation = (CdmaObservation) lastObservation;
 
-					updatedObservation.updateSignalStrength(signalStrength
-							.getCdmaDbm());
-					updatedObservation.updateCdmaEcio(signalStrength
-							.getCdmaEcio());
-					updatedObservation.updateEvdoDbm(signalStrength
-							.getEvdoDbm());
-					updatedObservation.updateEvdoEcio(signalStrength
-							.getEvdoEcio());
-					updatedObservation.updateEvdoSnr(signalStrength
-							.getEvdoSnr());
+                        updatedObservation.updateSignalStrength(signalStrength
+                                .getCdmaDbm());
+                        updatedObservation.updateCdmaEcio(signalStrength
+                                .getCdmaEcio());
+                        updatedObservation.updateEvdoDbm(signalStrength
+                                .getEvdoDbm());
+                        updatedObservation.updateEvdoEcio(signalStrength
+                                .getEvdoEcio());
+                        updatedObservation.updateEvdoSnr(signalStrength
+                                .getEvdoSnr());
 
-					changed = true;
-				}
+                        changed = true;
+                    }
+                }
 
 				if (changed) {
 					/* Notify listeners and update internal state */
