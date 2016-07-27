@@ -1,3 +1,8 @@
+## 1.3.6b (2016-07-27)
+
+Features:
+    - Add support for 4g's signal strength measurement.
+
 ## 1.3.5b (2015-10-23)
 
 Features:
