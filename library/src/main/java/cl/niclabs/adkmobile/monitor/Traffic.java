@@ -1,4 +1,4 @@
-package cl.niclabs.adkintunmobile.services.monitors;
+package cl.niclabs.adkmobile.monitor;
 
 import java.util.ArrayList;
 import java.util.Calendar;
