@@ -1,24 +1,35 @@
 package cl.niclabs.adkmobile.monitor;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
+import android.app.usage.NetworkStats;
+import android.app.usage.NetworkStatsManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
 import android.net.TrafficStats;
 import android.os.Build;
 import android.os.Build.VERSION;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.RemoteException;
+import android.preference.PreferenceManager;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.SparseArray;
+
+import cl.niclabs.adkmobile.monitor.AbstractMonitor;
 import cl.niclabs.adkmobile.monitor.data.Observation;
 import cl.niclabs.adkmobile.monitor.data.TrafficObservation;
 import cl.niclabs.adkmobile.monitor.data.constants.ConnectionType;
@@ -31,7 +42,7 @@ import cl.niclabs.android.utils.Time;
 /**
  * Implements monitoring of Rx & Tx bytes. Traffic is notified by the system as
  * a listener. This class will listen for each 10 seconds.
- * 
+ *
  * @author Mauricio Castro. Created 27-09-2013.
  */
 public class Traffic extends AbstractMonitor<TrafficListener> {
@@ -39,6 +50,11 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 	 * @var Frequency of sampling (in seconds)
 	 */
 	public static int TRAFFIC_UPDATE_INTERVAL = 10;
+
+	/**
+	 * @var Frequency of sampling for check NetworkStatsManager for android version > 6 (in seconds)
+	 */
+	public static int NEW_TRAFFIC_UPDATE_INTERVAL = 600;
 
 	/**
 	 * Extra key for configuring the traffic update interval
@@ -54,6 +70,11 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 	 * Represents a wifi network for storage
 	 */
 	public static final int NETWORK_TYPE_WIFI = ConnectionType.WIFI.value();
+
+    /**
+     * Preference file to save timestamp of the last NetworkStats.Bucket object for each UID
+     */
+    public static final string PREFERENCE_FILE = "cl.niclabs.adkintunmobile.PREFERENCE_FILE";
 
 	private Context mContext = this;
 
@@ -247,24 +268,30 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 	private Runnable appTask = new Runnable() {
 		@Override
 		public void run() {
-			long newWifiRxBytes = TrafficStats.getTotalRxBytes()
-					- TrafficStats.getMobileRxBytes();
-			long dWifiRxBytes = newWifiRxBytes - appWifiRxBytes;
-
-			int networkType = NETWORK_TYPE_MOBILE;
-			if (dWifiRxBytes > 0) {
-				networkType = NETWORK_TYPE_WIFI;
-			}
 			if (VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT_WATCH) {
 				uids = geRunningProcessesUids(mContext);
 			} else {
 				uids = getUids(mContext);
 			}
-			for (int uid : uids) {
-				calculateApplicationTrafficForUid(networkType, uid);
-			}
 
-			appWifiRxBytes = newWifiRxBytes;
+			if (VERSION.SDK_INT >= Build.VERSION_CODES.M){
+				calculateApplicationTrafficForAllUids(uids);
+			}
+			else {
+				long newWifiRxBytes = TrafficStats.getTotalRxBytes()
+						- TrafficStats.getMobileRxBytes();
+				long dWifiRxBytes = newWifiRxBytes - appWifiRxBytes;
+
+				int networkType = NETWORK_TYPE_MOBILE;
+				if (dWifiRxBytes > 0) {
+					networkType = NETWORK_TYPE_WIFI;
+				}
+				for (int uid : uids) {
+					calculateApplicationTrafficForUid(networkType, uid);
+				}
+
+				appWifiRxBytes = newWifiRxBytes;
+			}
 		}
 	};
 
@@ -288,10 +315,10 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 		// IF the entry does not exist, the delta is 0
 		long dAppRxBytes = newAppRxBytes
 				- (appRxBytes.indexOfKey(uid) < 0 ? newAppRxBytes : appRxBytes
-						.get(uid));
+				.get(uid));
 		long dAppTxBytes = newAppTxBytes
 				- (appTxBytes.indexOfKey(uid) < 0 ? newAppTxBytes : appTxBytes
-						.get(uid));
+				.get(uid));
 
 		/* Update state vars */
 		appRxBytes.put(uid, newAppRxBytes);
@@ -311,10 +338,10 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 			// If the entry does not exist, the delta is 0
 			long dAppRxPackets = newAppRxPackets
 					- (appRxPackets.indexOfKey(uid) < 0 ? newAppRxPackets
-							: appRxPackets.get(uid));
+					: appRxPackets.get(uid));
 			long dAppTxPackets = newAppTxPackets
 					- (appTxPackets.indexOfKey(uid) < 0 ? newAppRxPackets
-							: appTxPackets.get(uid));
+					: appTxPackets.get(uid));
 
 			if (dAppRxPackets >= 0) {
 				appData.setRxPackets(dAppRxPackets);
@@ -335,6 +362,103 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 		/* Log the results */
 		if (DEBUG)
 			Log.v(TAG, appData.toString());
+	}
+
+    /**
+     * Starting in Android 6, the method calculateApplicationTrafficForUid doesn't work,
+     * because isn't possible to get TrafficStats for other UIDs (for privacy reasons).
+     * This method uses NetworkStatsManager to access historical network statistics belonging
+     * to other UIDs, getting how many bytes have been received and transmitted over WiFi or
+     * Mobile Network.
+     *
+     * @param uids  Current installed applications UIDs
+     */
+	@TargetApi(Build.VERSION_CODES.M)
+	private void calculateApplicationTrafficForAllUids(ArrayList<Integer> uids){
+		TelephonyManager tm = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+		String subscriberID = tm.getSubscriberId();
+		SharedPreferences sharedPreferences = getSharedPreferences(
+				PREFERENCE_FILE, Context.MODE_PRIVATE);
+		SharedPreferences.Editor editor = sharedPreferences.edit();
+
+		NetworkStats.Bucket bucketOut = new NetworkStats.Bucket();
+		NetworkStatsManager networkStatsManager =
+				(NetworkStatsManager) getSystemService(Context.NETWORK_STATS_SERVICE);
+		NetworkStats stats;
+		long currentTimeMillis = System.currentTimeMillis();
+
+		Calendar calendar = Calendar.getInstance(Locale.getDefault());
+		calendar.setTimeInMillis(currentTimeMillis);
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MILLISECOND, 0);
+		long startOfActualDay = calendar.getTimeInMillis();
+
+		for (int uid : uids){
+            //Get wifi traffic
+			String uidWifiKey = Integer.toString(uid) + "_wifi";
+			long lastEndTimestamp;
+			if (sharedPreferences.contains(uidWifiKey))
+				lastEndTimestamp = sharedPreferences.getLong(uidWifiKey, 0);
+			else {
+				editor.putLong(uidWifiKey, startOfActualDay);
+				lastEndTimestamp = startOfActualDay;
+				editor.commit();
+			}
+			try {
+				stats = networkStatsManager.queryDetailsForUid(ConnectivityManager.TYPE_WIFI, "",
+						lastEndTimestamp, currentTimeMillis, uid);
+				while (stats.hasNextBucket()){
+					stats.getNextBucket(bucketOut);
+					TrafficObservation appData = new TrafficObservation(
+							TRAFFIC_APPLICATION, bucketOut.getEndTimeStamp());
+					appData.setUid(bucketOut.getUid());
+					appData.setNetworkType(NETWORK_TYPE_WIFI);
+					appData.setRxBytes(bucketOut.getRxBytes());
+					appData.setTxBytes(bucketOut.getTxBytes());
+					appData.setRxPackets(bucketOut.getRxPackets());
+					appData.setTxPackets(bucketOut.getTxPackets());
+					editor.putLong(uidWifiKey, bucketOut.getEndTimeStamp());
+					notifyListeners(appTrafficEvent, appData);
+				}
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			} finally {
+                editor.commit();
+            }
+
+            //Get mobile traffic
+			String uidMobileKey = Integer.toString(uid) + "_mobile";
+			if (sharedPreferences.contains(uidMobileKey))
+				lastEndTimestamp = sharedPreferences.getLong(uidMobileKey, 0);
+			else {
+				editor.putLong(uidMobileKey, startOfActualDay);
+				lastEndTimestamp = startOfActualDay;
+				editor.commit();
+			}
+			try {
+				stats = networkStatsManager.queryDetailsForUid(ConnectivityManager.TYPE_MOBILE,
+						subscriberID, lastEndTimestamp, currentTimeMillis, uid);
+				while (stats.hasNextBucket()){
+					stats.getNextBucket(bucketOut);
+					TrafficObservation appData = new TrafficObservation(
+							TRAFFIC_APPLICATION, bucketOut.getEndTimeStamp());
+					appData.setUid(bucketOut.getUid());
+					appData.setNetworkType(NETWORK_TYPE_MOBILE);
+					appData.setRxBytes(bucketOut.getRxBytes());
+					appData.setTxBytes(bucketOut.getTxBytes());
+					appData.setRxPackets(bucketOut.getRxPackets());
+					appData.setTxPackets(bucketOut.getTxPackets());
+					editor.putLong(uidMobileKey, bucketOut.getEndTimeStamp());
+					notifyListeners(appTrafficEvent, appData);
+				}
+			} catch (RemoteException e) {
+				e.printStackTrace();
+            } finally {
+                editor.commit();
+            }
+		}
 	}
 
 	private MonitorEvent<TrafficListener> mobileTrafficEvent = new AbstractMonitorEvent<TrafficListener>() {
@@ -505,8 +629,10 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 					uids = new ArrayList<Integer>();
 				}
 
+				int interval = (VERSION.SDK_INT >= Build.VERSION_CODES.M) ?
+						NEW_TRAFFIC_UPDATE_INTERVAL : TRAFFIC_UPDATE_INTERVAL;
 				future = Scheduler.getInstance().scheduleAtFixedRate(appTask,
-						0, TRAFFIC_UPDATE_INTERVAL, TimeUnit.SECONDS);
+						0, interval, TimeUnit.SECONDS);
 				super.activate();
 
 				if (DEBUG)
@@ -576,10 +702,10 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 	/**
 	 * Method that return an array with the total tcp bytes/segments
 	 * transmitted/received by all applications of the device
-	 * 
+	 *
 	 * The mobile API must be 12 or superior, otherwise the method will return
 	 * {-1,-1,-1,-1}.
-	 * 
+	 *
 	 * @param context
 	 * @return {TCP bytes received, TCP bytes transmitted, TCP segments
 	 *         transmitted, TCP segments received}
@@ -645,7 +771,7 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 	/**
 	 * Method that returns an arrayList with the UIDs of all the applications on
 	 * the mobile.
-	 * 
+	 *
 	 * @param context
 	 * @return An ArrayList with the UIDs
 	 */
@@ -665,7 +791,7 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 	/**
 	 * Method that returns an arrayList with the UIDs of the applications
 	 * running on the mobile.
-	 * 
+	 *
 	 * @param context
 	 * @return An ArrayList with the UIDs
 	 */
