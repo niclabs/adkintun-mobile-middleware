@@ -1,12 +1,16 @@
+## 1.3.7b (2017-04-21)
+Features:
+  - Fix traffic monitoring in devices with android version > 6
+
 ## 1.3.6b (2016-07-27)
 
 Features:
-    - Add support for 4g's signal strength measurement.
+   - Add support for 4g's signal strength measurement.
 
 ## 1.3.5b (2015-10-23)
 
 Features:
-    - Fix traffic monitoring per application to work with API changes in Lollipop.
+   - Fix traffic monitoring per application to work with API changes in Lollipop.
 
 ## 1.3.4b (2015-10-19)
 
