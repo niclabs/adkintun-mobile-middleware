@@ -74,7 +74,7 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
     /**
      * Preference file to save timestamp of the last NetworkStats.Bucket object for each UID
      */
-    public static final string PREFERENCE_FILE = "cl.niclabs.adkintunmobile.PREFERENCE_FILE";
+    public static final String PREFERENCE_FILE = "cl.niclabs.adkintunmobile.PREFERENCE_FILE";
 
 	private Context mContext = this;
 
