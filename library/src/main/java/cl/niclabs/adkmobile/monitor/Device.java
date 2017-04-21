@@ -45,7 +45,10 @@ import cl.niclabs.android.utils.Time;
  */
 public class Device extends BroadcastReceiver {
 	protected String TAG = "AdkintunMobile::Device";
-	
+
+	private final String QUICKBOOK_POWERON = "android.intent.action.QUICKBOOT_POWERON";
+	private final String HTC_QUICKBOOK_POWERON = "com.htc.intent.action.QUICKBOOT_POWERON";
+
 	/**
 	 * Called when the boot is completed. The default action is to
 	 * do nothing, it must be overriden by extending classes in order
@@ -66,7 +69,10 @@ public class Device extends BroadcastReceiver {
 
 	@Override
 	public final void onReceive(Context context, Intent intent) {
-		if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
+		if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED) ||
+				intent.getAction().equals((QUICKBOOK_POWERON)) ||
+				intent.getAction().equals((HTC_QUICKBOOK_POWERON))) {
+
 			StateChange stateChange = new StateChange(Monitor.DEVICE, Time.currentTimeMillis());
 			stateChange.setStateType(StateType.DEVICE_BOOT);
 			stateChange.setState(DeviceBootState.BOOT.value());
