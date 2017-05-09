@@ -89,7 +89,10 @@ public abstract class TelephonyObservation<E extends TelephonyObservation<E>> ex
 	 * @param signalStrength
 	 */
 	public void updateSignalStrength(int signalStrength) {
-		if (this.signalStrength == null) this.signalStrength = new Sample();
+		this.timestamp = System.currentTimeMillis();
+
+		if (this.signalStrength == null)
+			this.signalStrength = new Sample();
 		
 		this.signalStrength.update(signalStrength);
 	}
