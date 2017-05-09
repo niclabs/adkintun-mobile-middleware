@@ -1,3 +1,7 @@
+## 1.3.8b (2017-05-09)
+Features:
+  - TelephonyObservations are now sent as individial samples
+  
 ## 1.3.7b (2017-04-21)
 Features:
   - Fix traffic monitoring in devices with android version > 6
