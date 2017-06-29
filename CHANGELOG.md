@@ -1,3 +1,8 @@
+## 1.3.9b (2017-06-29)
+Features:
+  - Traffic monitoring in devices with android version > 6 read proc/ files
+  - Fix SignalStrength notifications
+  
 ## 1.3.8b (2017-05-09)
 Features:
   - TelephonyObservations are now sent as individial samples
