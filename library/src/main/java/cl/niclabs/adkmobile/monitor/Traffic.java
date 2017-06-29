@@ -1,5 +1,9 @@
 package cl.niclabs.adkmobile.monitor;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -54,7 +58,7 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 	/**
 	 * @var Frequency of sampling for check NetworkStatsManager for android version > 6 (in seconds)
 	 */
-	public static int NEW_TRAFFIC_UPDATE_INTERVAL = 600;
+	public static int NEW_TRAFFIC_UPDATE_INTERVAL = 10;
 
 	/**
 	 * Extra key for configuring the traffic update interval
@@ -274,24 +278,19 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 				uids = getUids(mContext);
 			}
 
-			if (VERSION.SDK_INT >= Build.VERSION_CODES.M){
-				calculateApplicationTrafficForAllUids(uids);
-			}
-			else {
-				long newWifiRxBytes = TrafficStats.getTotalRxBytes()
-						- TrafficStats.getMobileRxBytes();
-				long dWifiRxBytes = newWifiRxBytes - appWifiRxBytes;
+			long newWifiRxBytes = TrafficStats.getTotalRxBytes()
+					- TrafficStats.getMobileRxBytes();
+			long dWifiRxBytes = newWifiRxBytes - appWifiRxBytes;
 
-				int networkType = NETWORK_TYPE_MOBILE;
-				if (dWifiRxBytes > 0) {
-					networkType = NETWORK_TYPE_WIFI;
-				}
-				for (int uid : uids) {
-					calculateApplicationTrafficForUid(networkType, uid);
-				}
-
-				appWifiRxBytes = newWifiRxBytes;
+			int networkType = NETWORK_TYPE_MOBILE;
+			if (dWifiRxBytes > 0) {
+				networkType = NETWORK_TYPE_WIFI;
 			}
+			for (int uid : uids) {
+				calculateApplicationTrafficForUid(networkType, uid);
+			}
+
+			appWifiRxBytes = newWifiRxBytes;
 		}
 	};
 
@@ -299,6 +298,8 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 	private SparseArray<Long> appTxBytes;
 	private SparseArray<Long> appRxPackets;
 	private SparseArray<Long> appTxPackets;
+	private final String UID_STAT_RX_PATH = "/proc/uid_stat/%1$d/tcp_rcv";
+	private final String UID_STAT_TX_PATH = "/proc/uid_stat/%1$d/tcp_snd";
 
 	private ArrayList<Integer> uids;
 
@@ -309,8 +310,27 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 				TRAFFIC_APPLICATION, Time.currentTimeMillis());
 		appData.setUid(uid);
 
-		long newAppRxBytes = TrafficStats.getUidRxBytes(uid);
-		long newAppTxBytes = TrafficStats.getUidTxBytes(uid);
+		long newAppRxBytes = 0;
+		long newAppTxBytes = 0;
+
+		// if the following is not possible to use in the future, the method calculateApplicationTrafficForAllUids
+		// must be used (like in version 1.3.8b)
+		if (VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+			try {
+				BufferedReader rxBytesReader = new BufferedReader(new FileReader(String.format(UID_STAT_RX_PATH, uid)));
+				BufferedReader txBytesReader = new BufferedReader(new FileReader(String.format(UID_STAT_TX_PATH, uid)));
+				newAppRxBytes = Long.parseLong(rxBytesReader.readLine());
+				newAppTxBytes = Long.parseLong(txBytesReader.readLine());
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		else {
+			newAppRxBytes = TrafficStats.getUidRxBytes(uid);
+			newAppTxBytes = TrafficStats.getUidTxBytes(uid);
+		}
 
 		// IF the entry does not exist, the delta is 0
 		long dAppRxBytes = newAppRxBytes
@@ -396,7 +416,7 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 		long startOfActualDay = calendar.getTimeInMillis();
 
 		for (int uid : uids){
-            //Get wifi traffic
+			//Get wifi traffic
 			String uidWifiKey = Integer.toString(uid) + "_wifi";
 			long lastEndTimestamp;
 			if (sharedPreferences.contains(uidWifiKey))
@@ -412,7 +432,7 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 				while (stats.hasNextBucket()){
 					stats.getNextBucket(bucketOut);
 					TrafficObservation appData = new TrafficObservation(
-							TRAFFIC_APPLICATION, bucketOut.getEndTimeStamp());
+							TRAFFIC_APPLICATION, bucketOut.getStartTimeStamp());
 					appData.setUid(bucketOut.getUid());
 					appData.setNetworkType(NETWORK_TYPE_WIFI);
 					appData.setRxBytes(bucketOut.getRxBytes());
@@ -425,10 +445,10 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 			} catch (RemoteException e) {
 				e.printStackTrace();
 			} finally {
-                editor.commit();
-            }
+				editor.commit();
+			}
 
-            //Get mobile traffic
+			//Get mobile traffic
 			String uidMobileKey = Integer.toString(uid) + "_mobile";
 			if (sharedPreferences.contains(uidMobileKey))
 				lastEndTimestamp = sharedPreferences.getLong(uidMobileKey, 0);
@@ -455,9 +475,9 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 				}
 			} catch (RemoteException e) {
 				e.printStackTrace();
-            } finally {
-                editor.commit();
-            }
+			} finally {
+				editor.commit();
+			}
 		}
 	}
 
