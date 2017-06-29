@@ -44,17 +44,17 @@ import cl.niclabs.android.utils.Time;
 
 /**
  * Implements monitoring of Telephony services of the mobile.
- * 
+ *
  * Requires permissions - android.permission.ACCESS_COARSE_LOCATION for
  * obtaining the neighboring cell info - android.permission.READ_PHONE_STATE to
  * get network info
- * 
+ *
  * @author Mauricio Castro. Created 04-10-2013.
  */
 public class Telephony extends AbstractMonitor<TelephonyListener> {
 	/**
 	 * Listens to telephony events and notifies the listeners
-	 * 
+	 *
 	 * @author Mauricio Castro. Created 04-10-2013.
 	 */
 	private class TelephonyStateListener extends PhoneStateListener {
@@ -282,7 +282,8 @@ public class Telephony extends AbstractMonitor<TelephonyListener> {
                         GsmObservation updatedObservation = (GsmObservation) lastObservation;
 
 					/* convert the Signal Strength from GSM to Dbm */
-                        if (signalStrength.getGsmSignalStrength() != 99) {
+                        if (signalStrength.getGsmSignalStrength() >= 0
+								&& signalStrength.getGsmSignalStrength() <= 31) {
                             int signalStrengthDbm = (signalStrength
                                     .getGsmSignalStrength() * 2) - 113;
                             updatedObservation
