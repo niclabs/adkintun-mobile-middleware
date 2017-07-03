@@ -1,16 +1,5 @@
 package cl.niclabs.adkmobile.monitor;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
@@ -28,12 +17,17 @@ import android.os.Build.VERSION;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.SparseArray;
 
-import cl.niclabs.adkmobile.monitor.AbstractMonitor;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
 import cl.niclabs.adkmobile.monitor.data.Observation;
 import cl.niclabs.adkmobile.monitor.data.TrafficObservation;
 import cl.niclabs.adkmobile.monitor.data.constants.ConnectionType;
@@ -55,10 +49,10 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 	 */
 	public static int TRAFFIC_UPDATE_INTERVAL = 10;
 
-	/**
-	 * @var Frequency of sampling for check NetworkStatsManager for android version > 6 (in seconds)
-	 */
-	public static int NEW_TRAFFIC_UPDATE_INTERVAL = 10;
+    /**
+     * @var Frequency of sampling for check NetworkStatsManager for android version > 6 (in seconds)
+     */
+    public static int NEW_TRAFFIC_UPDATE_INTERVAL = 300;
 
 	/**
 	 * Extra key for configuring the traffic update interval
@@ -269,37 +263,40 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 		}
 	};
 
-	private Runnable appTask = new Runnable() {
-		@Override
-		public void run() {
-			if (VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT_WATCH) {
-				uids = geRunningProcessesUids(mContext);
-			} else {
-				uids = getUids(mContext);
-			}
+    private Runnable appTask = new Runnable() {
+        @Override
+        public void run() {
+            if (VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT_WATCH) {
+                uids = geRunningProcessesUids(mContext);
+            } else {
+                uids = getUids(mContext);
+            }
 
-			long newWifiRxBytes = TrafficStats.getTotalRxBytes()
-					- TrafficStats.getMobileRxBytes();
-			long dWifiRxBytes = newWifiRxBytes - appWifiRxBytes;
+            if (VERSION.SDK_INT >= Build.VERSION_CODES.M){
+                calculateApplicationTrafficForAllUids(uids);
+            }
+            else {
+                long newWifiRxBytes = TrafficStats.getTotalRxBytes()
+                        - TrafficStats.getMobileRxBytes();
+                long dWifiRxBytes = newWifiRxBytes - appWifiRxBytes;
 
-			int networkType = NETWORK_TYPE_MOBILE;
-			if (dWifiRxBytes > 0) {
-				networkType = NETWORK_TYPE_WIFI;
-			}
-			for (int uid : uids) {
-				calculateApplicationTrafficForUid(networkType, uid);
-			}
+                int networkType = NETWORK_TYPE_MOBILE;
+                if (dWifiRxBytes > 0) {
+                    networkType = NETWORK_TYPE_WIFI;
+                }
+                for (int uid : uids) {
+                    calculateApplicationTrafficForUid(networkType, uid);
+                }
 
-			appWifiRxBytes = newWifiRxBytes;
-		}
-	};
+                appWifiRxBytes = newWifiRxBytes;
+            }
+        }
+    };
 
-	private SparseArray<Long> appRxBytes;
-	private SparseArray<Long> appTxBytes;
-	private SparseArray<Long> appRxPackets;
-	private SparseArray<Long> appTxPackets;
-	private final String UID_STAT_RX_PATH = "/proc/uid_stat/%1$d/tcp_rcv";
-	private final String UID_STAT_TX_PATH = "/proc/uid_stat/%1$d/tcp_snd";
+    private SparseArray<Long> appRxBytes;
+    private SparseArray<Long> appTxBytes;
+    private SparseArray<Long> appRxPackets;
+    private SparseArray<Long> appTxPackets;
 
 	private ArrayList<Integer> uids;
 
@@ -310,27 +307,8 @@ public class Traffic extends AbstractMonitor<TrafficListener> {
 				TRAFFIC_APPLICATION, Time.currentTimeMillis());
 		appData.setUid(uid);
 
-		long newAppRxBytes = 0;
-		long newAppTxBytes = 0;
-
-		// if the following is not possible to use in the future, the method calculateApplicationTrafficForAllUids
-		// must be used (like in version 1.3.8b)
-		if (VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-			try {
-				BufferedReader rxBytesReader = new BufferedReader(new FileReader(String.format(UID_STAT_RX_PATH, uid)));
-				BufferedReader txBytesReader = new BufferedReader(new FileReader(String.format(UID_STAT_TX_PATH, uid)));
-				newAppRxBytes = Long.parseLong(rxBytesReader.readLine());
-				newAppTxBytes = Long.parseLong(txBytesReader.readLine());
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		else {
-			newAppRxBytes = TrafficStats.getUidRxBytes(uid);
-			newAppTxBytes = TrafficStats.getUidTxBytes(uid);
-		}
+        long newAppRxBytes = TrafficStats.getUidRxBytes(uid);
+        long newAppTxBytes = TrafficStats.getUidTxBytes(uid);
 
 		// IF the entry does not exist, the delta is 0
 		long dAppRxBytes = newAppRxBytes
